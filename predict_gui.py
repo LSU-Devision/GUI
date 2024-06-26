@@ -7,6 +7,7 @@ import numpy as np
 from csbdeep.utils import normalize
 from PIL import Image, ImageTk
 from stardist.models import StarDist2D
+from tkinter import messagebox
 
 class MainFrame(ttk.Frame):
     def __init__(self, container):
@@ -46,6 +47,11 @@ class MainFrame(ttk.Frame):
         self.clear_button = ttk.Button(self,text='Clear Images',command=self.clear_images)
         # adds clear button using grid method
         self.clear_button.grid(row=5, column=0, pady=15)
+
+        # creates a help button that will display button usage
+        self.show_info = ttk.Button(self,text='Help Page',command=self.help_page)
+        # adds the button to the GUI
+        self.show_info.grid(row=6, column=0, pady=15)
 
     def select_files(self):
         files = filedialog.askopenfilenames(initialdir='/home/max/development/stardist/data')
@@ -118,6 +124,22 @@ class MainFrame(ttk.Frame):
         self.slideshow.predicted_image.set_image(None)
         # set the item count label to empty
         self.slideshow.item_count_label.config(text=' ')
+
+    '''
+    Help Page: by Alex Mensen-Johnson
+    Description: Loads the Help_Information.txt into a file, reads the file, and displays the information in a pop up
+    '''
+    def help_page(self):
+        # Load File
+        info_file = open("Help_Information.txt")
+        # Read the file
+        file_information = info_file.read()
+        # Create the title string
+        title = 'Help Page'
+        # Create pop up with the information
+        messagebox.showinfo(title,file_information)
+
+
 
 class ImageFrame(ttk.Frame):
     def __init__(self, container):
