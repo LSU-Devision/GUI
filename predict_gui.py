@@ -42,6 +42,10 @@ class MainFrame(ttk.Frame):
         self.slideshow.grid(row=1, column=0)
         self.predict_frame.grid(row=2, column=0, pady=15)
         self.model_select_frame.grid(row=3, column=0, pady=15)
+        # creates clear button
+        self.clear_button = ttk.Button(self,text='Clear',command=self.clear_images)
+        # adds clear button using grid method
+        self.clear_button.grid(row=5, column=0, pady=15)
 
     def select_files(self):
         files = filedialog.askopenfilenames(initialdir='/home/max/development/stardist/data')
@@ -90,6 +94,30 @@ class MainFrame(ttk.Frame):
         image_path = self.image_files[self.slideshow.current_index]
         self._predict(image_path)
         self.slideshow.update_image()
+
+
+    '''
+    Clear Images: By Alex Mensen-Johnson
+    Method for clearing Images from the GUI, resets all variables to their primary state.
+    
+    '''
+    def clear_images(self):
+        # Set the base image reference to None
+        self.slideshow.base_image.image_ref = None
+        # Clear the label of the file path above the slideshow
+        self.slideshow.filepath_label.config(text='')
+        # Set the index of the pictures to 0
+        self.slideshow.current_index = 0
+        # empty the image files array
+        self.image_files = []
+        # set the image to none
+        self.slideshow.base_image.set_image(None)
+        # set the image files to the current image files, which is none
+        self.slideshow.image_files = self.image_files
+        # set the predicted image to none
+        self.slideshow.predicted_image.set_image(None)
+        # set the item count label to empty
+        self.slideshow.item_count_label.config(text=' ')
 
 class ImageFrame(ttk.Frame):
     def __init__(self, container):
