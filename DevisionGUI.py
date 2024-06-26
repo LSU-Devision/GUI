@@ -8,6 +8,10 @@ from csbdeep.utils import normalize
 from PIL import Image, ImageTk
 from stardist.models import StarDist2D
 from tkinter import messagebox
+import csv
+import datetime
+import matplotlib.pyplot as plt
+from stardist import random_label_cmap
 
 class MainFrame(ttk.Frame):
     def __init__(self, container):
@@ -15,6 +19,11 @@ class MainFrame(ttk.Frame):
 
         self.image_files = []
         self.prediction_files = {}
+        # initialize predictions_data list -skylar
+        self.predictions_data = []
+
+        # initialize lbl_cmap for random color map -skylar
+        self.lbl_cmap = random_label_cmap()
 
         # Check if GPU is available
         self.device = '/GPU:0' if tf.config.experimental.list_physical_devices('GPU') else '/CPU:0'
@@ -81,25 +90,67 @@ class MainFrame(ttk.Frame):
         with tf.device(self.device):
             labels, details = self.model.predict_instances(img)
 
-        save_path = os.path.join('output', 'labels', os.path.basename(image_path))
+        save_path = os.path.join('output', os.path.basename(image_path))
         save_path = os.path.abspath(save_path)
         if not os.path.exists(os.path.dirname(save_path)):
             os.makedirs(os.path.dirname(save_path))
 
-        # Convert labels to a PIL image and ensure it's in 'L' mode
-        labels_img = Image.fromarray(labels).convert('L')
-        labels_img.save(save_path)
-        self.prediction_files[image_path] = (save_path, len(details['points']))
+        # commented this section out to only display the colored image
+        # this section saves the predicted image in grayscale
+        # # Convert labels to a PIL image and ensure it's in 'L' mode
+        # labels_img = Image.fromarray(labels).convert('L')
+        # labels_img.save(save_path)
+        # self.prediction_files[image_path] = (save_path, len(details['points']))
+
+        # append csv file -skylar
+        self.predictions_data.append([os.path.basename(image_path), f' {len(details["points"])}'])
+
+        '''*Visualization* and *Save the figure*: changed the way the predicted image was saved
+        to one that can show color. this is based on our old prediction code. -skylar'''
+
+        # Visualization
+        plt.figure(figsize=(13, 10))
+        plt.imshow(img, cmap="gray")
+        plt.imshow(labels, cmap=self.lbl_cmap, alpha=0.5)
+        plt.title(f"Predicted Objects: {len(np.unique(labels)) - 1}", fontsize=16)
+        plt.axis("off")
+        plt.tight_layout()
+        
+        # Save the figure
+        prediction_image_path = os.path.join('output', f'prediction_{os.path.basename(image_path)}')
+        plt.savefig(prediction_image_path, dpi=500)
+        plt.close()
+        
+        # Update prediction files with the path to the visualization image
+        self.prediction_files[image_path] = (prediction_image_path, len(details['points']))
 
 
     def predict_all(self):
         for image_path in self.image_files:
             self._predict(image_path)
 
+        # added csv function call -skylar
+        self.export_predictions_to_csv()
+
     def predict_focused(self):
         image_path = self.image_files[self.slideshow.current_index]
         self._predict(image_path)
         self.slideshow.update_image()
+
+        # added csv function call -skylar
+        self.export_predictions_to_csv()
+
+    '''function to export filenames, predicted counts, and date/time to a csv file in the
+    output folder -skylar'''
+    def export_predictions_to_csv(self):
+        current_time = datetime.datetime.now().strftime("%m-%d-%Y_%I-%M-%S %p")
+        csv_file = os.path.join('output', f'predictions_{current_time}.csv')
+        if not os.path.exists('output'):
+            os.makedirs('output')
+        with open(csv_file, mode='w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(['File Name', ' Total Count'])
+            writer.writerows(self.predictions_data)
 
 
     '''
@@ -131,7 +182,7 @@ class MainFrame(ttk.Frame):
     '''
     def help_page(self):
         # Load File
-        info_file = open("Help_Information.txt")
+        info_file = open("docs/Help_Information.txt")
         # Read the file
         file_information = info_file.read()
         # Create the title string
