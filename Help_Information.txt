@@ -1,0 +1,23 @@
+This is the information that will be displayed in the help menu
+
+Select Files Button:
+Click the photos you want to load into the program
+multiple files can be selected at a time
+
+Slideshow
+You can view all files that have been loaded in the slide show.
+The name of the files will be located at the top of the slideshow
+after prediction, the predicted value will be displayed at the bottom of the slideshow
+You can use the prev/next buttons to cycle through the files in the slideshow
+
+Predict
+the predict button will predict the current file in the slideshow
+
+Predict All
+will predict all the files in the slideshow
+
+Select Model
+Select the model you wish to use by selecting the folder in which the model is contained
+
+Clear Images
+This button will clear all images from the slide show.
