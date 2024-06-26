@@ -43,7 +43,7 @@ class MainFrame(ttk.Frame):
         self.predict_frame.grid(row=2, column=0, pady=15)
         self.model_select_frame.grid(row=3, column=0, pady=15)
         # creates clear button
-        self.clear_button = ttk.Button(self,text='Clear images',command=self.clear_images)
+        self.clear_button = ttk.Button(self,text='Clear Images',command=self.clear_images)
         # adds clear button using grid method
         self.clear_button.grid(row=5, column=0, pady=15)
 
