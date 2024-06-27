@@ -29,9 +29,7 @@ class MainFrame(ttk.Frame):
         self.device = '/GPU:0' if tf.config.experimental.list_physical_devices('GPU') else '/CPU:0'
         print("Using device:", self.device)
 
-        # Load model on the specified device
-        with tf.device(self.device):
-            self.model = StarDist2D.from_pretrained('2D_demo')
+        self.model = None
         
         
         self.select_files_button = ttk.Button(self, text='Select Files', command=self.select_files)
@@ -42,7 +40,7 @@ class MainFrame(ttk.Frame):
         # make two buttons
         self.select_model_button = ttk.Button(self.model_select_frame, text='Select Model', command=self.select_model)
         self.clear_model_button = ttk.Button(self.model_select_frame, text='Clear Model', command=self.clear_model)
-        self.model_label = ttk.Label(self.model_select_frame, text='2D_demo')
+        self.model_label = ttk.Label(self.model_select_frame, text='(No model selected)')
         # arange them
         self.select_model_button.grid(row=0, column=0, padx=2, sticky='w')
         self.clear_model_button.grid(row=0, column=1, padx=2, sticky='e')
@@ -78,6 +76,9 @@ class MainFrame(ttk.Frame):
 
     def select_model(self):
         model_path = filedialog.askdirectory()
+        print(model_path)
+        print(os.path.basename(model_path))
+        print(os.path.dirname(model_path))
         with tf.device(self.device):
             self.model = StarDist2D(None, name=os.path.basename(model_path), basedir=os.path.dirname(model_path))
         self.model_label.config(text=os.path.basename(model_path))
