@@ -33,34 +33,63 @@ class MainFrame(ttk.Frame):
         with tf.device(self.device):
             self.model = StarDist2D.from_pretrained('2D_demo')
         
+
+        self.create_display()
+        self.load_display()
+
+    '''
+    Author: Alex Mensen-Johnson
+    Creates the display in the code and organizes all the creation into a method
+    If you intend on creating a feature for display, add it here please
+    '''
+    def create_display(self):
+        # Creates the select files button
         self.select_files_button = ttk.Button(self, text='Select Files', command=self.select_files)
+        # Creates the slide show
         self.slideshow = Slideshow(self)
-
+        # Creates the model select frame
         self.model_select_frame = ttk.Frame(self)
+        # Creates the select model button
         self.select_model_button = ttk.Button(self.model_select_frame, text='Select Model', command=self.select_model)
+        # Creates the model label
         self.model_label = ttk.Label(self.model_select_frame, text='2D_demo')
-        self.select_model_button.pack()
-        self.model_label.pack()
-
+        # Creates the predict frame
         self.predict_frame = ttk.Frame(self)
-        self.predict_focused_button = ttk.Button(self.predict_frame, text='Predict', command=self.predict_focused)
+        # creates the single predict button (this is commented out)
+        #self.predict_focused_button = ttk.Button(self.predict_frame, text='Predict', command=self.predict_focused)
+        # Creates the predict all button
         self.predict_all_button = ttk.Button(self.predict_frame, text='Predict All', command=self.predict_all)
-        self.predict_focused_button.pack()
-        self.predict_all_button.pack()
-        
-        self.select_files_button.grid(row=0, column=0, pady=15)
-        self.slideshow.grid(row=1, column=0)
-        self.predict_frame.grid(row=2, column=0, pady=15)
-        self.model_select_frame.grid(row=3, column=0, pady=15)
         # creates clear button
-        self.clear_button = ttk.Button(self,text='Clear Images',command=self.clear_images)
-        # adds clear button using grid method
-        self.clear_button.grid(row=5, column=0, pady=15)
-
+        self.clear_button = ttk.Button(self, text='Clear Images', command=self.clear_images)
         # creates a help button that will display button usage
-        self.show_info = ttk.Button(self,text='Help Page',command=self.help_page)
+        self.show_info = ttk.Button(self, text='Help Page', command=self.help_page)
+    '''
+    Author: Alex Mensen-Johnson
+    organizes the display buttons into a method for loading the display in a clear format
+    If you are loading anything into the display, please add it here.
+    '''
+    def load_display(self):
+        # loads the model label into the frame
+        self.model_label.grid(row=1, column=0, pady=0)
+        # loads the select model button into the frame
+        self.select_model_button.grid(row=2,column=0,pady=10)
+        # Loads the select files button into the page
+        self.select_files_button.grid(row=3, column=0, pady=0)
+        # This is the focused predict button, it has been commented out
+        #self.predict_focused_button.pack()
+        # loads the predict all button
+        self.predict_all_button.grid(row=4,column=0,pady=5)
+        # creates a seperate frame for the predict buttons (not sure if this is true)
+        self.predict_frame.grid(row=4, column=0, pady=10)
+        # Not sure about this one
+        self.model_select_frame.grid(row=0, column=0, pady=0)
+        # loads the slide show frame into the display
+        self.slideshow.grid(row=5, column=0)
+
+        # adds clear button using grid method
+        self.clear_button.grid(row=7, column=0, pady=5)
         # adds the button to the GUI
-        self.show_info.grid(row=6, column=0, pady=15)
+        self.show_info.grid(row=8, column=0, pady=5)
 
     def select_files(self):
         files = filedialog.askopenfilenames(initialdir='/home/max/development/stardist/data')
@@ -129,7 +158,9 @@ class MainFrame(ttk.Frame):
         for image_path in self.image_files:
             self._predict(image_path)
 
+        self.slideshow.update_image()
         # added csv function call -skylar
+
         self.export_predictions_to_csv()
 
     def predict_focused(self):
