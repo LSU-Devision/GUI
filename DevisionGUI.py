@@ -33,14 +33,21 @@ class MainFrame(ttk.Frame):
         with tf.device(self.device):
             self.model = StarDist2D.from_pretrained('2D_demo')
         
+        
         self.select_files_button = ttk.Button(self, text='Select Files', command=self.select_files)
         self.slideshow = Slideshow(self)
 
+        # Model selection frame
         self.model_select_frame = ttk.Frame(self)
+        # make two buttons
         self.select_model_button = ttk.Button(self.model_select_frame, text='Select Model', command=self.select_model)
+        self.clear_model_button = ttk.Button(self.model_select_frame, text='Clear Model', command=self.clear_model)
         self.model_label = ttk.Label(self.model_select_frame, text='2D_demo')
-        self.select_model_button.pack()
-        self.model_label.pack()
+        # arange them
+        self.select_model_button.grid(row=0, column=0, padx=2, sticky='w')
+        self.clear_model_button.grid(row=0, column=1, padx=2, sticky='e')
+        self.model_label.grid(row=1, column=0, columnspan=2)
+
 
         self.predict_frame = ttk.Frame(self)
         self.predict_focused_button = ttk.Button(self.predict_frame, text='Predict', command=self.predict_focused)
@@ -74,6 +81,11 @@ class MainFrame(ttk.Frame):
         with tf.device(self.device):
             self.model = StarDist2D(None, name=os.path.basename(model_path), basedir=os.path.dirname(model_path))
         self.model_label.config(text=os.path.basename(model_path))
+
+    def clear_model(self):
+        #TODO: must disable the prediction buttons while self.model is None
+        self.model = None
+        self.model_label.config(text='(No model selected)')
 
     def _predict(self, image_path):
         img = Image.open(image_path)
