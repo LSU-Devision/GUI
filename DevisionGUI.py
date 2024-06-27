@@ -286,15 +286,19 @@ class Slideshow(ttk.Frame):
         title = os.path.basename(image_path)
         if len(title) > 20:
             title = title[:10] + '...' + title[-10:]
-
-        self.filepath_label.config(text=title)
+        # concatanates File name with the file name
+        new_title = 'Filename: ' + title
+        # changes the label to the new title
+        self.filepath_label.config(text=new_title)
         
         prediction_path, num_labels = self.prediction_files.get(image_path, (None, ''))
 
         self.predicted_image.set_image(prediction_path)
         self.base_image.set_image(image_path)
-
-        self.item_count_label.config(text=num_labels)
+        # adds number predicted to the label
+        new_label = 'Number Predicted: ' + str(num_labels)
+        # updates tkinter label with the new label
+        self.item_count_label.config(text=new_label)
 
 class App(tk.Tk):
     def __init__(self):
