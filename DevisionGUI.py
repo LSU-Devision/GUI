@@ -13,6 +13,27 @@ import datetime
 import matplotlib.pyplot as plt
 from stardist import random_label_cmap
 
+'''
+Class Main Frame
+Author: The firsy guy
+Contributors: Skylar Wilson, Alex Mensen-Johnson
+Class: Main Frame
+Description: Main Frame of GUI, all sub frames will be loaded inside of this class
+Params:
+    container: a container containing the title and geometry of the Graphic User Interface
+Methods:
+    init: Initialization method
+    create display: method to create the buttons and subframes of the main frame
+    load display: method to load data into the GUI
+    select files: method for selecting files to be predicted on
+    select model: method for selecting the model for prediction
+    predict: method for predicting egg count for the frog eggs. outputs the photos saved with the number count
+    predict all: predicts the values of all the loaded files in the GUI
+    predict focused: predicts the current image of the GUI (Method has been removed from buttons)
+    export to csv: Outputs the files to csv
+    clear images: Clears the images from the GUI
+    help page: creates a help page pop up for the users
+'''
 class MainFrame(ttk.Frame):
     def __init__(self, container):
         super().__init__(container)
@@ -206,6 +227,7 @@ class MainFrame(ttk.Frame):
         self.slideshow.predicted_image.set_image(None)
         # set the item count label to empty
         self.slideshow.item_count_label.config(text=' ')
+
 
     '''
     Help Page: by Alex Mensen-Johnson
