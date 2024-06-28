@@ -15,7 +15,7 @@ from stardist import random_label_cmap
 
 '''
 Class Main Frame
-Author: The firsy guy
+Author: Max
 Contributors: Skylar Wilson, Alex Mensen-Johnson
 Class: Main Frame
 Description: Main Frame of GUI, all sub frames will be loaded inside of this class
@@ -106,7 +106,6 @@ class MainFrame(ttk.Frame):
         self.model_select_frame.grid(row=0, column=0, pady=0)
         # loads the slide show frame into the display
         self.slideshow.grid(row=5, column=0)
-
         # adds clear button using grid method
         self.clear_button.grid(row=7, column=0, pady=5)
         # adds the button to the GUI
@@ -227,6 +226,10 @@ class MainFrame(ttk.Frame):
         self.slideshow.predicted_image.set_image(None)
         # set the item count label to empty
         self.slideshow.item_count_label.config(text=' ')
+        # resets the predictions file to the empty dictionary
+        self.prediction_files = {}
+        # sets the slideshow prediction files to empty
+        self.slideshow.prediction_files = self.prediction_files
 
 
     '''
