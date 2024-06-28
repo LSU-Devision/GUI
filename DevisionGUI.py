@@ -39,12 +39,10 @@ class MainFrame(ttk.Frame):
         self.model_select_frame = ttk.Frame(self)
         # make two buttons
         self.select_model_button = ttk.Button(self.model_select_frame, text='Select Model', command=self.select_model)
-        self.clear_model_button = ttk.Button(self.model_select_frame, text='Clear Model', command=self.clear_model)
         self.model_label = ttk.Label(self.model_select_frame, text='(No model selected)')
         # arange them
-        self.select_model_button.grid(row=0, column=0, padx=2, sticky='w')
-        self.clear_model_button.grid(row=0, column=1, padx=2, sticky='e')
-        self.model_label.grid(row=1, column=0, columnspan=2)
+        self.select_model_button.grid(row=0, column=0, pady=2)
+        self.model_label.grid(row=1, column=0)
 
 
         self.predict_frame = ttk.Frame(self)
@@ -82,11 +80,6 @@ class MainFrame(ttk.Frame):
         with tf.device(self.device):
             self.model = StarDist2D(None, name=os.path.basename(model_path), basedir=os.path.dirname(model_path))
         self.model_label.config(text=os.path.basename(model_path))
-
-    def clear_model(self):
-        #TODO: must disable the prediction buttons while self.model is None
-        self.model = None
-        self.model_label.config(text='(No model selected)')
 
     def _predict(self, image_path):
         img = Image.open(image_path)
