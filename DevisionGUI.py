@@ -67,7 +67,6 @@ class MainFrame(ttk.Frame):
         self.select_files_button = ttk.Button(self, text='Select Files', command=self.select_files)
         # Creates the slide show
         self.slideshow = Slideshow(self)
-<<<<<<< HEAD
         # Creates the model select frame
         self.model_select_frame = ttk.Frame(self)
         # Creates the select model button
@@ -76,11 +75,12 @@ class MainFrame(ttk.Frame):
         self.model_label = ttk.Label(self.model_select_frame, text='2D_demo')
         # Creates the predict frame
         self.predict_frame = ttk.Frame(self)
+        # initialize buttons as disabled until a model is selected
+        self.model_selected = False
         # creates the single predict button (this is commented out)
-        #self.predict_focused_button = ttk.Button(self.predict_frame, text='Predict', command=self.predict_focused)
+        self.predict_focused_button = ttk.Button(self.predict_frame, text='Predict', command=self.predict_focused, status=tk.DISABLED)
         # Creates the predict all button
-        self.predict_all_button = ttk.Button(self.predict_frame, text='Predict All', command=self.predict_all)
-=======
+        self.predict_all_button = ttk.Button(self.predict_frame, text='Predict All', command=self.predict_all, status=tk.DISABLED)
 
         # Model selection frame
         self.model_select_frame = ttk.Frame(self)
@@ -92,11 +92,6 @@ class MainFrame(ttk.Frame):
         self.model_label.grid(row=1, column=0)
 
 
-        self.predict_frame = ttk.Frame(self)
-        # initialize buttons as disabled until a model is selected
-        self.model_selected = False
-        self.predict_focused_button = ttk.Button(self.predict_frame, text='Predict', command=self.predict_focused, state=tk.DISABLED)
-        self.predict_all_button = ttk.Button(self.predict_frame, text='Predict All', command=self.predict_all, state=tk.DISABLED)
         self.predict_focused_button.pack()
         self.predict_all_button.pack()
         
@@ -104,7 +99,6 @@ class MainFrame(ttk.Frame):
         self.slideshow.grid(row=1, column=0)
         self.predict_frame.grid(row=2, column=0, pady=15)
         self.model_select_frame.grid(row=3, column=0, pady=15)
->>>>>>> clear-model-button
         # creates clear button
         self.clear_button = ttk.Button(self, text='Clear Images', command=self.clear_images)
         # creates a help button that will display button usage
