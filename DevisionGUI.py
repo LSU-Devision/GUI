@@ -50,9 +50,8 @@ class MainFrame(ttk.Frame):
         self.device = '/GPU:0' if tf.config.experimental.list_physical_devices('GPU') else '/CPU:0'
         print("Using device:", self.device)
 
-        # Load model on the specified device
-        with tf.device(self.device):
-            self.model = StarDist2D.from_pretrained('2D_demo')
+        self.model = None
+        
         
 
         self.create_display()
@@ -68,6 +67,7 @@ class MainFrame(ttk.Frame):
         self.select_files_button = ttk.Button(self, text='Select Files', command=self.select_files)
         # Creates the slide show
         self.slideshow = Slideshow(self)
+<<<<<<< HEAD
         # Creates the model select frame
         self.model_select_frame = ttk.Frame(self)
         # Creates the select model button
@@ -80,6 +80,31 @@ class MainFrame(ttk.Frame):
         #self.predict_focused_button = ttk.Button(self.predict_frame, text='Predict', command=self.predict_focused)
         # Creates the predict all button
         self.predict_all_button = ttk.Button(self.predict_frame, text='Predict All', command=self.predict_all)
+=======
+
+        # Model selection frame
+        self.model_select_frame = ttk.Frame(self)
+        # make two buttons
+        self.select_model_button = ttk.Button(self.model_select_frame, text='Select Model', command=self.select_model)
+        self.model_label = ttk.Label(self.model_select_frame, text='(No model selected)')
+        # arange them
+        self.select_model_button.grid(row=0, column=0, pady=2)
+        self.model_label.grid(row=1, column=0)
+
+
+        self.predict_frame = ttk.Frame(self)
+        # initialize buttons as disabled until a model is selected
+        self.model_selected = False
+        self.predict_focused_button = ttk.Button(self.predict_frame, text='Predict', command=self.predict_focused, state=tk.DISABLED)
+        self.predict_all_button = ttk.Button(self.predict_frame, text='Predict All', command=self.predict_all, state=tk.DISABLED)
+        self.predict_focused_button.pack()
+        self.predict_all_button.pack()
+        
+        self.select_files_button.grid(row=0, column=0, pady=15)
+        self.slideshow.grid(row=1, column=0)
+        self.predict_frame.grid(row=2, column=0, pady=15)
+        self.model_select_frame.grid(row=3, column=0, pady=15)
+>>>>>>> clear-model-button
         # creates clear button
         self.clear_button = ttk.Button(self, text='Clear Images', command=self.clear_images)
         # creates a help button that will display button usage
@@ -121,9 +146,16 @@ class MainFrame(ttk.Frame):
 
     def select_model(self):
         model_path = filedialog.askdirectory()
+        print(model_path)
+        print(os.path.basename(model_path))
+        print(os.path.dirname(model_path))
         with tf.device(self.device):
             self.model = StarDist2D(None, name=os.path.basename(model_path), basedir=os.path.dirname(model_path))
         self.model_label.config(text=os.path.basename(model_path))
+        if not self.model_selected:
+            self.predict_focused_button.config(state=tk.NORMAL)
+            self.predict_all_button.config(state=tk.NORMAL)
+            self.model_selected = True
 
     def _predict(self, image_path):
         img = Image.open(image_path)
