@@ -78,9 +78,9 @@ class MainFrame(ttk.Frame):
         # initialize buttons as disabled until a model is selected
         self.model_selected = False
         # creates the single predict button (this is commented out)
-        self.predict_focused_button = ttk.Button(self.predict_frame, text='Predict', command=self.predict_focused, status=tk.DISABLED)
+        self.predict_focused_button = ttk.Button(self.predict_frame, text='Predict', command=self.predict_focused, state=tk.DISABLED)
         # Creates the predict all button
-        self.predict_all_button = ttk.Button(self.predict_frame, text='Predict All', command=self.predict_all, status=tk.DISABLED)
+        self.predict_all_button = ttk.Button(self.predict_frame, text='Predict All', command=self.predict_all, state=tk.DISABLED)
 
         # Model selection frame
         self.model_select_frame = ttk.Frame(self)
@@ -91,9 +91,6 @@ class MainFrame(ttk.Frame):
         self.select_model_button.grid(row=0, column=0, pady=2)
         self.model_label.grid(row=1, column=0)
 
-
-        self.predict_focused_button.pack()
-        self.predict_all_button.pack()
         
         self.select_files_button.grid(row=0, column=0, pady=15)
         self.slideshow.grid(row=1, column=0)
