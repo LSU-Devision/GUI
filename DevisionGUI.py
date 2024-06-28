@@ -46,8 +46,10 @@ class MainFrame(ttk.Frame):
 
 
         self.predict_frame = ttk.Frame(self)
-        self.predict_focused_button = ttk.Button(self.predict_frame, text='Predict', command=self.predict_focused)
-        self.predict_all_button = ttk.Button(self.predict_frame, text='Predict All', command=self.predict_all)
+        # initialize buttons as disabled until a model is selected
+        self.model_selected = False
+        self.predict_focused_button = ttk.Button(self.predict_frame, text='Predict', command=self.predict_focused, state=tk.DISABLED)
+        self.predict_all_button = ttk.Button(self.predict_frame, text='Predict All', command=self.predict_all, state=tk.DISABLED)
         self.predict_focused_button.pack()
         self.predict_all_button.pack()
         
@@ -80,6 +82,10 @@ class MainFrame(ttk.Frame):
         with tf.device(self.device):
             self.model = StarDist2D(None, name=os.path.basename(model_path), basedir=os.path.dirname(model_path))
         self.model_label.config(text=os.path.basename(model_path))
+        if not self.model_selected:
+            self.predict_focused_button.config(state=tk.NORMAL)
+            self.predict_all_button.config(state=tk.NORMAL)
+            self.model_selected = True
 
     def _predict(self, image_path):
         img = Image.open(image_path)
