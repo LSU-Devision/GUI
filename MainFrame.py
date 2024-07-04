@@ -82,25 +82,18 @@ class MainFrame(ttk.Frame):
         self.predict_focused_button = ttk.Button(self.predict_frame, text='Predict', command=self.predict_focused, state=tk.DISABLED)
         # Creates the predict all button
         self.predict_all_button = ttk.Button(self.predict_frame, text='Predict All', command=self.predict_all, state=tk.DISABLED)
-
         # Model selection frame
         self.model_select_frame = ttk.Frame(self)
         # make two buttons
         self.select_model_button = ttk.Button(self.model_select_frame, text='Select Model', command=self.select_model)
+        # creates the model label
         self.model_label = ttk.Label(self.model_select_frame, text='(No model selected)')
-        # arange them
-        self.select_model_button.grid(row=0, column=0, pady=2)
-        self.model_label.grid(row=1, column=0)
-
-        
-        self.select_files_button.grid(row=0, column=0, pady=15)
-        self.slideshow.grid(row=1, column=0)
-        self.predict_frame.grid(row=2, column=0, pady=15)
-        self.model_select_frame.grid(row=3, column=0, pady=15)
         # creates clear button
         self.clear_button = ttk.Button(self, text='Clear Images', command=self.clear_images)
         # creates a help button that will display button usage
         self.show_info = ttk.Button(self, text='Help Page', command=self.help_page)
+        # creates the export to csv button
+        self.export_to_csv_button = ttk.Button(self,text="Export to CSV", command= self.export_predictions_to_csv())
     '''
     Author: Alex Mensen-Johnson
     organizes the display buttons into a method for loading the display in a clear format
@@ -127,6 +120,8 @@ class MainFrame(ttk.Frame):
         self.clear_button.grid(row=7, column=0, pady=5)
         # adds the button to the GUI
         self.show_info.grid(row=8, column=0, pady=5)
+        # adds the export to csv button to the GUI
+        self.export_to_csv_button.grid(row=9,column=0,pady=5)
 
     def select_files(self):
         files = filedialog.askopenfilenames(initialdir='/home/max/development/stardist/data')
@@ -205,7 +200,7 @@ class MainFrame(ttk.Frame):
         self.slideshow.update_image()
         # added csv function call -skylar
 
-        self.export_predictions_to_csv()
+        # self.export_predictions_to_csv()
 
     def predict_focused(self):
         image_path = self.image_files[self.slideshow.current_index]
@@ -213,7 +208,7 @@ class MainFrame(ttk.Frame):
         self.slideshow.update_image()
 
         # added csv function call -skylar
-        self.export_predictions_to_csv()
+        # self.export_predictions_to_csv()
 
     '''function to export filenames, predicted counts, and date/time to a csv file in the
     output folder -skylar'''
