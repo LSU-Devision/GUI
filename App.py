@@ -1,4 +1,4 @@
-from MainFrame import MainFrame, Slideshow
+from MainFrame import MainFrame
 import tkinter as tk
 
 class App(tk.Tk):
