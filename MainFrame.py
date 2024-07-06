@@ -54,6 +54,7 @@ class MainFrame(ttk.Frame):
         self.model = None
         self.create_display()
         self.load_display()
+        self.csv_file = None
 
     '''
     Author: Alex Mensen-Johnson
@@ -213,11 +214,13 @@ class MainFrame(ttk.Frame):
     output folder -skylar
     '''
     def export_predictions_to_csv(self):
+
         current_time = datetime.datetime.now().strftime("%m-%d-%Y_%I-%M-%S %p")
-        csv_file = os.path.join('output', f'predictions_{current_time}.csv')
+        if self.csv_file is None:
+            self.csv_file = os.path.join('output', f'predictions_{current_time}.csv')
         if not os.path.exists('output'):
             os.makedirs('output')
-        with open(csv_file, mode='w', newline='') as file:
+        with open(self.csv_file, mode='w', newline='') as file:
             writer = csv.writer(file)
             writer.writerow(['File Name', ' Total Count'])
             writer.writerows(self.predictions_data)
@@ -249,6 +252,9 @@ class MainFrame(ttk.Frame):
         # sets the slideshow prediction files to empty
         self.slideshow.prediction_files = self.prediction_files
 
+    def load_csv_by_selection(self):
+        csv_file = filedialog.askopenfilenames(initialdir='/home/max/development/stardist/data')
+        self.csv_file = csv_file
     '''
     Help Page: by Alex Mensen-Johnson
     Description: Loads the Help_Information.txt into a file, reads the file, and displays the information in a pop up
@@ -283,7 +289,20 @@ class MainFrame(ttk.Frame):
         self.window.wm_title('CSV Options')
         # set the geometry of the pop up window
         self.window.geometry(f'{pop_up_window_width}x{pop_up_window_height}+{x}+{y}')
-        # create the export csv button
-        self.window.export_csv_button = ttk.Button(self.window,text='export csv', command=self.export_predictions_to_csv)
-        # add the export csv button to the pop up window
-        self.window.export_csv_button.grid(row=0,column=1,pady=15,padx=15)
+
+
+        def inner_create_page(self):
+            # create the export csv button
+            self.window.export_csv_button = ttk.Button(self.window, text='Export CSV',command=self.export_predictions_to_csv)
+            # create the load csv by selection button
+            self.window.load_csv_by_selection_button = ttk.Button(self.window, text='Load CSV',command=self.load_csv_by_selection)
+
+
+        def inner_load_page(self):
+            # add the export csv button to the pop up window
+            self.window.export_csv_button.grid(row=0, column=1, pady=15, padx=15)
+            # add the load csv by selection button to the pop up window
+            self.window.load_csv_by_selection_button.grid(row=1, column=1, pady=15, padx=15)
+
+        inner_create_page(self)
+        inner_load_page(self)
