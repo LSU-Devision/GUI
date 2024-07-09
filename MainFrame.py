@@ -99,6 +99,8 @@ class MainFrame(ttk.Frame):
         self.csv_label_title = ttk.Label(self, text=str(self.csv_label))
         # creates the export to csv button
         self.csv_save_page_button = ttk.Button(self,text='CSV Save Page',command=self.csv_save_page)
+        # Create settings page
+        self.settings_page_button = ttk.Button(self,text='Settings',command=self.settings_page)
 
     '''
     Author: Alex Mensen-Johnson
@@ -130,6 +132,8 @@ class MainFrame(ttk.Frame):
         self.csv_label_title.grid(row=9, column=0, pady=5, padx=5)
         # adds the csv save page to the window
         self.csv_save_page_button.grid(row=10,column=0,pady=5)
+        # adds the settings button to the window
+        self.settings_page_button.grid(row=11,column=0,pady=5)
 
     def select_files(self):
         files = filedialog.askopenfilenames(initialdir='/home/max/development/stardist/data')
@@ -320,6 +324,26 @@ class MainFrame(ttk.Frame):
 
         inner_create_page(self)
         inner_load_page(self)
+
+    def settings_page(self):
+        # create the pop up window
+        self.window = tk.Toplevel(self.container)
+        # set the size of the pop up window
+        main_window_width = self.container.winfo_width()
+        # set the size of the pop up window
+        main_window_height = self.container.winfo_height()
+        # variables for the pop up window
+        pop_up_window_width = 200
+        # variables for the pop up window
+        pop_up_window_height = 200
+        # set the position of the pop up window
+        x = main_window_width + 75
+        # set the position of the pop up window
+        y = main_window_height // 2 - pop_up_window_height // 2  # center the pop-up window vertically
+        # set the title of the pop up window
+        self.window.wm_title('CSV Options')
+        # set the geometry of the pop up window
+        self.window.geometry(f'{pop_up_window_width}x{pop_up_window_height}+{x}+{y}')
 
 def String_to_Substring(string):
     substring = string[-20:]
