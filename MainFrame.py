@@ -56,6 +56,7 @@ class MainFrame(ttk.Frame):
         self.csv_label = None
         self.create_display()
         self.load_display()
+        self.automatic_csv_setting = False
 
 
 
@@ -211,8 +212,8 @@ class MainFrame(ttk.Frame):
 
         self.slideshow.update_image()
         # added csv function call -skylar
-
-        # self.export_predictions_to_csv()
+        if self.automatic_csv_setting == True:
+            self.export_predictions_to_csv()
 
     def predict_focused(self):
         image_path = self.image_files[self.slideshow.current_index]
@@ -344,6 +345,26 @@ class MainFrame(ttk.Frame):
         self.window.wm_title('CSV Options')
         # set the geometry of the pop up window
         self.window.geometry(f'{pop_up_window_width}x{pop_up_window_height}+{x}+{y}')
+
+        def inner_create_page(self):
+            self.window.automatic_csv_export_label = ttk.Label(self.window, text='Off')
+            self.window.automatic_csv_export = ttk.Button(self.window, text='Automatic CSV Export',command=Toggle_automatic_csv_export)
+        def inner_load_page(self):
+            self.window.automatic_csv_export.grid(row=0, column=0, pady=15, padx=15)
+            self.window.automatic_csv_export_label.grid(row=0, column=1, pady=15, padx=15)
+
+
+        def Toggle_automatic_csv_export():
+            if self.automatic_csv_setting  == True:
+                self.automatic_csv_setting = False
+                self.window.automatic_csv_export_label.config(text='Off')
+            else:
+                self.automatic_csv_setting = True
+                self.window.automatic_csv_export_label.config(text='On')
+
+        inner_create_page(self)
+        inner_load_page(self)
+
 
 def String_to_Substring(string):
     substring = string[-20:]
