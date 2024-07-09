@@ -7,10 +7,11 @@ class App(tk.Tk):
 
         self.title('Devision')
         self.geometry('600x600')
-
         self.main = MainFrame(self)
         self.main.pack(pady=5)
 
 if __name__ == "__main__":
+    # run the application
     app = App()
+    # start the event loop
     app.mainloop()

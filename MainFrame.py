@@ -52,9 +52,14 @@ class MainFrame(ttk.Frame):
         self.device = '/GPU:0' if tf.config.experimental.list_physical_devices('GPU') else '/CPU:0'
         print("Using device:", self.device)
         self.model = None
+        self.csv_file = None
+        self.csv_label = None
         self.create_display()
         self.load_display()
-        self.csv_file = None
+
+
+
+
 
     '''
     Author: Alex Mensen-Johnson
@@ -90,6 +95,8 @@ class MainFrame(ttk.Frame):
         self.clear_button = ttk.Button(self, text='Clear Images', command=self.clear_images)
         # creates a help button that will display button usage
         self.show_info = ttk.Button(self, text='Help Page', command=self.help_page)
+        # creates the csv label
+        self.csv_label_title = ttk.Label(self, text=str(self.csv_label))
         # creates the export to csv button
         self.csv_save_page_button = ttk.Button(self,text='CSV Save Page',command=self.csv_save_page)
 
@@ -119,8 +126,10 @@ class MainFrame(ttk.Frame):
         self.clear_button.grid(row=7, column=0, pady=5)
         # adds the button to the GUI
         self.show_info.grid(row=8, column=0, pady=5)
+        # adds the csv label to the window
+        self.csv_label_title.grid(row=9, column=0, pady=5, padx=5)
         # adds the csv save page to the window
-        self.csv_save_page_button.grid(row=9,column=0,pady=5)
+        self.csv_save_page_button.grid(row=10,column=0,pady=5)
 
     def select_files(self):
         files = filedialog.askopenfilenames(initialdir='/home/max/development/stardist/data')
@@ -253,8 +262,11 @@ class MainFrame(ttk.Frame):
         self.slideshow.prediction_files = self.prediction_files
 
     def load_csv_by_selection(self):
-        csv_file = filedialog.askopenfilenames(initialdir='/home/max/development/stardist/data')
+        csv_file = filedialog.askopenfilename(initialdir='/home/max/development/stardist/data')
         self.csv_file = csv_file
+        self.csv_label = String_to_Substring(self.csv_file)
+        self.csv_label_title.config(text= str(self.csv_label))
+
     '''
     Help Page: by Alex Mensen-Johnson
     Description: Loads the Help_Information.txt into a file, reads the file, and displays the information in a pop up
@@ -290,6 +302,8 @@ class MainFrame(ttk.Frame):
         # set the geometry of the pop up window
         self.window.geometry(f'{pop_up_window_width}x{pop_up_window_height}+{x}+{y}')
 
+        if self.csv_file is not None:
+            self.csv_label = String_to_Substring(self, self.csv_file)
 
         def inner_create_page(self):
             # create the export csv button
@@ -300,9 +314,13 @@ class MainFrame(ttk.Frame):
 
         def inner_load_page(self):
             # add the export csv button to the pop up window
-            self.window.export_csv_button.grid(row=0, column=1, pady=15, padx=15)
+            self.window.export_csv_button.grid(row=1, column=1, pady=15, padx=15)
             # add the load csv by selection button to the pop up window
-            self.window.load_csv_by_selection_button.grid(row=1, column=1, pady=15, padx=15)
+            self.window.load_csv_by_selection_button.grid(row=1, column=2, pady=15, padx=15)
 
         inner_create_page(self)
         inner_load_page(self)
+
+def String_to_Substring(string):
+    substring = string[-20:]
+    return substring
