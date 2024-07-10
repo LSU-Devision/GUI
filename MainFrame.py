@@ -57,6 +57,7 @@ class MainFrame(ttk.Frame):
         self.create_display()
         self.load_display()
         self.automatic_csv_setting = False
+        self.automatic_prediction_data_clear_setting = False
 
 
 
@@ -238,6 +239,8 @@ class MainFrame(ttk.Frame):
             writer = csv.writer(file)
             writer.writerow(['File Name', ' Total Count'])
             writer.writerows(self.predictions_data)
+        if self.automatic_prediction_data_clear_setting == True:
+            self.predictions_data.clear()
 
     '''
     Clear Images: By Alex Mensen-Johnson
@@ -265,6 +268,8 @@ class MainFrame(ttk.Frame):
         self.prediction_files = {}
         # sets the slideshow prediction files to empty
         self.slideshow.prediction_files = self.prediction_files
+        if self.automatic_prediction_data_clear_setting == True:
+            self.predictions_data.clear()
 
     def load_csv_by_selection(self):
         csv_file = filedialog.askopenfilename(initialdir='/home/max/development/stardist/data')
@@ -286,6 +291,8 @@ class MainFrame(ttk.Frame):
         # Create pop up with the information
         messagebox.showinfo(title,file_information)
 
+    def clear_predicted_data(self):
+        self.predictions_data.clear()
 
     def csv_save_page(self):
         # create the pop up window
@@ -316,7 +323,7 @@ class MainFrame(ttk.Frame):
             # create the load csv by selection button
             self.window.load_csv_by_selection_button = ttk.Button(self.window, text='Load CSV',command=self.load_csv_by_selection)
             # create the clear predictions button
-            self.clear_prediction_data_button = ttk.Button(self.window, text='Clear Predictions',command=clear_predicted_data)
+            self.clear_prediction_data_button = ttk.Button(self.window, text='Clear Predictions',command=self.clear_predicted_data)
 
 
         def inner_load_page(self):
@@ -327,8 +334,10 @@ class MainFrame(ttk.Frame):
             # add the clear predictions button to the pop up window
             self.clear_prediction_data_button.grid(row=2, column=1, pady=15, padx=15)
 
-        def clear_predicted_data():
-            self.predictions_data.clear()
+
+        def inner_destroy_page(self):
+            # destroy the pop up window
+            self.window.destroy()
 
         inner_create_page(self)
         inner_load_page(self)
@@ -341,7 +350,7 @@ class MainFrame(ttk.Frame):
         # set the size of the pop up window
         main_window_height = self.container.winfo_height()
         # variables for the pop up window
-        pop_up_window_width = 200
+        pop_up_window_width = 300
         # variables for the pop up window
         pop_up_window_height = 200
         # set the position of the pop up window
@@ -355,19 +364,31 @@ class MainFrame(ttk.Frame):
 
         def inner_create_page(self):
             self.window.automatic_csv_export_label = ttk.Label(self.window, text='Off')
-            self.window.automatic_csv_export = ttk.Button(self.window, text='Automatic CSV Export',command=Toggle_automatic_csv_export)
+            self.window.automatic_csv_export = ttk.Button(self.window, text='Automatic CSV Export',command=toggle_automatic_csv_export)
+            self.window.automatic_prediction_data_clear_label = ttk.Label(self.window, text='Off')
+            self.window.automatic_prediction_data_clear = ttk.Button(self.window, text='Automatic Prediction Data Clear',command=toggle_automatic_prediction_data_clear)
         def inner_load_page(self):
             self.window.automatic_csv_export.grid(row=0, column=0, pady=15, padx=15)
             self.window.automatic_csv_export_label.grid(row=0, column=1, pady=15, padx=15)
+            self.window.automatic_prediction_data_clear.grid(row=1, column=0, pady=15, padx=15)
+            self.window.automatic_prediction_data_clear_label.grid(row=1, column=1, pady=15, padx=15)
 
 
-        def Toggle_automatic_csv_export():
+        def toggle_automatic_csv_export():
             if self.automatic_csv_setting  == True:
                 self.automatic_csv_setting = False
                 self.window.automatic_csv_export_label.config(text='Off')
             else:
                 self.automatic_csv_setting = True
                 self.window.automatic_csv_export_label.config(text='On')
+
+        def toggle_automatic_prediction_data_clear():
+            if self.automatic_prediction_data_clear_setting == True:
+                self.automatic_prediction_data_clear_setting = False
+                self.window.automatic_prediction_data_clear_label.config(text='Off')
+            else:
+                self.automatic_prediction_data_clear_setting = True
+                self.window.automatic_prediction_data_clear_label.config(text='On')
 
         inner_create_page(self)
         inner_load_page(self)
