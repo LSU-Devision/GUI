@@ -295,7 +295,7 @@ class MainFrame(ttk.Frame):
         # set the size of the pop up window
         main_window_height = self.container.winfo_height()
         # variables for the pop up window
-        pop_up_window_width = 200
+        pop_up_window_width = 300
         # variables for the pop up window
         pop_up_window_height = 200
         # set the position of the pop up window
@@ -315,6 +315,8 @@ class MainFrame(ttk.Frame):
             self.window.export_csv_button = ttk.Button(self.window, text='Export CSV',command=self.export_predictions_to_csv)
             # create the load csv by selection button
             self.window.load_csv_by_selection_button = ttk.Button(self.window, text='Load CSV',command=self.load_csv_by_selection)
+            # create the clear predictions button
+            self.clear_prediction_data_button = ttk.Button(self.window, text='Clear Predictions',command=clear_predicted_data)
 
 
         def inner_load_page(self):
@@ -322,6 +324,11 @@ class MainFrame(ttk.Frame):
             self.window.export_csv_button.grid(row=1, column=1, pady=15, padx=15)
             # add the load csv by selection button to the pop up window
             self.window.load_csv_by_selection_button.grid(row=1, column=2, pady=15, padx=15)
+            # add the clear predictions button to the pop up window
+            self.clear_prediction_data_button.grid(row=2, column=1, pady=15, padx=15)
+
+        def clear_predicted_data():
+            self.predictions_data.clear()
 
         inner_create_page(self)
         inner_load_page(self)
