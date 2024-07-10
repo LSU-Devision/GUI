@@ -98,7 +98,7 @@ class MainFrame(ttk.Frame):
         # creates a help button that will display button usage
         self.show_info = ttk.Button(self, text='Help Page', command=self.help_page)
         # creates the csv label
-        self.csv_label_title = ttk.Label(self, text=str(self.csv_label))
+        self.csv_label_title = ttk.Label(self, text=str(self.csv_label),font=50)
         # creates the export to csv button
         self.csv_save_page_button = ttk.Button(self,text='CSV Save Page',command=self.csv_save_page)
         # Create settings page
@@ -363,9 +363,9 @@ class MainFrame(ttk.Frame):
         self.window.geometry(f'{pop_up_window_width}x{pop_up_window_height}+{x}+{y}')
 
         def inner_create_page(self):
-            self.window.automatic_csv_export_label = ttk.Label(self.window, text='Off')
+            self.window.automatic_csv_export_label = ttk.Label(self.window, text='Off',font=50)
             self.window.automatic_csv_export = ttk.Button(self.window, text='Automatic CSV Export',command=toggle_automatic_csv_export)
-            self.window.automatic_prediction_data_clear_label = ttk.Label(self.window, text='Off')
+            self.window.automatic_prediction_data_clear_label = ttk.Label(self.window, text='Off',font=50)
             self.window.automatic_prediction_data_clear = ttk.Button(self.window, text='Automatic Prediction Data Clear',command=toggle_automatic_prediction_data_clear)
         def inner_load_page(self):
             self.window.automatic_csv_export.grid(row=0, column=0, pady=15, padx=15)
