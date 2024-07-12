@@ -296,6 +296,11 @@ class MainFrame(ttk.Frame):
     def clear_predicted_data(self):
         self.predictions_data.clear()
 
+    def clear_csv_file(self):
+        self.csv_file = None
+        self.csv_label = None
+        self.csv_label_title.config(text='None')
+
     def csv_save_page(self):
         # create the pop up window
         self.window = tk.Toplevel(self.container)
@@ -319,6 +324,7 @@ class MainFrame(ttk.Frame):
         if self.csv_file is not None:
             self.csv_label = String_to_Substring(self.csv_file)
 
+
         def inner_create_page(self):
             # create the export csv button
             self.window.export_csv_button = ttk.Button(self.window, text='Export CSV',command=self.export_predictions_to_csv)
@@ -326,6 +332,8 @@ class MainFrame(ttk.Frame):
             self.window.load_csv_by_selection_button = ttk.Button(self.window, text='Load CSV',command=self.load_csv_by_selection)
             # create the clear predictions button
             self.clear_prediction_data_button = ttk.Button(self.window, text='Clear Predictions',command=self.clear_predicted_data)
+            # create the clear csv file button
+            self.window.clear_csv_file_button = ttk.Button(self.window, text='Clear CSV File', command=self.clear_csv_file)
 
 
         def inner_load_page(self):
@@ -335,11 +343,8 @@ class MainFrame(ttk.Frame):
             self.window.load_csv_by_selection_button.grid(row=1, column=2, pady=15, padx=15)
             # add the clear predictions button to the pop up window
             self.clear_prediction_data_button.grid(row=2, column=1, pady=15, padx=15)
-
-
-        def inner_destroy_page(self):
-            # destroy the pop up window
-            self.window.destroy()
+            # add the clear csv file button to the pop up window
+            self.window.clear_csv_file_button.grid(row=2, column=2, pady=15, padx=15)
 
         inner_create_page(self)
         inner_load_page(self)
@@ -371,6 +376,7 @@ class MainFrame(ttk.Frame):
             self.window.automatic_prediction_data_clear = ttk.Button(self.window, text='Automatic Prediction Data Clear',command=toggle_automatic_prediction_data_clear)
             self.window.clear_data_on_clear_images_label = ttk.Label(self.window, text='On',font=50)
             self.window.clear_data_on_clear_images_button = ttk.Button(self.window, text='Clear Data on Clear Images',command=toggle_clear_data_on_clear_images)
+
         def inner_load_page(self):
             self.window.automatic_csv_export.grid(row=0, column=0, pady=15, padx=15)
             self.window.automatic_csv_export_label.grid(row=0, column=1, pady=15, padx=15)
@@ -378,6 +384,7 @@ class MainFrame(ttk.Frame):
             self.window.automatic_prediction_data_clear_label.grid(row=1, column=1, pady=15, padx=15)
             self.window.clear_data_on_clear_images_button.grid(row=2, column=0, pady=15, padx=15)
             self.window.clear_data_on_clear_images_label.grid(row=2, column=1, pady=15, padx=15)
+
 
 
         def toggle_automatic_csv_export():
@@ -403,6 +410,7 @@ class MainFrame(ttk.Frame):
             else:
                 self.clear_data_on_clear_images_setting = True
                 self.window.clear_data_on_clear_images_label.config(text='On')
+
 
         inner_create_page(self)
         inner_load_page(self)
