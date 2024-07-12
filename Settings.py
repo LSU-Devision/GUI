@@ -15,7 +15,7 @@ class SettingsJson():
         self.json_file['automatic prediction clear data'] = self.automatic_prediction_clear_data
         self.json_file['clear data on clear images'] = self.clear_data_on_clear_images
         with open(default_json, 'w') as json_file:
-            json.dump(self.json_file, json_file)
+            json.dump(self.json_file, json_file, indent=4)
 
 
     def get_automatic_csv_export(self):
