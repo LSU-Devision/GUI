@@ -41,3 +41,4 @@ class SettingsJson():
     def set_clear_data_on_clear_images(self, value):
         self.clear_data_on_clear_images = value
         self.update_json()
+
