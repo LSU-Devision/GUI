@@ -6,7 +6,7 @@ class App(tk.Tk):
         super().__init__()
 
         self.title('Devision')
-        self.geometry('600x700')
+        self.geometry('1000x1000')
         self.main = MainFrame(self)
         self.main.pack(pady=5)
 

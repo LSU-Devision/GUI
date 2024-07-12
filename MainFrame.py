@@ -56,8 +56,7 @@ class MainFrame(ttk.Frame):
         self.csv_file = None
         self.csv_label = None
         self.csv_label_index = 0
-        self.create_display()
-        self.load_display()
+
         if self.settings.get_automatic_csv_export() == 'True':
             self.automatic_csv_setting = True
         else:
@@ -70,7 +69,8 @@ class MainFrame(ttk.Frame):
             self.clear_data_on_clear_images_setting = True
         else:
             self.clear_data_on_clear_images_setting = False
-
+        self.create_display()
+        self.load_display()
 
 
 
@@ -104,7 +104,7 @@ class MainFrame(ttk.Frame):
         # make two buttons
         self.select_model_button = ttk.Button(self.model_select_frame, text='Select Model', command=self.select_model)
         # creates the model label
-        self.model_label = ttk.Label(self.model_select_frame, text='(No model selected)')
+        self.model_label = ttk.Label(self.model_select_frame, text='No Model Selected',font=50)
         # creates clear button
         self.clear_button = ttk.Button(self, text='Clear Images', command=self.clear_images)
         # creates a help button that will display button usage
