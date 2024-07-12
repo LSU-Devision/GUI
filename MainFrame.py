@@ -13,6 +13,7 @@ import datetime
 import matplotlib.pyplot as plt
 from stardist import random_label_cmap
 from Slideshow import Slideshow
+import Settings
 
 '''
 Class Main Frame
@@ -38,7 +39,7 @@ Methods:
 class MainFrame(ttk.Frame):
     def __init__(self, container):
         super().__init__(container)
-
+        self.settings = Settings.SettingsJson()
         self.container = container
         self.image_files = []
         self.prediction_files = {}
@@ -57,9 +58,18 @@ class MainFrame(ttk.Frame):
         self.csv_label_index = 0
         self.create_display()
         self.load_display()
-        self.automatic_csv_setting = False
-        self.automatic_prediction_data_clear_setting = False
-        self.clear_data_on_clear_images_setting = True
+        if self.settings.automatic_csv_export == 'True':
+            self.automatic_csv_setting = True
+        else:
+            self.automatic_csv_setting = False
+        if self.settings.automatic_prediction_clear_data == 'True':
+            self.automatic_prediction_data_clear_setting = True
+        else:
+            self.automatic_prediction_data_clear_setting = False
+        if self.settings.clear_data_on_clear_images == 'True':
+            self.clear_data_on_clear_images_setting = True
+        else:
+            self.clear_data_on_clear_images_setting = False
 
 
 
@@ -370,11 +380,11 @@ class MainFrame(ttk.Frame):
         self.window.geometry(f'{pop_up_window_width}x{pop_up_window_height}+{x}+{y}')
 
         def inner_create_page(self):
-            self.window.automatic_csv_export_label = ttk.Label(self.window, text='Off',font=50)
+            self.window.automatic_csv_export_label = ttk.Label(self.window, text=Boolean_Text_Conversion(self.automatic_csv_setting),font=50)
             self.window.automatic_csv_export = ttk.Button(self.window, text='Automatic CSV Export',command=toggle_automatic_csv_export)
-            self.window.automatic_prediction_data_clear_label = ttk.Label(self.window, text='Off',font=50)
+            self.window.automatic_prediction_data_clear_label = ttk.Label(self.window, text=Boolean_Text_Conversion(self.automatic_prediction_data_clear_setting),font=50)
             self.window.automatic_prediction_data_clear = ttk.Button(self.window, text='Automatic Prediction Data Clear',command=toggle_automatic_prediction_data_clear)
-            self.window.clear_data_on_clear_images_label = ttk.Label(self.window, text='On',font=50)
+            self.window.clear_data_on_clear_images_label = ttk.Label(self.window, text=Boolean_Text_Conversion(self.clear_data_on_clear_images_setting),font=50)
             self.window.clear_data_on_clear_images_button = ttk.Button(self.window, text='Clear Data on Clear Images',command=toggle_clear_data_on_clear_images)
 
         def inner_load_page(self):
@@ -419,3 +429,9 @@ class MainFrame(ttk.Frame):
 def String_to_Substring(string):
     substring = string[-20:]
     return substring
+
+def Boolean_Text_Conversion(boolean):
+    if boolean == True:
+        return 'On'
+    else:
+        return 'Off'
