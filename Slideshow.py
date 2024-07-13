@@ -61,6 +61,7 @@ class Slideshow(ttk.Frame):
 
         self.predicted_image.set_image(prediction_path)
         self.base_image.set_image(image_path)
+        
         # adds number predicted to the label
         new_label = 'Number Predicted: ' + str(num_labels)
         # updates tkinter label with the new label

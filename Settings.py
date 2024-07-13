@@ -11,12 +11,16 @@ class SettingsJson():
         self.automatic_csv_export = self.json_file['automatic csv export']
         self.automatic_prediction_clear_data = self.json_file['automatic prediction clear data']
         self.clear_data_on_clear_images = self.json_file['clear data on clear images']
+        # added for save images toggle -skylar
+        self.save_images_output = self.json_file['save images output']
 
 
     def update_json(self):
         self.json_file['automatic csv export'] = self.automatic_csv_export
         self.json_file['automatic prediction clear data'] = self.automatic_prediction_clear_data
         self.json_file['clear data on clear images'] = self.clear_data_on_clear_images
+        # added for save images toggle -skylar
+        self.json_file['save images output'] = self.save_images_output
         with open(default_json, 'w') as json_file:
             json.dump(self.json_file, json_file, indent=4)
 
@@ -29,6 +33,10 @@ class SettingsJson():
 
     def get_clear_data_on_clear_images(self):
         return self.clear_data_on_clear_images
+    
+    # added for save images toggle -skylar
+    def get_save_images_output(self):
+        return self.save_images_output
 
     def set_automatic_csv_export(self, value):
         self.automatic_csv_export = value
@@ -42,3 +50,7 @@ class SettingsJson():
         self.clear_data_on_clear_images = value
         self.update_json()
 
+    # added for save images toggle -skylar
+    def set_save_images_output(self, value):
+        self.save_images_output = value
+        self.update_json()
