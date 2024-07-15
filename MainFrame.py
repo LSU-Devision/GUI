@@ -169,7 +169,15 @@ class MainFrame(ttk.Frame):
         self.progress_bar.grid(row=12, column=0, pady=10)
         self.predicted_images_label.grid(row=13, column=0, pady=5)
         self.estimated_time_label.grid(row=14, column=0, pady=5)
-        
+        #############################################
+        self.progress_bar.grid_remove()
+        self.predicted_images_label.grid_remove()
+        self.estimated_time_label.grid_remove()
+        # Configure the grid for dynamic resizing
+        self.grid_rowconfigure(5, weight=0)  # Assuming slideshow should expand
+        self.grid_columnconfigure(0, weight=1)
+        #############################################
+
     def select_files(self):
         files = filedialog.askopenfilenames(initialdir='/home/max/development/stardist/data')
         self.image_files.extend(files)
@@ -245,6 +253,13 @@ class MainFrame(ttk.Frame):
         self.predicted_images_label.config(text=f'Predicted 0/{total_images} images')
         self.estimated_time_label.config(text='Estimated time remaining: Calculating...')
 
+        #############################################
+        # Show the progress bar and labels
+        self.progress_bar.grid()
+        self.predicted_images_label.grid()
+        self.estimated_time_label.grid()
+        #############################################
+        
         for i, image_path in enumerate(self.image_files):
             self._predict(image_path)
             elapsed_time = time.time() - start_time
@@ -265,6 +280,13 @@ class MainFrame(ttk.Frame):
         print(f"Predicted {total_images} images in {total_elapsed_time} seconds")
         # Schedule messagebox on the main thread
         self.progress_bar.after(0, self.show_completion_message, total_images, total_elapsed_time)
+
+        #############################################
+        # Hide the progress bar and labels
+        self.progress_bar.grid_remove()
+        self.predicted_images_label.grid_remove()
+        self.estimated_time_label.grid_remove()
+        #############################################
 
     # function to update the progress bar and estimated time -skylar
     def update_progress(self, current, total, remaining_time):

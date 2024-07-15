@@ -1,10 +1,13 @@
 from tkinter import ttk
 from ImageFrame import ImageFrame
 import os.path
+import Settings
 
 class Slideshow(ttk.Frame):
     def __init__(self, container):
         super().__init__(container)
+        # to access settings
+        self.settings = Settings.SettingsJson()
 
         # Copies the image files from the Main frame into the sub frame
         self.image_files = container.image_files
@@ -17,22 +20,43 @@ class Slideshow(ttk.Frame):
 
         self.filepath_label.grid(row=0, column=0, columnspan=2, pady=2)
         self.base_image.grid(row=1, column=0)
-        self.predicted_image.grid(row=1, column=1)
+        # if save images output setting is true, show second box
+        # else show base image box only
+        if self.settings.get_save_images_output() == "True":
+            self.predicted_image.grid(row=1, column=1)
+        else:
+            self.predicted_image.grid_remove()
+
         self.item_count_label.grid(row=2, column=0, columnspan=2)
-        self.next_image_button.grid(row=3, column=1, padx=2, sticky='w')
-        self.prev_image_button.grid(row=3, column=0, padx=2, sticky='e')
+
+        # made previous/next buttons into a frame
+        # need to move into own file? -skylar
+        self.button_frame = ttk.Frame(self)
+        self.button_frame.grid(row = 3, column = 0, columnspan = 2)
+        self.prev_image_button = ttk.Button(self.button_frame, text='Prev', command=self.prev_image)
+        self.next_image_button = ttk.Button(self.button_frame, text='Next', command=self.next_image)
+        # Pack the buttons with some padding
+        self.prev_image_button.pack(side='left', padx=10)
+        self.next_image_button.pack(side='left', padx=10)
+        # Center the button frame
+        self.button_frame.grid(row=3, column=0, columnspan=2, pady=2)
+        # end previous/next button frame
+        
+
+    def update_slideshow(self):
+        self.create_frame()
 
     def create_frame(self):
         # Creates a button for next image
-        self.next_image_button = ttk.Button(self, text='Next', command=self.next_image)
+        #self.next_image_button = ttk.Button(self, text='Next', command=self.next_image)
         # Creates a button for the previous image
-        self.prev_image_button = ttk.Button(self, text='Prev', command=self.prev_image)
+        #self.prev_image_button = ttk.Button(self, text='Prev', command=self.prev_image)
         # Creates a label for the file path
         self.filepath_label = ttk.Label(self, font=25)
         # Creates an image frame for the base image
         self.base_image = ImageFrame(self)
-        # Creates and Image frame for the predicted image
         self.predicted_image = ImageFrame(self)
+        
         # Creates a label for the Item count
         self.item_count_label = ttk.Label(self, font=25)
 
