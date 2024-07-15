@@ -10,6 +10,10 @@ from stardist.models import StarDist2D
 from tkinter import messagebox
 import csv
 import datetime
+import time
+import threading
+import matplotlib
+matplotlib.use('agg')
 import matplotlib.pyplot as plt
 from stardist import random_label_cmap
 from Slideshow import Slideshow
@@ -69,17 +73,15 @@ class MainFrame(ttk.Frame):
             self.clear_data_on_clear_images_setting = True
         else:
             self.clear_data_on_clear_images_setting = False
-        self.create_display()
-        self.load_display()
 
-        ######################################################
+        # settings for save images output toggle -skylar
         if self.settings.get_save_images_output() == 'True':
             self.save_images_output_setting = True
         else:
             self.save_images_output_setting = False
-        ######################################################
 
-
+        self.create_display()
+        self.load_display()
 
     '''
     Author: Alex Mensen-Johnson
@@ -122,6 +124,13 @@ class MainFrame(ttk.Frame):
         # Create settings page
         self.settings_page_button = ttk.Button(self,text='Settings',command=self.settings_page)
 
+        # Create the progress bar
+        # Create a label to display progress of predicted images
+        # Create a label to display estimated time remaining -skylar
+        self.progress_bar = ttk.Progressbar(self, orient='horizontal', mode='determinate', length=300)
+        self.predicted_images_label = ttk.Label(self, text='Predicted 0/0 images')
+        self.estimated_time_label = ttk.Label(self, text='Estimated time remaining: N/A')
+
     '''
     Author: Alex Mensen-Johnson
     organizes the display buttons into a method for loading the display in a clear format
@@ -154,7 +163,11 @@ class MainFrame(ttk.Frame):
         self.csv_save_page_button.grid(row=10,column=0,pady=5)
         # adds the settings button to the window
         self.settings_page_button.grid(row=11,column=0,pady=5)
-
+        # Add the progress bar and labels to the window -skylar
+        self.progress_bar.grid(row=12, column=0, pady=10)
+        self.predicted_images_label.grid(row=13, column=0, pady=5)
+        self.estimated_time_label.grid(row=14, column=0, pady=5)
+        
     def select_files(self):
         files = filedialog.askopenfilenames(initialdir='/home/max/development/stardist/data')
         self.image_files.extend(files)
@@ -175,8 +188,8 @@ class MainFrame(ttk.Frame):
             self.predict_all_button.config(state=tk.NORMAL)
             self.model_selected = True
 
-    '''opens image, converts to grayscale, normalizes, predicts, saves predicted image if toggle set
-    to true. -skylar'''
+    '''opens image, converts to grayscale, normalizes, predicts, appends data to predictions_data,
+    saves predicted image if toggle set to true. -skylar'''
     def _predict(self, image_path):
         img = Image.open(image_path)
 
@@ -192,16 +205,19 @@ class MainFrame(ttk.Frame):
         with tf.device(self.device):
             labels, details = self.model.predict_instances(img, n_tiles = (2, 2))
 
-        # Visualization
-        fig, ax = plt.subplots(figsize=(13, 10))
-        ax.imshow(img, cmap="gray")
-        ax.imshow(labels, cmap=self.lbl_cmap, alpha=0.5)
-        ax.set_title(f"Predicted Objects: {len(np.unique(labels)) - 1}", fontsize=16)
-        ax.axis("off")
-        plt.tight_layout()
+        # appends data
+        self.predictions_data.append((os.path.basename(image_path), len(details['points'])))
 
         # Save the predicted image to output folder if setting is true
         if self.save_images_output_setting:
+            # Visualization of predicted image
+            fig, ax = plt.subplots(figsize=(13, 10))
+            ax.imshow(img, cmap="gray")
+            ax.imshow(labels, cmap=self.lbl_cmap, alpha=0.5)
+            ax.set_title(f"Predicted Objects: {len(np.unique(labels)) - 1}", fontsize=16)
+            ax.axis("off")
+            plt.tight_layout()
+            # saving predicted image
             save_path = os.path.join('output', f'prediction_{os.path.basename(image_path)}')
             if not os.path.exists(os.path.dirname(save_path)):
                 os.makedirs(os.path.dirname(save_path))
@@ -209,31 +225,69 @@ class MainFrame(ttk.Frame):
             plt.close(fig)
             self.prediction_files[image_path] = (save_path, len(details['points']))
         else:
+            #plt.close(fig)
             self.prediction_files[image_path] = (None, len(details['points']))
 
+    # added threading to keep gui loaded -skylar
     def predict_all(self):
-        for image_path in self.image_files:
+        threading.Thread(target=self.thread_predict_all).start()
+    
+    '''changed predict_all to be threaded for updating gui
+    adds updating counter for predicted images
+    adds estimated time to finish predicting all images -skylar'''
+    def thread_predict_all(self):
+        total_images = len(self.image_files)
+        start_time = time.time()
+        self.progress_bar['maximum'] = total_images
+        self.progress_bar['value'] = 0
+        self.predicted_images_label.config(text=f'Predicted 0/{total_images} images')
+        self.estimated_time_label.config(text='Estimated time remaining: Calculating...')
+
+        for i, image_path in enumerate(self.image_files):
             self._predict(image_path)
+            elapsed_time = time.time() - start_time
+            avg_time_per_image = elapsed_time / (i + 1)
+            remaining_time = int(avg_time_per_image * (total_images - (i + 1)))
+
+            print(f"Predicted {i + 1}/{total_images} images. Estimated time remaining: {remaining_time} seconds")
+            
+            # Schedule GUI update on the main thread
+            self.progress_bar.after(0, self.update_progress, i + 1, total_images, remaining_time)
+
+        # if true, appends data to csv at end of predictions
+        if self.automatic_csv_setting:
+            self.export_predictions_to_csv()
 
         self.slideshow.update_image()
-        # added csv function call -skylar
-        if self.automatic_csv_setting == True:
-            self.export_predictions_to_csv()
+        total_elapsed_time = int(time.time() - start_time)
+        print(f"Predicted {total_images} images in {total_elapsed_time} seconds")
+        # Schedule messagebox on the main thread
+        self.progress_bar.after(0, self.show_completion_message, total_images, total_elapsed_time)
+
+    # function to update the progress bar and estimated time -skylar
+    def update_progress(self, current, total, remaining_time):
+        self.progress_bar['value'] = current
+        self.predicted_images_label.config(text=f'Predicted {current}/{total} images')
+        self.estimated_time_label.config(text=f'Estimated time remaining: {remaining_time} seconds')
+        self.update_idletasks()
+    
+    # function to show completion of predictions -skylar
+    def show_completion_message(self, total_images, total_elapsed_time):
+        messagebox.showinfo("Prediction Complete", f"Predicted {total_images} images in {total_elapsed_time} seconds")
+        self.estimated_time_label.config(text='Estimated time remaining: N/A')
+        self.predicted_images_label.config(text=f'Predicted {total_images}/{total_images} images')
+        self.progress_bar['value'] = 0
 
     def predict_focused(self):
         image_path = self.image_files[self.slideshow.current_index]
         self._predict(image_path)
         self.slideshow.update_image()
 
-        # added csv function call -skylar
-        # self.export_predictions_to_csv()
-
     '''
     function to export filenames, predicted counts, and date/time to a csv file in the
     output folder -skylar
     '''
     def export_predictions_to_csv(self):
-
         current_time = datetime.datetime.now().strftime("%m-%d-%Y_%I-%M-%S %p")
         if self.csv_file is None:
             self.csv_file = os.path.join('output', f'predictions_{current_time}.csv')

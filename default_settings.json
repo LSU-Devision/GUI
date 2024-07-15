@@ -3,6 +3,6 @@
     "automatic csv export": "True",
     "automatic prediction clear data": "False",
     "clear data on clear images": "True",
-    "save images output": "True",
+    "save images output": "False",
     "current settings": "Target-Settings.json"
 }
