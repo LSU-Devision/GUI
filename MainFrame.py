@@ -60,6 +60,8 @@ class MainFrame(ttk.Frame):
         self.csv_file = None
         self.csv_label = None
         self.csv_label_index = 0
+        self.is_csv_save_page_open = False
+        self.is_settings_page_open = False
 
         if self.settings.get_automatic_csv_export() == 'True':
             self.automatic_csv_setting = True
@@ -358,28 +360,32 @@ class MainFrame(ttk.Frame):
         self.csv_label_title.config(text='None')
 
     def csv_save_page(self):
-        # create the pop up window
-        self.window = tk.Toplevel(self.container)
-        # set the size of the pop up window
-        main_window_width = self.container.winfo_width()
-        # set the size of the pop up window
-        main_window_height = self.container.winfo_height()
-        # variables for the pop up window
-        pop_up_window_width = 300
-        # variables for the pop up window
-        pop_up_window_height = 200
-        # set the position of the pop up window
-        x = main_window_width + 75
-        # set the position of the pop up window
-        y = main_window_height // 2 - pop_up_window_height // 2  # center the pop-up window vertically
-        # set the title of the pop up window
-        self.window.wm_title('CSV Options')
-        # set the geometry of the pop up window
-        self.window.geometry(f'{pop_up_window_width}x{pop_up_window_height}+{x}+{y}')
+        if self.is_csv_save_page_open == False:
+            # create the pop up window
+            self.window = tk.Toplevel(self.container)
+            # set the size of the pop up window
+            main_window_width = self.container.winfo_width()
+            # set the size of the pop up window
+            main_window_height = self.container.winfo_height()
+            # variables for the pop up window
+            pop_up_window_width = 300
+            # variables for the pop up window
+            pop_up_window_height = 200
+            # set the position of the pop up window
+            x = main_window_width + 75
+            # set the position of the pop up window
+            y = main_window_height // 2 - pop_up_window_height // 2  # center the pop-up window vertically
+            # set the title of the pop up window
+            self.window.wm_title('CSV Options')
+            # set the geometry of the pop up window
+            self.window.geometry(f'{pop_up_window_width}x{pop_up_window_height}+{x}+{y}')
 
-        if self.csv_file is not None:
-            self.csv_label = utils.string_to_substring(self.csv_file)
+            if self.csv_file is not None:
+                self.csv_label = utils.string_to_substring(self.csv_file)
 
+        def close_window():
+            self.window.withdraw()
+            self.is_csv_save_page_open = False
 
         def inner_create_page(self):
             # create the export csv button
@@ -390,6 +396,7 @@ class MainFrame(ttk.Frame):
             self.clear_prediction_data_button = ttk.Button(self.window, text='Clear Predictions',command=self.clear_predicted_data)
             # create the clear csv file button
             self.window.clear_csv_file_button = ttk.Button(self.window, text='Clear CSV File', command=self.clear_csv_file)
+            self.window.protocol("WM_DELETE_WINDOW", lambda: close_window())
 
 
         def inner_load_page(self):
@@ -402,28 +409,32 @@ class MainFrame(ttk.Frame):
             # add the clear csv file button to the pop up window
             self.window.clear_csv_file_button.grid(row=2, column=2, pady=15, padx=15)
 
-        inner_create_page(self)
-        inner_load_page(self)
+        if self.is_csv_save_page_open == False:
+            self.is_csv_save_page_open = True
+            inner_create_page(self)
+            inner_load_page(self)
 
     def settings_page(self):
-        # create the pop up window
-        self.window = tk.Toplevel(self.container)
-        # set the size of the pop up window
-        main_window_width = self.container.winfo_width()
-        # set the size of the pop up window
-        main_window_height = self.container.winfo_height()
-        # variables for the pop up window
-        pop_up_window_width = 300
-        # variables for the pop up window
-        pop_up_window_height = 300
-        # set the position of the pop up window
-        x = main_window_width + 75
-        # set the position of the pop up window
-        y = main_window_height // 2 - pop_up_window_height // 2  # center the pop-up window vertically
-        # set the title of the pop up window
-        self.window.wm_title('CSV Options')
-        # set the geometry of the pop up window
-        self.window.geometry(f'{pop_up_window_width}x{pop_up_window_height}+{x}+{y}')
+        if self.is_settings_page_open == False:
+
+            # create the pop up window
+            self.window = tk.Toplevel(self.container)
+            # set the size of the pop up window
+            main_window_width = self.container.winfo_width()
+            # set the size of the pop up window
+            main_window_height = self.container.winfo_height()
+            # variables for the pop up window
+            pop_up_window_width = 300
+            # variables for the pop up window
+            pop_up_window_height = 300
+            # set the position of the pop up window
+            x = main_window_width + 75
+            # set the position of the pop up window
+            y = main_window_height // 2 - pop_up_window_height // 2  # center the pop-up window vertically
+            # set the title of the pop up window
+            self.window.wm_title('CSV Options')
+            # set the geometry of the pop up window
+            self.window.geometry(f'{pop_up_window_width}x{pop_up_window_height}+{x}+{y}')
 
         def inner_create_page(self):
             self.window.automatic_csv_export_label = ttk.Label(self.window, text=utils.boolean_text_conversion(self.automatic_csv_setting), font=50)
@@ -437,6 +448,7 @@ class MainFrame(ttk.Frame):
             self.window.save_images_output_button = ttk.Button(self.window, text='Save images to Output',command=toggle_save_images_output)
             ######################################
             self.window.save_settings_button = ttk.Button(self.window, text='Save Settings',command=save_settings)
+            # self.windwow.protocol("WM_DELETE_WINDOW", lambda: close_window() )
 
         def inner_load_page(self):
             self.window.automatic_csv_export.grid(row=0, column=0, pady=15, padx=15)
@@ -493,10 +505,14 @@ class MainFrame(ttk.Frame):
             else:
                 self.save_images_output_setting = True
                 self.window.save_images_output_label.config(text = 'On')
-        ################################## 
 
-        inner_create_page(self)
-        inner_load_page(self)
+
+        ##################################
+
+        if self.is_settings_page_open == False:
+            inner_create_page(self)
+            inner_load_page(self)
+            # self.is_settings_page_open = True
 
 
 
