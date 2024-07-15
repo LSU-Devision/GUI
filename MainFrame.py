@@ -174,8 +174,10 @@ class MainFrame(ttk.Frame):
         self.predicted_images_label.grid_remove()
         self.estimated_time_label.grid_remove()
         # Configure the grid for dynamic resizing
-        self.grid_rowconfigure(5, weight=0)  # Assuming slideshow should expand
+        self.grid_rowconfigure(5, weight=1)  # Assuming slideshow should expand
         self.grid_columnconfigure(0, weight=1)
+        for row in range(15):
+            self.grid_rowconfigure(row, weight=1)
         #############################################
 
     def select_files(self):
