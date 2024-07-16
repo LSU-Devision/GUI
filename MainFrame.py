@@ -67,7 +67,11 @@ class MainFrame(ttk.Frame):
 
 
         # settings for automatic csv export
-        self.automatic_csv_setting = utils.string_to_boolean(self.settings.get_automatic_csv_export())
+        # i made it so it can return a boolean value
+        self.automatic_csv_setting = self.settings.get_automatic_csv_export()
+        print(self.automatic_csv_setting)
+
+
         # settings for automatic prediction data clear
         self.automatic_prediction_data_clear_setting = utils.string_to_boolean(self.settings.get_automatic_prediction_clear_data())
         # settings for clear data on clear images toggle
@@ -89,26 +93,20 @@ class MainFrame(ttk.Frame):
         self.select_files_button = ttk.Button(self, text='Select Files', command=self.select_files)
         # Creates the slide show
         self.slideshow = Slideshow(self)
-        # Creates the model select frame
-        self.model_select_frame = ttk.Frame(self)
         # Creates the select model button
-        self.select_model_button = ttk.Button(self.model_select_frame, text='Select Model', command=self.select_model)
+        self.select_model_button = ttk.Button(self, text='Select Model', command=self.select_model)
         # Creates the model label
-        self.model_label = ttk.Label(self.model_select_frame, text='2D_demo')
-        # Creates the predict frame
-        self.predict_frame = ttk.Frame(self)
+        self.model_label = ttk.Label(self, text='2D_demo')
         # initialize buttons as disabled until a model is selected
         self.model_selected = False
         # creates the single predict button (this is commented out)
-        self.predict_focused_button = ttk.Button(self.predict_frame, text='Predict', command=self.predict_focused, state=tk.DISABLED)
+        self.predict_focused_button = ttk.Button(self, text='Predict', command=self.predict_focused, state=tk.DISABLED)
         # Creates the predict all button
-        self.predict_all_button = ttk.Button(self.predict_frame, text='Predict All', command=self.predict_all, state=tk.DISABLED)
-        # Model selection frame
-        self.model_select_frame = ttk.Frame(self)
+        self.predict_all_button = ttk.Button(self, text='Predict All', command=self.predict_all, state=tk.DISABLED)
         # make two buttons
-        self.select_model_button = ttk.Button(self.model_select_frame, text='Select Model', command=self.select_model)
+        self.select_model_button = ttk.Button(self, text='Select Model', command=self.select_model)
         # creates the model label
-        self.model_label = ttk.Label(self.model_select_frame, text='No Model Selected',font=50)
+        self.model_label = ttk.Label(self, text='No Model Selected',font=50)
         # creates clear button
         self.clear_button = ttk.Button(self, text='Clear Images', command=self.clear_images)
         # creates a help button that will display button usage
@@ -133,36 +131,34 @@ class MainFrame(ttk.Frame):
     If you are loading anything into the display, please add it here.
     '''
     def load_display(self):
+        # using grid layout -skylar
+        self.grid_rowconfigure(0, weight=0)
+        self.grid_columnconfigure(0, weight=1)
+
         # loads the model label into the frame
-        self.model_label.grid(row=1, column=0, pady=0)
+        self.model_label.grid(row=1, column=0, pady=5)
         # loads the select model button into the frame
-        self.select_model_button.grid(row=2,column=0,pady=10)
+        self.select_model_button.grid(row=2,column=0,pady=5)
         # Loads the select files button into the page
-        self.select_files_button.grid(row=3, column=0, pady=0)
-        # This is the focused predict button, it has been commented out
-        #self.predict_focused_button.pack()
+        self.select_files_button.grid(row=3, column=0, pady=5)
         # loads the predict all button
         self.predict_all_button.grid(row=4,column=0,pady=5)
-        # creates a seperate frame for the predict buttons (not sure if this is true)
-        self.predict_frame.grid(row=4, column=0, pady=10)
-        # Not sure about this one
-        self.model_select_frame.grid(row=0, column=0, pady=0)
         # loads the slide show frame into the display
         self.slideshow.grid(row=5, column=0)
         # adds clear button using grid method
-        self.clear_button.grid(row=7, column=0, pady=5)
+        self.clear_button.grid(row=6, column=0, pady=5)
         # adds the button to the GUI
-        self.show_info.grid(row=8, column=0, pady=5)
+        self.show_info.grid(row=7, column=0, pady=5)
         # adds the csv label to the window
-        self.csv_label_title.grid(row=9, column=0, pady=5, padx=5)
+        self.csv_label_title.grid(row=8, column=0, pady=0)
         # adds the csv save page to the window
-        self.csv_save_page_button.grid(row=10,column=0,pady=5)
+        self.csv_save_page_button.grid(row=9,column=0,pady=5)
         # adds the settings button to the window
-        self.settings_page_button.grid(row=11,column=0,pady=5)
+        self.settings_page_button.grid(row=10,column=0,pady=5)
         # Add the progress bar and labels to the window -skylar
-        self.progress_bar.grid(row=10, column=0, pady=10)
-        self.predicted_images_label.grid(row=11, column=0, pady=5)
-        self.estimated_time_label.grid(row=12, column=0, pady=5)
+        self.progress_bar.grid(row=11, column=0, pady=5)
+        self.predicted_images_label.grid(row=12, column=0, pady=5)
+        self.estimated_time_label.grid(row=13, column=0, pady=5)
 
     '''****************************************************************************************'''
     '''Destroys current frame and reloads MainFrame for the purpose of dynamic display. -skylar'''
@@ -529,31 +525,24 @@ class MainFrame(ttk.Frame):
             else:
                 self.settings.set_save_images_output(True)
                 self.window.save_images_output_label.config(text = 'On')
-
                 self.update_display()
         
         def reset_settings():
             self.settings.reset_to_default()
             self.automatic_csv_setting = utils.string_to_boolean(self.settings.get_automatic_csv_export())
-            print(self.automatic_csv_setting)
+            #print(self.automatic_csv_setting)
             self.automatic_prediction_data_clear_setting = utils.string_to_boolean(self.settings.get_automatic_prediction_clear_data())
-            print(self.automatic_prediction_data_clear_setting)
+            #print(self.automatic_prediction_data_clear_setting)
             self.clear_data_on_clear_images_setting = utils.string_to_boolean(self.settings.get_clear_data_on_clear_images())
-            print(self.clear_data_on_clear_images_setting)
+            #print(self.clear_data_on_clear_images_setting)
             self.save_images_output_setting = utils.string_to_boolean(self.settings.get_save_images_output())
-            print(self.save_images_output_setting)
+            #print(self.save_images_output_setting)
             self.window.automatic_csv_export_label.config(text=utils.boolean_text_conversion(self.automatic_csv_setting))
             self.window.automatic_prediction_data_clear_label.config(text=utils.boolean_text_conversion(self.automatic_prediction_data_clear_setting))
             self.window.clear_data_on_clear_images_label.config(text=utils.boolean_text_conversion(self.clear_data_on_clear_images_setting))
             self.window.save_images_output_label.config(text=utils.boolean_text_conversion(self.save_images_output_setting))
 
-
-        ##################################
-
         if self.is_settings_page_open == False:
             inner_create_page(self)
             inner_load_page(self)
             # self.is_settings_page_open = True
-
-
-
