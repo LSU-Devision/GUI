@@ -18,6 +18,16 @@ def string_to_substring(string):
 def boolean_text_conversion(boolean):
     if boolean == True:
         return 'On'
-    else:
+    elif boolean == False:
         return 'Off'
+    else:
+        print('Error: Invalid boolean value')
+
+def string_to_boolean(string):
+    if string == 'True':
+        return True
+    elif string == 'False':
+        return False
+    else:
+        print('Error: Invalid boolean string')
 
