@@ -19,6 +19,7 @@ from stardist import random_label_cmap
 from Slideshow import Slideshow
 import Settings
 import Utilities as utils
+import CSVEditor as csv_editor
 '''
 Class Main Frame
 Author: Max
@@ -61,8 +62,10 @@ class MainFrame(ttk.Frame):
         self.device = '/GPU:0' if tf.config.experimental.list_physical_devices('GPU') else '/CPU:0'
         print("Using device:", self.device)
         self.model = None
-        self.csv_file = None
-        self.csv_label = None
+        self.csv_editor = csv_editor.CSVEditor()
+        self.csv_editor.set_csv_file(None)
+        self.csv_editor.set_csv_label(None)
+        # self.csv_label = None
         self.csv_label_index = 0
         self.is_csv_save_page_open = False
         self.is_settings_page_open = False
@@ -114,7 +117,7 @@ class MainFrame(ttk.Frame):
         # creates a help button that will display button usage
         self.show_info = ttk.Button(self, text='Help Page', command=self.help_page)
         # creates the csv label
-        self.csv_label_title = ttk.Label(self, text=str(self.csv_label),font=50)
+        self.csv_label_title = ttk.Label(self, text=str(self.csv_editor.get_csv_label()),font=50)
         # creates the export to csv button
         self.csv_save_page_button = ttk.Button(self,text='CSV Save Page',command=self.csv_save_page)
         # Create settings page
@@ -285,11 +288,11 @@ class MainFrame(ttk.Frame):
     '''
     def export_predictions_to_csv(self):
         current_time = datetime.datetime.now().strftime("%m-%d-%Y_%I-%M-%S %p")
-        if self.csv_file is None:
-            self.csv_file = os.path.join('output', f'predictions_{current_time}.csv')
+        if self.csv_editor.get_csv_file() is None:
+            self.csv_editor.set_csv_file(os.path.join('output', f'predictions_{current_time}.csv'))
         if not os.path.exists('output'):
             os.makedirs('output')
-        with open(self.csv_file, mode='w', newline='') as file:
+        with open(self.csv_editor.get_csv_file(), mode='w', newline='') as file:
             writer = csv.writer(file)
             writer.writerow(['File Name', ' Total Count'])
             writer.writerows(self.predictions_data)
@@ -327,9 +330,9 @@ class MainFrame(ttk.Frame):
 
     def load_csv_by_selection(self):
         csv_file = filedialog.askopenfilename(initialdir='/home/max/development/stardist/data')
-        self.csv_file = csv_file
-        self.csv_label = utils.string_to_substring(self.csv_file)
-        self.csv_label_title.config(text= str(self.csv_label))
+        self.csv_editor.set_csv_file(csv_file)
+        self.csv_editor.get_substring()
+        self.csv_label_title.config(text= str(self.csv_editor.get_csv_label()))
 
     '''
     Help Page: by Alex Mensen-Johnson
@@ -349,8 +352,8 @@ class MainFrame(ttk.Frame):
         self.predictions_data.clear()
 
     def clear_csv_file(self):
-        self.csv_file = None
-        self.csv_label = None
+        self.csv_editor.set_csv_file(None)
+        self.csv_editor.set_csv_label(None)
         self.csv_label_title.config(text='None')
 
     def csv_save_page(self):
@@ -374,8 +377,8 @@ class MainFrame(ttk.Frame):
             # set the geometry of the pop up window
             self.window.geometry(f'{pop_up_window_width}x{pop_up_window_height}+{x}+{y}')
 
-            if self.csv_file is not None:
-                self.csv_label = utils.string_to_substring(self.csv_file)
+            if self.csv_editor.get_csv_file() is not None:
+                self.csv_editor.get_substring()
 
         def close_window():
             self.window.withdraw()
