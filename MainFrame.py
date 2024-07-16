@@ -49,16 +49,9 @@ class MainFrame(ttk.Frame):
         self.prediction_files = {}
         # initialize predictions_data list -skylar
         self.predictions_data = []
-
         # initialize lbl_cmap for random color map -skylar
         self.lbl_cmap = random_label_cmap()
 
-        # Check if GPU is available
-        self.device = '/GPU:0' if tf.config.experimental.list_physical_devices('GPU') else '/CPU:0'
-        if self.device == '/GPU:0':
-            print(f"Program will use: GPU.")
-        else:
-            print(f"Program will use: CPU. Warning, processing will be slower as a result. A CUDA compatible NVIDIA GPU is highly recommended.")
         self.model = None
         self.csv_file = None
         self.csv_label = None
@@ -78,11 +71,6 @@ class MainFrame(ttk.Frame):
             self.clear_data_on_clear_images_setting = True
         else:
             self.clear_data_on_clear_images_setting = False
-        # settings for save images output toggle -skylar
-        if self.settings.get_save_images_output() == 'True':
-            self.save_images_output_setting = True
-        else:
-            self.save_images_output_setting = False
 
         self.create_display()
         self.load_display()
@@ -164,7 +152,19 @@ class MainFrame(ttk.Frame):
         self.progress_bar.grid(row=10, column=0, pady=10)
         self.predicted_images_label.grid(row=11, column=0, pady=5)
         self.estimated_time_label.grid(row=12, column=0, pady=5)
+
+    '''****************************************************************************************'''
+    '''Destroys current frame and reloads MainFrame for the purpose of dynamic display. -skylar'''
+    def update_display(self):
+        parent_container = self.container
+        self.destroy()
         
+        # Re-initialize the frame with the same container
+        new_frame = MainFrame(parent_container)
+
+        # Add the new frame to the container using grid
+        new_frame.grid(row=0, column=0, sticky='nsew')
+
     def select_files(self):
         files = filedialog.askopenfilenames(initialdir='/home/max/development/stardist/data')
         self.image_files.extend(files)
@@ -206,7 +206,8 @@ class MainFrame(ttk.Frame):
         self.predictions_data.append((os.path.basename(image_path), len(details['points'])))
 
         # Save the predicted image to output folder if setting is true
-        if self.save_images_output_setting:
+        # changed if statement to use a boolean from settings function -skylar
+        if self.settings.get_save_images_output():
             # Visualization of predicted image
             fig, ax = plt.subplots(figsize=(13, 10))
             ax.imshow(img, cmap="gray")
@@ -438,10 +439,15 @@ class MainFrame(ttk.Frame):
             self.window.automatic_prediction_data_clear = ttk.Button(self.window, text='Automatic Prediction Data Clear',command=toggle_automatic_prediction_data_clear)
             self.window.clear_data_on_clear_images_label = ttk.Label(self.window, text=utils.boolean_text_conversion(self.clear_data_on_clear_images_setting), font=50)
             self.window.clear_data_on_clear_images_button = ttk.Button(self.window, text='Clear Data on Clear Images',command=toggle_clear_data_on_clear_images)
-            # added for save images toggle -skylar
-            self.window.save_images_output_label = ttk.Label(self.window, text=utils.boolean_text_conversion(self.save_images_output_setting),font=50)
+
+            ####################################################
+            # THIS SECTION NEEDS TO BE UPDATED FOR UPDATED BOOLEAN FUNCTIONS INSIDE SETTINGS
+            # added for save images toggle. no longer uses variable setting.
+            # uses boolean value fetched from respective settings function -skylar
+            self.window.save_images_output_label = ttk.Label(self.window, text=utils.boolean_text_conversion(self.settings.get_save_images_output()),font=50)
             self.window.save_images_output_button = ttk.Button(self.window, text='Save images to Output',command=toggle_save_images_output)
-            ######################################
+            ####################################################
+
             self.window.save_settings_button = ttk.Button(self.window, text='Save Settings',command=save_settings)
             # self.windwow.protocol("WM_DELETE_WINDOW", lambda: close_window() )
 
@@ -452,19 +458,26 @@ class MainFrame(ttk.Frame):
             self.window.automatic_prediction_data_clear_label.grid(row=1, column=1, pady=15, padx=15)
             self.window.clear_data_on_clear_images_button.grid(row=2, column=0, pady=15, padx=15)
             self.window.clear_data_on_clear_images_label.grid(row=2, column=1, pady=15, padx=15)
+
+            ####################################################
             # added for save images toggle -skylar
             self.window.save_images_output_button.grid(row=3, column=0, pady=15, padx=15)
             self.window.save_images_output_label.grid(row=3, column=1, pady=15, padx=15)
-            #####################################
+            ###################################################
+
             self.window.save_settings_button.grid(row=4, column=0, pady=15, padx=15)
 
         def save_settings():
             self.settings.set_automatic_csv_export(str(self.automatic_csv_setting))
             self.settings.set_automatic_prediction_clear_data(str(self.automatic_prediction_data_clear_setting))
             self.settings.set_clear_data_on_clear_images(str(self.clear_data_on_clear_images_setting))
+
+            ####################################################
+            # THIS SECTION NEEDS TO BE UPDATED FOR UPDATED BOOLEAN FUNCTIONS INSIDE SETTINGS
             # added for save images toggle -skylar
-            self.settings.set_save_images_output(str(self.save_images_output_setting))
-            ######################################
+            self.settings.set_save_images_output(self.save_images_output_setting)
+            ####################################################
+
             self.settings.update_json()
 
 
@@ -492,15 +505,18 @@ class MainFrame(ttk.Frame):
                 self.clear_data_on_clear_images_setting = True
                 self.window.clear_data_on_clear_images_label.config(text='On')
 
-        # added save images toggle -skylar
+        ####################################################
+        # added save images toggle. reloads display for dynamic image and prediction frame
+        # uses boolean values -skylar
         def toggle_save_images_output():
-            if self.save_images_output_setting == True:
-                self.save_images_output_setting = False
+            if self.settings.get_save_images_output() == True:
+                self.settings.set_save_images_output(False)
                 self.window.save_images_output_label.config(text = 'Off')
+                self.update_display()
             else:
-                self.save_images_output_setting = True
+                self.settings.set_save_images_output(True)
                 self.window.save_images_output_label.config(text = 'On')
-
+                self.update_display()
 
         ##################################
 
