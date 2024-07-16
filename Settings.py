@@ -21,9 +21,19 @@ class SettingsJson():
         self.json_file['clear data on clear images'] = self.clear_data_on_clear_images
         # added for save images toggle -skylar
         self.json_file['save images output'] = self.save_images_output
+        self.json_file['current settings'] = self.json_file_path
         with open(default_json, 'w') as json_file:
             json.dump(self.json_file, json_file, indent=4)
 
+    def reset_to_default(self):
+        self.json_file_path = default_json
+        self.automatic_csv_export = 'True'
+        self.automatic_prediction_clear_data = 'False'
+        self.clear_data_on_clear_images = 'True'
+        # added for save images toggle -skylar
+        self.save_images_output = 'False'
+        self.current_settings = default_json
+        self.update_json()
 
     def get_automatic_csv_export(self):
         return self.automatic_csv_export
