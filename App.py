@@ -11,10 +11,6 @@ class App(tk.Tk):
 
         # set minimum window size
         self.minsize(750, 850)
-        
-        # Use grid layout for the main window
-        self.grid_rowconfigure(0, weight=1)
-        self.grid_columnconfigure(0, weight=1)
 
         ####################################################
         # Check if GPU is available and sends messages to console
@@ -25,6 +21,10 @@ class App(tk.Tk):
         else:
             print(f"Program will use: CPU. Warning, processing will be slower as a result. A CUDA compatible NVIDIA GPU is highly recommended.")
         ####################################################
+        
+        # Use grid layout for the main window
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
 
         self.main = MainFrame(self)
         self.main.grid(row=0, column=0, sticky="nsew")
