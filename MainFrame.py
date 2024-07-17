@@ -66,6 +66,7 @@ class MainFrame(ttk.Frame):
         self.is_settings_page_open = False
 
 
+
         # settings for automatic csv export
         # i made it so it can return a boolean value
         self.automatic_csv_setting = self.settings.get_automatic_csv_export()
@@ -371,9 +372,9 @@ class MainFrame(ttk.Frame):
             # set the size of the pop up window
             main_window_height = self.container.winfo_height()
             # variables for the pop up window
-            pop_up_window_width = 300
+            pop_up_window_width = 700
             # variables for the pop up window
-            pop_up_window_height = 200
+            pop_up_window_height = 400
             # set the position of the pop up window
             x = main_window_width + 75
             # set the position of the pop up window
@@ -401,6 +402,34 @@ class MainFrame(ttk.Frame):
             self.window.clear_csv_file_button = ttk.Button(self.window, text='Clear CSV File', command=self.clear_csv_file)
             self.window.protocol("WM_DELETE_WINDOW", lambda: close_window())
 
+            self.window.csv_index_column_toggle = ttk.Button(self.window, text='CSV Index Column')
+            self.window.csv_index_column_dropdown = ttk.Combobox(self.window,state='readonly',values=['None','1','2','3','4','5'])
+            self.window.csv_index_column_dropdown.set(self.csv_editor.get_csv_index_column_index())
+            self.window.csv_index_column_dropdown.bind("<<ComboboxSelected>>", lambda event: self.csv_editor.set_csv_index_column_value(self.window.csv_index_column_dropdown.get()))
+
+            self.window.csv_date_column_toggle = ttk.Button(self.window, text='CSV Date Column')
+            self.window.csv_date_column_dropdown = ttk.Combobox(self.window,state='readonly',values=['None','1','2','3','4','5'])
+            self.window.csv_date_column_dropdown.set(self.csv_editor.get_csv_date_column_index())
+            self.window.csv_date_column_dropdown.bind("<<ComboboxSelected>>", lambda event: self.csv_editor.set_csv_date_column_value(self.window.csv_date_column_dropdown.get()))
+
+            self.window.csv_time_column_toggle = ttk.Button(self.window, text='CSV Time Column')
+            self.window.csv_time_column_dropdown = ttk.Combobox(self.window,state='readonly',values=['None','1','2','3','4','5'])
+            self.window.csv_time_column_dropdown.set(self.csv_editor.get_csv_time_column_index())
+            self.window.csv_time_column_dropdown.bind("<<ComboboxSelected>>", lambda event: self.csv_editor.set_csv_time_column_value(self.window.csv_time_column_dropdown.get()))
+
+            self.window.csv_file_name_column_toggle = ttk.Button(self.window, text='CSV File Name Column')
+            self.window.csv_file_name_column_dropdown = ttk.Combobox(self.window, state='readonly', values=['None','1', '2', '3', '4', '5'])
+            self.window.csv_file_name_column_dropdown.set(self.csv_editor.get_csv_file_name_column_index())
+            self.window.csv_file_name_column_dropdown.bind("<<ComboboxSelected>>", lambda event: self.csv_editor.set_csv_file_name_column_value(self.window.csv_file_name_column_dropdown.get()))
+
+
+            self.window.csv_total_count_column_toggle = ttk.Button(self.window, text='CSV Total Count Column')
+            self.window.csv_total_count_column_dropdown = ttk.Combobox(self.window, state='readonly', values=['None','1', '2', '3', '4', '5'])
+            self.window.csv_total_count_column_dropdown.set(self.csv_editor.get_csv_total_count_column_index())
+            self.window.csv_total_count_column_dropdown.bind("<<ComboboxSelected>>", lambda event: self.csv_editor.set_csv_total_count_column_value(self.window.csv_total_count_column_dropdown.get()))
+
+            self.window.save_csv_column_button = ttk.Button(self.window, text='Save CSV Column',command=self.csv_editor.save_csv_settings)
+            self.window.save_csv_column_button.bind("<Button-1>", lambda event: messagebox.showinfo("Saved", "CSV Column Saved"))
 
         def inner_load_page(self):
             # add the export csv button to the pop up window
@@ -411,6 +440,24 @@ class MainFrame(ttk.Frame):
             self.clear_prediction_data_button.grid(row=2, column=1, pady=15, padx=15)
             # add the clear csv file button to the pop up window
             self.window.clear_csv_file_button.grid(row=2, column=2, pady=15, padx=15)
+
+            self.window.csv_index_column_toggle.grid(row=1, column=3, pady=15, padx=15)
+            self.window.csv_index_column_dropdown.grid(row=1, column=4, pady=15, padx=15)
+
+            self.window.csv_date_column_toggle.grid(row=2, column=3, pady=15, padx=15)
+            self.window.csv_date_column_dropdown.grid(row=2, column=4, pady=15, padx=15)
+
+            self.window.csv_time_column_toggle.grid(row=3, column=3, pady=15, padx=15)
+            self.window.csv_time_column_dropdown.grid(row=3, column=4, pady=15, padx=15)
+
+            self.window.csv_file_name_column_toggle.grid(row=4, column=3, pady=15, padx=15)
+            self.window.csv_file_name_column_dropdown.grid(row=4, column=4, pady=15, padx=15)
+
+            self.window.csv_total_count_column_toggle.grid(row=5, column=3, pady=15, padx=15)
+            self.window.csv_total_count_column_dropdown.grid(row=5, column=4, pady=15, padx=15)
+
+            self.window.save_csv_column_button.grid(row=6, column=3, pady=15, padx=15)
+
 
         if self.is_csv_save_page_open == False:
             self.is_csv_save_page_open = True
