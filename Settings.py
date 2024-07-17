@@ -1,9 +1,20 @@
 import json
+import os
+import sys
+
 default_json_path = "docs/default_settings.json"
 target_json_path = "docs/Target-Settings.json"
 
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    try:
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)
+
 class SettingsJson():
-    def __init__(self, json_file_path=default_json_path):
+    def __init__(self, json_file_path=resource_path(default_json_path)):
         ####################################################
         # restructured loading -skylar
         # Load default json
@@ -11,7 +22,7 @@ class SettingsJson():
             self.default_json_data = json.load(default_json_file)
 
         # Load target json
-        with open(target_json_path, 'r') as target_json_file:
+        with open(resource_path(target_json_path), 'r') as target_json_file:
             self.target_json_data = json.load(target_json_file)
 
         # Initially load target settings
@@ -42,7 +53,7 @@ class SettingsJson():
         self.json_file = self.default_json_data
 
         # Overwrite target-settings.json with default data
-        with open(target_json_path, 'w') as json_file:
+        with (resource_path(target_json_path), 'w') as json_file:
             json.dump(self.default_json_data, json_file, indent=4)
 
         # Load default settings
@@ -52,14 +63,14 @@ class SettingsJson():
     # updated function to use boolean values -skylar
     def update_json(self, key, value):
         # Load target-settings.json
-        with open(target_json_path, 'r') as target_json_file:
+        with open(resource_path(target_json_path), 'r') as target_json_file:
             self.json_file = json.load(target_json_file)
 
         # Update data
         self.json_file[key] = value
 
         # Overwrite all settings in target-settings.json with updated data
-        with open(target_json_path, 'w') as json_file:
+        with open(resource_path(target_json_path), 'w') as json_file:
             json.dump(self.json_file, json_file, indent=4)
 
     ####################################################
