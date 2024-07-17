@@ -65,21 +65,16 @@ class MainFrame(ttk.Frame):
         self.is_csv_save_page_open = False
         self.is_settings_page_open = False
         self.device = '/GPU:0' if tf.config.experimental.list_physical_devices('GPU') else '/CPU:0'
-
-
-        # settings for automatic csv export
-        # i made it so it can return a boolean value
-        self.automatic_csv_setting = self.settings.get_automatic_csv_export()
-        print(self.automatic_csv_setting)
-
-
-        # settings for automatic prediction data clear
-        self.automatic_prediction_data_clear_setting = utils.string_to_boolean(self.settings.get_automatic_prediction_clear_data())
-        # settings for clear data on clear images toggle
-        self.clear_data_on_clear_images_setting = utils.string_to_boolean(self.settings.get_clear_data_on_clear_images())
-        # settings for save images output toggle -skylar,
-        self.save_images_output_setting = utils.string_to_boolean(self.settings.get_save_images_output())
-
+        self.progress_popup = None  # Initialize progress_popup to None
+        # commenting out for release
+        # # settings for automatic csv export
+        # self.automatic_csv_setting = self.settings.get_automatic_csv_export()
+        # # settings for automatic prediction data clear
+        # self.automatic_prediction_data_clear_setting = utils.string_to_boolean(self.settings.get_automatic_prediction_clear_data())
+        # # settings for clear data on clear images toggle
+        # self.clear_data_on_clear_images_setting = utils.string_to_boolean(self.settings.get_clear_data_on_clear_images())
+        # # settings for save images output toggle -skylar,
+        # self.save_images_output_setting = utils.string_to_boolean(self.settings.get_save_images_output())
 
         self.create_display()
         self.load_display()
@@ -122,9 +117,9 @@ class MainFrame(ttk.Frame):
         # Create the progress bar
         # Create a label to display progress of predicted images
         # Create a label to display estimated time remaining -skylar
-        self.progress_bar = ttk.Progressbar(self, orient='horizontal', mode='determinate', length=300)
-        self.predicted_images_label = ttk.Label(self, text='Predicted 0/0 images')
-        self.estimated_time_label = ttk.Label(self, text='Estimated time remaining: N/A')
+        # self.progress_bar = ttk.Progressbar(self, orient='horizontal', mode='determinate', length=300)
+        # self.predicted_images_label = ttk.Label(self, text='Predicted 0/0 images')
+        # self.estimated_time_label = ttk.Label(self, text='Estimated time remaining: N/A')
 
     '''
     Author: Alex Mensen-Johnson
@@ -157,9 +152,9 @@ class MainFrame(ttk.Frame):
         # adds the settings button to the window
         self.settings_page_button.grid(row=10,column=0,pady=5)
         # Add the progress bar and labels to the window -skylar
-        self.progress_bar.grid(row=11, column=0, pady=5)
-        self.predicted_images_label.grid(row=12, column=0, pady=5)
-        self.estimated_time_label.grid(row=13, column=0, pady=5)
+        # self.progress_bar.grid(row=11, column=0, pady=5)
+        # self.predicted_images_label.grid(row=12, column=0, pady=5)
+        # self.estimated_time_label.grid(row=13, column=0, pady=5)
 
     '''****************************************************************************************'''
     '''Destroys current frame and reloads MainFrame for the purpose of dynamic display. -skylar'''
@@ -242,6 +237,10 @@ class MainFrame(ttk.Frame):
     adds updating counter for predicted images
     adds estimated time to finish predicting all images -skylar'''
     def thread_predict_all(self):
+
+        # popup for progress bar and estimation time
+        self.create_progress_popup()
+
         total_images = len(self.image_files)
         start_time = time.time()
         self.progress_bar['maximum'] = total_images
@@ -261,7 +260,7 @@ class MainFrame(ttk.Frame):
             self.progress_bar.after(0, self.update_progress, i + 1, total_images, remaining_time)
 
         # if true, appends data to csv at end of predictions
-        if self.automatic_csv_setting:
+        if self.settings.get_automatic_csv_export:
             self.export_predictions_to_csv()
 
         self.slideshow.update_image()
@@ -270,19 +269,38 @@ class MainFrame(ttk.Frame):
         # Schedule messagebox on the main thread
         self.progress_bar.after(0, self.show_completion_message, total_images, total_elapsed_time)
 
+    '''
+    Author: Skylar Wilson
+    Creates a pop-up window to display progress information
+    '''
+    def create_progress_popup(self):
+        self.progress_popup = tk.Toplevel(self)
+        self.progress_popup.title("Prediction Progress")
+
+        self.progress_bar = ttk.Progressbar(self.progress_popup, orient='horizontal', mode='determinate', length=300)
+        self.predicted_images_label = ttk.Label(self.progress_popup, text='Predicted 0/0 images')
+        self.estimated_time_label = ttk.Label(self.progress_popup, text='Estimated time remaining: N/A')
+
+        self.progress_bar.grid(row=0, column=0, pady=5)
+        self.predicted_images_label.grid(row=1, column=0, pady=5)
+        self.estimated_time_label.grid(row=2, column=0, pady=5)
+
     # function to update the progress bar and estimated time -skylar
     def update_progress(self, current, total, remaining_time):
-        self.progress_bar['value'] = current
-        self.predicted_images_label.config(text=f'Predicted {current}/{total} images')
-        self.estimated_time_label.config(text=f'Estimated time remaining: {remaining_time} seconds')
-        self.update_idletasks()
+        if self.progress_popup and self.progress_popup.winfo_exists():
+            self.progress_bar['value'] = current
+            self.predicted_images_label.config(text=f'Predicted {current}/{total} images')
+            self.estimated_time_label.config(text=f'Estimated time remaining: {remaining_time} seconds')
+            self.update_idletasks()
     
     # function to show completion of predictions -skylar
     def show_completion_message(self, total_images, total_elapsed_time):
-        messagebox.showinfo("Prediction Complete", f"Predicted {total_images} images in {total_elapsed_time} seconds")
-        self.estimated_time_label.config(text='Estimated time remaining: N/A')
-        self.predicted_images_label.config(text=f'Predicted {total_images}/{total_images} images')
-        self.progress_bar['value'] = 0
+        if self.progress_popup and self.progress_popup.winfo_exists():
+            messagebox.showinfo("Prediction Complete", f"Predicted {total_images} images in {total_elapsed_time} seconds")
+            self.estimated_time_label.config(text='Estimated time remaining: N/A')
+            self.predicted_images_label.config(text=f'Predicted {total_images}/{total_images} images')
+            self.progress_bar['value'] = 0
+            self.progress_popup.destroy()
 
     def predict_focused(self):
         image_path = self.image_files[self.slideshow.current_index]
@@ -303,7 +321,7 @@ class MainFrame(ttk.Frame):
             writer = csv.writer(file)
             writer.writerow(['File Name', ' Total Count'])
             writer.writerows(self.predictions_data)
-        if self.automatic_prediction_data_clear_setting == True:
+        if self.settings.get_automatic_prediction_clear_data():
             self.predictions_data.clear()
 
     '''
@@ -332,7 +350,7 @@ class MainFrame(ttk.Frame):
         self.prediction_files = {}
         # sets the slideshow prediction files to empty
         self.slideshow.prediction_files = self.prediction_files
-        if self.clear_data_on_clear_images_setting == True:
+        if self.settings.get_clear_data_on_clear_images():
             self.predictions_data.clear()
 
     def load_csv_by_selection(self):
@@ -526,13 +544,14 @@ class MainFrame(ttk.Frame):
             self.window.default_settings_button.grid(row=5, column=0, pady=15, padx=15)
 
         def save_settings():
-            self.settings.set_automatic_csv_export(self.automatic_csv_setting)
-            self.settings.set_automatic_prediction_clear_data(self.automatic_prediction_data_clear_setting)
-            self.settings.set_clear_data_on_clear_images(self.clear_data_on_clear_images_setting)
-            # added for save images toggle -skylar
-            self.settings.set_save_images_output(self.save_images_output_setting)
-            ####################################################
-            self.settings.update_json()
+            # self.settings.set_automatic_csv_export(self.automatic_csv_setting)
+            # self.settings.set_automatic_prediction_clear_data(self.automatic_prediction_data_clear_setting)
+            # self.settings.set_clear_data_on_clear_images(self.clear_data_on_clear_images_setting)
+            # # added for save images toggle -skylar
+            # self.settings.set_save_images_output(self.save_images_output_setting)
+            # ####################################################
+            # self.settings.update_json()
+            pass
 
         def toggle_automatic_csv_export():
             if self.settings.get_automatic_csv_export()  == True:
@@ -565,26 +584,26 @@ class MainFrame(ttk.Frame):
             if self.settings.get_save_images_output() == True:
                 self.settings.set_save_images_output(False)
                 self.window.save_images_output_label.config(text = 'Off')
-                self.update_display()
+                # self.update_display()
             else:
                 self.settings.set_save_images_output(True)
                 self.window.save_images_output_label.config(text = 'On')
-                self.update_display()
+                # self.update_display()
         
         def reset_settings():
-            self.settings.reset_to_default()
-            self.automatic_csv_setting = utils.string_to_boolean(self.settings.get_automatic_csv_export())
-            #print(self.automatic_csv_setting)
-            self.automatic_prediction_data_clear_setting = utils.string_to_boolean(self.settings.get_automatic_prediction_clear_data())
-            #print(self.automatic_prediction_data_clear_setting)
-            self.clear_data_on_clear_images_setting = utils.string_to_boolean(self.settings.get_clear_data_on_clear_images())
-            #print(self.clear_data_on_clear_images_setting)
-            self.save_images_output_setting = utils.string_to_boolean(self.settings.get_save_images_output())
-            #print(self.save_images_output_setting)
-            self.window.automatic_csv_export_label.config(text=utils.boolean_text_conversion(self.automatic_csv_setting))
-            self.window.automatic_prediction_data_clear_label.config(text=utils.boolean_text_conversion(self.automatic_prediction_data_clear_setting))
-            self.window.clear_data_on_clear_images_label.config(text=utils.boolean_text_conversion(self.clear_data_on_clear_images_setting))
-            self.window.save_images_output_label.config(text=utils.boolean_text_conversion(self.save_images_output_setting))
+            self.settings.revert_to_default()
+            # self.automatic_csv_setting = utils.string_to_boolean(self.settings.get_automatic_csv_export())
+            # #print(self.automatic_csv_setting)
+            # self.automatic_prediction_data_clear_setting = utils.string_to_boolean(self.settings.get_automatic_prediction_clear_data())
+            # #print(self.automatic_prediction_data_clear_setting)
+            # self.clear_data_on_clear_images_setting = utils.string_to_boolean(self.settings.get_clear_data_on_clear_images())
+            # #print(self.clear_data_on_clear_images_setting)
+            # self.save_images_output_setting = utils.string_to_boolean(self.settings.get_save_images_output())
+            # #print(self.save_images_output_setting)
+            self.window.automatic_csv_export_label.config(text=utils.boolean_text_conversion(self.settings.get_automatic_csv_export()))
+            self.window.automatic_prediction_data_clear_label.config(text=utils.boolean_text_conversion(self.settings.get_automatic_prediction_clear_data()))
+            self.window.clear_data_on_clear_images_label.config(text=utils.boolean_text_conversion(self.settings.get_clear_data_on_clear_images()))
+            self.window.save_images_output_label.config(text=utils.boolean_text_conversion(self.settings.get_save_images_output()))
 
         if self.is_settings_page_open == False:
             inner_create_page(self)
