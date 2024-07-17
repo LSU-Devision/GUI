@@ -66,15 +66,20 @@ class MainFrame(ttk.Frame):
         self.is_settings_page_open = False
         self.device = '/GPU:0' if tf.config.experimental.list_physical_devices('GPU') else '/CPU:0'
         self.progress_popup = None  # Initialize progress_popup to None
-        # commenting out for release
-        # # settings for automatic csv export
-        # self.automatic_csv_setting = self.settings.get_automatic_csv_export()
-        # # settings for automatic prediction data clear
-        # self.automatic_prediction_data_clear_setting = utils.string_to_boolean(self.settings.get_automatic_prediction_clear_data())
-        # # settings for clear data on clear images toggle
-        # self.clear_data_on_clear_images_setting = utils.string_to_boolean(self.settings.get_clear_data_on_clear_images())
-        # # settings for save images output toggle -skylar,
-        # self.save_images_output_setting = utils.string_to_boolean(self.settings.get_save_images_output())
+
+        # settings for automatic csv export
+        # i made it so it can return a boolean value
+        self.automatic_csv_setting = self.settings.get_automatic_csv_export()
+        # print(self.automatic_csv_setting)
+
+
+        # settings for automatic prediction data clear
+        self.automatic_prediction_data_clear_setting = self.settings.get_automatic_prediction_clear_data()
+        # settings for clear data on clear images toggle
+        self.clear_data_on_clear_images_setting = self.settings.get_clear_data_on_clear_images()
+        # settings for save images output toggle -skylar,
+        self.save_images_output_setting = self.settings.get_save_images_output()
+
 
         self.create_display()
         self.load_display()
@@ -522,7 +527,6 @@ class MainFrame(ttk.Frame):
             self.window.save_images_output_button = ttk.Button(self.window, text='Save images to Output',command=toggle_save_images_output)
             ####################################################
 
-            self.window.save_settings_button = ttk.Button(self.window, text='Save Settings',command=save_settings)
             self.window.default_settings_button = ttk.Button(self.window, text='Reset To Default Settings',command=reset_settings)
             # self.windwow.protocol("WM_DELETE_WINDOW", lambda: close_window() )
 
@@ -540,8 +544,7 @@ class MainFrame(ttk.Frame):
             self.window.save_images_output_label.grid(row=3, column=1, pady=15, padx=15)
             ###################################################
 
-            self.window.save_settings_button.grid(row=4, column=0, pady=15, padx=15)
-            self.window.default_settings_button.grid(row=5, column=0, pady=15, padx=15)
+            self.window.default_settings_button.grid(row=4, column=0, pady=15, padx=15)
 
         def save_settings():
             # self.settings.set_automatic_csv_export(self.automatic_csv_setting)
@@ -592,18 +595,14 @@ class MainFrame(ttk.Frame):
         
         def reset_settings():
             self.settings.revert_to_default()
-            # self.automatic_csv_setting = utils.string_to_boolean(self.settings.get_automatic_csv_export())
-            # #print(self.automatic_csv_setting)
-            # self.automatic_prediction_data_clear_setting = utils.string_to_boolean(self.settings.get_automatic_prediction_clear_data())
-            # #print(self.automatic_prediction_data_clear_setting)
-            # self.clear_data_on_clear_images_setting = utils.string_to_boolean(self.settings.get_clear_data_on_clear_images())
-            # #print(self.clear_data_on_clear_images_setting)
-            # self.save_images_output_setting = utils.string_to_boolean(self.settings.get_save_images_output())
-            # #print(self.save_images_output_setting)
-            self.window.automatic_csv_export_label.config(text=utils.boolean_text_conversion(self.settings.get_automatic_csv_export()))
-            self.window.automatic_prediction_data_clear_label.config(text=utils.boolean_text_conversion(self.settings.get_automatic_prediction_clear_data()))
-            self.window.clear_data_on_clear_images_label.config(text=utils.boolean_text_conversion(self.settings.get_clear_data_on_clear_images()))
-            self.window.save_images_output_label.config(text=utils.boolean_text_conversion(self.settings.get_save_images_output()))
+            self.automatic_csv_setting = self.settings.get_automatic_csv_export()
+            self.automatic_prediction_data_clear_setting = self.settings.get_automatic_prediction_clear_data()
+            self.clear_data_on_clear_images_setting = self.settings.get_clear_data_on_clear_images()
+            self.save_images_output_setting = self.settings.get_save_images_output()
+            self.window.automatic_csv_export_label.config(text=utils.boolean_text_conversion(self.automatic_csv_setting))
+            self.window.automatic_prediction_data_clear_label.config(text=utils.boolean_text_conversion(self.automatic_prediction_data_clear_setting))
+            self.window.clear_data_on_clear_images_label.config(text=utils.boolean_text_conversion(self.clear_data_on_clear_images_setting))
+            self.window.save_images_output_label.config(text=utils.boolean_text_conversion(self.save_images_output_setting))
 
         if self.is_settings_page_open == False:
             inner_create_page(self)

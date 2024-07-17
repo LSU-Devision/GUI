@@ -32,25 +32,29 @@ class SettingsJson():
     ####################################################
     # function to load default json file. -skylar
     def load_default(self):
-        self.automatic_csv_export = self.json_file['automatic csv export']
-        self.automatic_prediction_clear_data = self.json_file['automatic prediction clear data']
-        self.clear_data_on_clear_images = self.json_file['clear data on clear images']
-        self.save_images_output = self.json_file['save images output']
+        with open(target_json_path, 'r') as self.json_file:
+            self.default_json_data = json.load(self.json_file)
+        self.automatic_csv_export = self.default_json_data['automatic csv export']
+        self.automatic_prediction_clear_data = self.default_json_data['automatic prediction clear data']
+        self.clear_data_on_clear_images = self.default_json_data['clear data on clear images']
+        self.save_images_output = self.default_json_data['save images output']
 
     ####################################################
     # function to load custom settings from json file. -skylar
     def load_custom_settings(self):
-        self.json_file = self.target_json_data
-        self.automatic_csv_export = self.json_file['automatic csv export']
-        self.automatic_prediction_clear_data = self.json_file['automatic prediction clear data']
-        self.clear_data_on_clear_images = self.json_file['clear data on clear images']
-        self.save_images_output = self.json_file['save images output']
+        with open(default_json_path, 'r') as self.json_file:
+            self.default_json_data = self.target_json_data
+        self.automatic_csv_export = self.default_json_data['automatic csv export']
+        self.automatic_prediction_clear_data = self.default_json_data['automatic prediction clear data']
+        self.clear_data_on_clear_images = self.default_json_data['clear data on clear images']
+        self.save_images_output = self.default_json_data['save images output']
 
     ####################################################
     # function to revert back to default settings. -skylar
     def revert_to_default(self):
         # Load default json data
-        self.json_file = self.default_json_data
+        with open(default_json_path, 'r') as self.json_file:
+            self.default_json_data = json.load(self.json_file)
 
         # Overwrite target-settings.json with default data
         with (resource_path(target_json_path), 'w') as json_file:
