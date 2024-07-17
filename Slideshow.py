@@ -50,7 +50,7 @@ class Slideshow(ttk.Frame):
         # Creates and Image frame for the predicted image
         self.predicted_image = ImageFrame(self)
         # Creates a label for the Item count
-        self.item_count_label = ttk.Label(self, font=25)
+        self.item_count_label = ttk.Label(self, font=50)
     
     # no longer needed, functionality in main. leaving for now
     # def update_slideshow(self):
