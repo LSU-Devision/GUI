@@ -64,7 +64,7 @@ class MainFrame(ttk.Frame):
         self.csv_label_index = 0
         self.is_csv_save_page_open = False
         self.is_settings_page_open = False
-
+        self.device = '/GPU:0' if tf.config.experimental.list_physical_devices('GPU') else '/CPU:0'
 
         # settings for automatic csv export
         # i made it so it can return a boolean value
@@ -440,18 +440,20 @@ class MainFrame(ttk.Frame):
             self.window.geometry(f'{pop_up_window_width}x{pop_up_window_height}+{x}+{y}')
 
         def inner_create_page(self):
-            self.window.automatic_csv_export_label = ttk.Label(self.window, text=utils.boolean_text_conversion(self.automatic_csv_setting), font=50)
+            self.window.automatic_csv_export_label = ttk.Label(self.window, text=utils.boolean_text_conversion(self.settings.get_automatic_csv_export()), font=50)
             self.window.automatic_csv_export = ttk.Button(self.window, text='Automatic CSV Export',command=toggle_automatic_csv_export)
-            self.window.automatic_prediction_data_clear_label = ttk.Label(self.window, text=utils.boolean_text_conversion(self.automatic_prediction_data_clear_setting), font=50)
+
+            self.window.automatic_prediction_data_clear_label = ttk.Label(self.window, text=utils.boolean_text_conversion(self.settings.get_automatic_prediction_clear_data()), font=50)
             self.window.automatic_prediction_data_clear = ttk.Button(self.window, text='Automatic Prediction Data Clear',command=toggle_automatic_prediction_data_clear)
-            self.window.clear_data_on_clear_images_label = ttk.Label(self.window, text=utils.boolean_text_conversion(self.clear_data_on_clear_images_setting), font=50)
+
+            self.window.clear_data_on_clear_images_label = ttk.Label(self.window, text=utils.boolean_text_conversion(self.settings.get_clear_data_on_clear_images()), font=50)
             self.window.clear_data_on_clear_images_button = ttk.Button(self.window, text='Clear Data on Clear Images',command=toggle_clear_data_on_clear_images)
 
             ####################################################
             # THIS SECTION NEEDS TO BE UPDATED FOR UPDATED BOOLEAN FUNCTIONS INSIDE SETTINGS
             # added for save images toggle. no longer uses variable setting.
             # uses boolean value fetched from respective settings function -skylar
-            self.window.save_images_output_label = ttk.Label(self.window, text=utils.boolean_text_conversion(self.settings.get_save_images_output()),font=50)
+            self.window.save_images_output_label = ttk.Label(self.window, text=utils.boolean_text_conversion(self.settings.get_save_images_output()), font=50)
             self.window.save_images_output_button = ttk.Button(self.window, text='Save images to Output',command=toggle_save_images_output)
             ####################################################
 
@@ -477,41 +479,36 @@ class MainFrame(ttk.Frame):
             self.window.default_settings_button.grid(row=5, column=0, pady=15, padx=15)
 
         def save_settings():
-            self.settings.set_automatic_csv_export(str(self.automatic_csv_setting))
-            self.settings.set_automatic_prediction_clear_data(str(self.automatic_prediction_data_clear_setting))
-            self.settings.set_clear_data_on_clear_images(str(self.clear_data_on_clear_images_setting))
-
-            ####################################################
-            # THIS SECTION NEEDS TO BE UPDATED FOR UPDATED BOOLEAN FUNCTIONS INSIDE SETTINGS
+            self.settings.set_automatic_csv_export(self.automatic_csv_setting)
+            self.settings.set_automatic_prediction_clear_data(self.automatic_prediction_data_clear_setting)
+            self.settings.set_clear_data_on_clear_images(self.clear_data_on_clear_images_setting)
             # added for save images toggle -skylar
             self.settings.set_save_images_output(self.save_images_output_setting)
             ####################################################
-
             self.settings.update_json()
 
-
         def toggle_automatic_csv_export():
-            if self.automatic_csv_setting  == True:
-                self.automatic_csv_setting = False
+            if self.settings.get_automatic_csv_export()  == True:
+                self.settings.set_automatic_csv_export(False)
                 self.window.automatic_csv_export_label.config(text='Off')
             else:
-                self.automatic_csv_setting = True
+                self.settings.set_automatic_csv_export(True)
                 self.window.automatic_csv_export_label.config(text='On')
 
         def toggle_automatic_prediction_data_clear():
-            if self.automatic_prediction_data_clear_setting == True:
-                self.automatic_prediction_data_clear_setting = False
+            if self.settings.get_automatic_prediction_clear_data() == True:
+                self.settings.set_automatic_prediction_clear_data(False)
                 self.window.automatic_prediction_data_clear_label.config(text='Off')
             else:
-                self.automatic_prediction_data_clear_setting = True
+                self.settings.set_automatic_prediction_clear_data(True)
                 self.window.automatic_prediction_data_clear_label.config(text='On')
 
         def toggle_clear_data_on_clear_images():
-            if self.clear_data_on_clear_images_setting == True:
-                self.clear_data_on_clear_images_setting = False
+            if self.settings.get_clear_data_on_clear_images() == True:
+                self.settings.set_clear_data_on_clear_images(False)
                 self.window.clear_data_on_clear_images_label.config(text='Off')
             else:
-                self.clear_data_on_clear_images_setting = True
+                self.settings.set_clear_data_on_clear_images(True)
                 self.window.clear_data_on_clear_images_label.config(text='On')
 
         ####################################################
