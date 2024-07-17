@@ -1,6 +1,6 @@
 import json
-default_json_path = 'default_settings.json'
-target_json_path = 'Target-Settings.json'
+default_json_path = "docs/default_settings.json"
+target_json_path = "docs/Target-Settings.json"
 
 class SettingsJson():
     def __init__(self, json_file_path=default_json_path):

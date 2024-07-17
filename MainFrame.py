@@ -65,7 +65,7 @@ class MainFrame(ttk.Frame):
         self.is_csv_save_page_open = False
         self.is_settings_page_open = False
         self.device = '/GPU:0' if tf.config.experimental.list_physical_devices('GPU') else '/CPU:0'
-
+        self.progress_popup = None  # Initialize progress_popup to None
         # commenting out for release
         # # settings for automatic csv export
         # self.automatic_csv_setting = self.settings.get_automatic_csv_export()
@@ -288,17 +288,20 @@ class MainFrame(ttk.Frame):
 
     # function to update the progress bar and estimated time -skylar
     def update_progress(self, current, total, remaining_time):
-        self.progress_bar['value'] = current
-        self.predicted_images_label.config(text=f'Predicted {current}/{total} images')
-        self.estimated_time_label.config(text=f'Estimated time remaining: {remaining_time} seconds')
-        self.update_idletasks()
+        if self.progress_popup and self.progress_popup.winfo_exists():
+            self.progress_bar['value'] = current
+            self.predicted_images_label.config(text=f'Predicted {current}/{total} images')
+            self.estimated_time_label.config(text=f'Estimated time remaining: {remaining_time} seconds')
+            self.update_idletasks()
     
     # function to show completion of predictions -skylar
     def show_completion_message(self, total_images, total_elapsed_time):
-        messagebox.showinfo("Prediction Complete", f"Predicted {total_images} images in {total_elapsed_time} seconds")
-        self.estimated_time_label.config(text='Estimated time remaining: N/A')
-        self.predicted_images_label.config(text=f'Predicted {total_images}/{total_images} images')
-        self.progress_bar['value'] = 0
+        if self.progress_popup and self.progress_popup.winfo_exists():
+            messagebox.showinfo("Prediction Complete", f"Predicted {total_images} images in {total_elapsed_time} seconds")
+            self.estimated_time_label.config(text='Estimated time remaining: N/A')
+            self.predicted_images_label.config(text=f'Predicted {total_images}/{total_images} images')
+            self.progress_bar['value'] = 0
+            self.progress_popup.destroy()
 
     def predict_focused(self):
         image_path = self.image_files[self.slideshow.current_index]
