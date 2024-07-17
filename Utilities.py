@@ -21,7 +21,7 @@ def boolean_text_conversion(boolean):
     elif boolean == False:
         return 'Off'
     else:
-        print('Error: Invalid boolean value')
+        raise ValueError('Error: Invalid boolean value')
 
 def string_to_boolean(string):
     if string == 'True':
@@ -29,5 +29,5 @@ def string_to_boolean(string):
     elif string == 'False':
         return False
     else:
-        print('Error: Invalid boolean string')
+        raise ValueError('Error: Invalid boolean string')
 
