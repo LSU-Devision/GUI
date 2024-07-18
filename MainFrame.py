@@ -106,7 +106,7 @@ class MainFrame(ttk.Frame):
         # creates clear button
         self.clear_button = ttk.Button(self, text='Clear Images', command=self.clear_images)
         # creates a help button that will display button usage
-        self.show_info = ttk.Button(self, text='Help Page', command=self.help_page)
+        self.show_info = ttk.Button(self, text='Help', command=self.help_page)
         # creates the csv label
         self.csv_label_title = ttk.Label(self, text=str(self.csv_editor.get_csv_label()),font=50)
         # creates the export to csv button
@@ -352,6 +352,8 @@ class MainFrame(ttk.Frame):
         self.slideshow.prediction_files = self.prediction_files
         if self.settings.get_clear_data_on_clear_images():
             self.predictions_data.clear()
+        #
+        messagebox.showinfo("Devision", "Images Cleared!")
 
     def load_csv_by_selection(self):
         csv_file = filedialog.askopenfilename(initialdir='/home/max/development/stardist/data')
@@ -369,7 +371,7 @@ class MainFrame(ttk.Frame):
         # Read the file
         file_information = info_file.read()
         # Create the title string
-        title = 'Help Page'
+        title = 'Help'
         # Create pop up with the information
         messagebox.showinfo(title,file_information)
 
