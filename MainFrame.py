@@ -71,6 +71,7 @@ class MainFrame(ttk.Frame):
         # i made it so it can return a boolean value
         self.automatic_csv_setting = self.settings.get_automatic_csv_export()
         # print(self.automatic_csv_setting)
+        self.predict_index = 1
 
 
         # settings for automatic prediction data clear
@@ -196,6 +197,7 @@ class MainFrame(ttk.Frame):
     '''opens image, converts to grayscale, normalizes, predicts, appends data to predictions_data,
     saves predicted image if toggle set to true. -skylar'''
     def _predict(self, image_path):
+
         img = Image.open(image_path)
 
         if img.mode != 'L':
@@ -211,8 +213,10 @@ class MainFrame(ttk.Frame):
             labels, details = self.model.predict_instances(img, n_tiles = (2, 2))
 
         # appends data
-        self.predictions_data.append((os.path.basename(image_path), len(details['points'])))
-
+        date = datetime.datetime.now().date().strftime("%Y/%m/%d")
+        time = datetime.datetime.now().time().strftime("%H:%M:%S")
+        self.predictions_data.append((self.predict_index,date,time,os.path.basename(image_path), len(details['points'])))
+        self.predict_index = 1 + self.predict_index
         # Save the predicted image to output folder if setting is true
         # changed if statement to use a boolean from settings function -skylar
         if self.settings.get_save_images_output():
@@ -263,7 +267,7 @@ class MainFrame(ttk.Frame):
             
             # Schedule GUI update on the main thread
             self.progress_bar.after(0, self.update_progress, i + 1, total_images, remaining_time)
-
+        self.predict_index = 1
         # if true, appends data to csv at end of predictions
         if self.settings.get_automatic_csv_export:
             self.export_predictions_to_csv()
@@ -324,7 +328,7 @@ class MainFrame(ttk.Frame):
             os.makedirs('output')
         with open(self.csv_editor.get_csv_file(), mode='w', newline='') as file:
             writer = csv.writer(file)
-            writer.writerow(['File Name', ' Total Count'])
+            writer.writerow(['Index', 'Date', 'Time', 'File Name', ' Total Count'])
             writer.writerows(self.predictions_data)
         if self.settings.get_automatic_prediction_clear_data():
             self.predictions_data.clear()
@@ -397,9 +401,9 @@ class MainFrame(ttk.Frame):
             # set the size of the pop up window
             main_window_height = self.container.winfo_height()
             # variables for the pop up window
-            pop_up_window_width = 700
+            pop_up_window_width = 300
             # variables for the pop up window
-            pop_up_window_height = 400
+            pop_up_window_height = 200
             # set the position of the pop up window
             x = main_window_width + 75
             # set the position of the pop up window
@@ -465,7 +469,7 @@ class MainFrame(ttk.Frame):
             self.clear_prediction_data_button.grid(row=2, column=1, pady=15, padx=15)
             # add the clear csv file button to the pop up window
             self.window.clear_csv_file_button.grid(row=2, column=2, pady=15, padx=15)
-
+            '''
             self.window.csv_index_column_toggle.grid(row=1, column=3, pady=15, padx=15)
             self.window.csv_index_column_dropdown.grid(row=1, column=4, pady=15, padx=15)
 
@@ -482,7 +486,7 @@ class MainFrame(ttk.Frame):
             self.window.csv_total_count_column_dropdown.grid(row=5, column=4, pady=15, padx=15)
 
             self.window.save_csv_column_button.grid(row=6, column=3, pady=15, padx=15)
-
+            '''
 
         if self.is_csv_save_page_open == False:
             self.is_csv_save_page_open = True
