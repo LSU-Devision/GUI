@@ -57,8 +57,8 @@ class SettingsJson():
             self.default_json_data = json.load(self.json_file)
 
         # Overwrite target-settings.json with default data
-        with open(target_json_path, 'w') as self.json_file:
-            json.dump(self.default_json_data, self.json_file, indent=4)
+        with (resource_path(target_json_path), 'w') as json_file:
+            json.dump(self.default_json_data, json_file, indent=4)
 
         # Load default settings
         self.load_default()
