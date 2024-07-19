@@ -21,6 +21,7 @@ import Settings
 import Utilities as utils
 import CSVEditor as csv_editor
 from openpyxl import Workbook, load_workbook
+from SettingsWIndow import SettingsWindow
 '''
 Class Main Frame
 Author: Max
@@ -119,7 +120,8 @@ class MainFrame(ttk.Frame):
         # creates the export to csv button
         self.csv_save_page_button = ttk.Button(self,text='CSV Save Page',command=self.csv_save_page)
         # Create settings page
-        self.settings_page_button = ttk.Button(self,text='Settings',command=self.settings_page)
+        self.settings_page_button = ttk.Button(self, text='Settings', command=lambda: SettingsWindow(master=self, container=self.container, settings=self.settings))
+
 
         # Create the progress bar
         # Create a label to display progress of predicted images
@@ -518,125 +520,3 @@ class MainFrame(ttk.Frame):
             self.is_csv_save_page_open = True
             inner_create_page(self)
             inner_load_page(self)
-
-    def settings_page(self):
-        if self.is_settings_page_open == False:
-
-            # create the pop up window
-            self.window = tk.Toplevel(self.container)
-            # set the size of the pop up window
-            main_window_width = self.container.winfo_width()
-            # set the size of the pop up window
-            main_window_height = self.container.winfo_height()
-            # variables for the pop up window
-            pop_up_window_width = 300
-            # variables for the pop up window
-            pop_up_window_height = 400
-            # set the position of the pop up window
-            x = main_window_width + 75
-            # set the position of the pop up window
-            y = main_window_height // 2 - pop_up_window_height // 2  # center the pop-up window vertically
-            # set the title of the pop up window
-            self.window.wm_title('Settings')
-            # set the geometry of the pop up window
-            self.window.geometry(f'{pop_up_window_width}x{pop_up_window_height}+{x}+{y}')
-
-        def inner_create_page(self):
-            self.window.automatic_csv_export_label = ttk.Label(self.window, text=utils.boolean_text_conversion(self.settings.get_automatic_csv_export()), font=50)
-            self.window.automatic_csv_export = ttk.Button(self.window, text='Automatic CSV Export',command=toggle_automatic_csv_export)
-
-            self.window.automatic_prediction_data_clear_label = ttk.Label(self.window, text=utils.boolean_text_conversion(self.settings.get_automatic_prediction_clear_data()), font=50)
-            self.window.automatic_prediction_data_clear = ttk.Button(self.window, text='Automatic Prediction Data Clear',command=toggle_automatic_prediction_data_clear)
-
-            self.window.clear_data_on_clear_images_label = ttk.Label(self.window, text=utils.boolean_text_conversion(self.settings.get_clear_data_on_clear_images()), font=50)
-            self.window.clear_data_on_clear_images_button = ttk.Button(self.window, text='Clear Data on Clear Images',command=toggle_clear_data_on_clear_images)
-
-            ####################################################
-            # THIS SECTION NEEDS TO BE UPDATED FOR UPDATED BOOLEAN FUNCTIONS INSIDE SETTINGS
-            # added for save images toggle. no longer uses variable setting.
-            # uses boolean value fetched from respective settings function -skylar
-            self.window.save_images_output_label = ttk.Label(self.window, text=utils.boolean_text_conversion(self.settings.get_save_images_output()), font=50)
-            self.window.save_images_output_button = ttk.Button(self.window, text='Save images to Output',command=toggle_save_images_output)
-            ####################################################
-
-            self.window.default_settings_button = ttk.Button(self.window, text='Reset To Default Settings',command=reset_settings)
-            # self.windwow.protocol("WM_DELETE_WINDOW", lambda: close_window() )
-
-        def inner_load_page(self):
-            self.window.automatic_csv_export.grid(row=0, column=0, pady=15, padx=15)
-            self.window.automatic_csv_export_label.grid(row=0, column=1, pady=15, padx=15)
-            self.window.automatic_prediction_data_clear.grid(row=1, column=0, pady=15, padx=15)
-            self.window.automatic_prediction_data_clear_label.grid(row=1, column=1, pady=15, padx=15)
-            self.window.clear_data_on_clear_images_button.grid(row=2, column=0, pady=15, padx=15)
-            self.window.clear_data_on_clear_images_label.grid(row=2, column=1, pady=15, padx=15)
-
-            ####################################################
-            # added for save images toggle -skylar
-            self.window.save_images_output_button.grid(row=3, column=0, pady=15, padx=15)
-            self.window.save_images_output_label.grid(row=3, column=1, pady=15, padx=15)
-            ###################################################
-
-            self.window.default_settings_button.grid(row=4, column=0, pady=15, padx=15)
-
-        def save_settings():
-            # self.settings.set_automatic_csv_export(self.automatic_csv_setting)
-            # self.settings.set_automatic_prediction_clear_data(self.automatic_prediction_data_clear_setting)
-            # self.settings.set_clear_data_on_clear_images(self.clear_data_on_clear_images_setting)
-            # # added for save images toggle -skylar
-            # self.settings.set_save_images_output(self.save_images_output_setting)
-            # ####################################################
-            # self.settings.update_json()
-            pass
-
-        def toggle_automatic_csv_export():
-            if self.settings.get_automatic_csv_export()  == True:
-                self.settings.set_automatic_csv_export(False)
-                self.window.automatic_csv_export_label.config(text='Off')
-            else:
-                self.settings.set_automatic_csv_export(True)
-                self.window.automatic_csv_export_label.config(text='On')
-
-        def toggle_automatic_prediction_data_clear():
-            if self.settings.get_automatic_prediction_clear_data() == True:
-                self.settings.set_automatic_prediction_clear_data(False)
-                self.window.automatic_prediction_data_clear_label.config(text='Off')
-            else:
-                self.settings.set_automatic_prediction_clear_data(True)
-                self.window.automatic_prediction_data_clear_label.config(text='On')
-
-        def toggle_clear_data_on_clear_images():
-            if self.settings.get_clear_data_on_clear_images() == True:
-                self.settings.set_clear_data_on_clear_images(False)
-                self.window.clear_data_on_clear_images_label.config(text='Off')
-            else:
-                self.settings.set_clear_data_on_clear_images(True)
-                self.window.clear_data_on_clear_images_label.config(text='On')
-
-        ####################################################
-        # added save images toggle. reloads display for dynamic image and prediction frame
-        # uses boolean values -skylar
-        def toggle_save_images_output():
-            if self.settings.get_save_images_output() == True:
-                self.settings.set_save_images_output(False)
-                self.window.save_images_output_label.config(text = 'Off')
-                # self.update_display()
-            else:
-                self.settings.set_save_images_output(True)
-                self.window.save_images_output_label.config(text = 'On')
-                # self.update_display()
-        
-        def reset_settings():
-            self.settings.revert_to_default()
-            self.automatic_csv_setting = self.settings.get_automatic_csv_export()
-            self.automatic_prediction_data_clear_setting = self.settings.get_automatic_prediction_clear_data()
-            self.clear_data_on_clear_images_setting = self.settings.get_clear_data_on_clear_images()
-            self.save_images_output_setting = self.settings.get_save_images_output()
-            self.window.automatic_csv_export_label.config(text=utils.boolean_text_conversion(self.automatic_csv_setting))
-            self.window.automatic_prediction_data_clear_label.config(text=utils.boolean_text_conversion(self.automatic_prediction_data_clear_setting))
-            self.window.clear_data_on_clear_images_label.config(text=utils.boolean_text_conversion(self.clear_data_on_clear_images_setting))
-            self.window.save_images_output_label.config(text=utils.boolean_text_conversion(self.save_images_output_setting))
-
-        if self.is_settings_page_open == False:
-            inner_create_page(self)
-            inner_load_page(self)
-            # self.is_settings_page_open = True
