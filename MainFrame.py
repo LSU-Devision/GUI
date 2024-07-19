@@ -20,6 +20,7 @@ from Slideshow import Slideshow
 import Settings
 import Utilities as utils
 import CSVEditor as csv_editor
+from openpyxl import Workbook, load_workbook
 '''
 Class Main Frame
 Author: Max
@@ -323,13 +324,38 @@ class MainFrame(ttk.Frame):
     def export_predictions_to_csv(self):
         current_time = datetime.datetime.now().strftime("%m-%d-%Y_%I-%M-%S %p")
         if self.csv_editor.get_csv_file() is None:
-            self.csv_editor.set_csv_file(os.path.join('output', f'predictions_{current_time}.csv'))
+            self.csv_editor.set_csv_file(os.path.join('output', f'predictions_{current_time}.xlsx'))
         if not os.path.exists('output'):
             os.makedirs('output')
-        with open(self.csv_editor.get_csv_file(), mode='w', newline='') as file:
-            writer = csv.writer(file)
-            writer.writerow(['Index', 'Date', 'Time', 'File Name', ' Total Count'])
-            writer.writerows(self.predictions_data)
+
+        #with open(self.csv_editor.get_csv_file(), mode='w', newline='') as file:
+            #writer = csv.writer(file)
+            #writer.writerow(['Index', 'Date', 'Time', 'File Name', ' Total Count'])
+            #writer.writerows(self.predictions_data)
+        does_file_exist = True
+        try:
+            wb = load_workbook(self.csv_editor.get_csv_file())
+            ws = wb.active
+        except FileNotFoundError:
+            wb = Workbook()
+            ws = wb.active
+            does_file_exist = False
+        has_index_column = 'Index' in [cell.value for cell in ws['A']]
+        last_index_value = 0
+        if does_file_exist is False:
+            headers = ['Index', 'Date', 'Time', 'File Name', ' Total Count']
+            ws.append(headers)
+        elif has_index_column is True:
+            for cell in ws['A']:
+                last_index_value = cell.value
+        for prediction in self.predictions_data:
+            prediction_list = list(prediction)
+            prediction_list[0] = prediction_list[0] + last_index_value
+            ws.append(prediction_list)
+        try:
+            wb.save(self.csv_editor.get_csv_file())
+        except PermissionError:
+            messagebox.showerror("Permissions Error", "Excel file may have Read only attribute, please check permissions")
         if self.settings.get_automatic_prediction_clear_data():
             self.predictions_data.clear()
 
