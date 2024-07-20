@@ -1,8 +1,19 @@
 import csv
-import Utilities as utils
 import json
+import os
+import sys
+import Utilities as utils
 
-default_settings = 'csv_settings.json'
+default_settings = 'config/csv_settings.json'
+
+def resource_path(relative_path):
+    """ Get absolute path to resource, needed for PyInstaller """
+    try:
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)
+
 class CSVEditor:
     def __init__(self):
         self.csv_file = None
@@ -16,7 +27,7 @@ class CSVEditor:
 
     def load_csv_settings(self):
         self.data = None
-        with open(default_settings) as json_file:
+        with open(resource_path(default_settings)) as json_file:
             self.data = json.load(json_file)
         self.csv_index_value = self.data['csv_index_column']
         self.csv_date_value = self.data['csv_date_column']
@@ -32,7 +43,7 @@ class CSVEditor:
         self.data_save['csv_time_column'] = self.csv_time_value
         self.data_save['csv_file_name_column'] = self.csv_file_name_value
         self.data_save['csv_total_count_column'] = self.csv_total_count_value
-        with open(default_settings, 'w') as outfile:
+        with open(resource_path(default_settings), 'w') as outfile:
             json.dump(self.data_save, outfile,indent=4)
     def get_csv_index_column_index(self):
         return self.csv_index_value

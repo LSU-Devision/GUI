@@ -2,11 +2,11 @@ import json
 import os
 import sys
 
-default_json_path = "docs/default_settings.json"
-target_json_path = "docs/Target-Settings.json"
+default_json_path = "config/default_settings.json"
+target_json_path = "config/Target-Settings.json"
 
 def resource_path(relative_path):
-    """ Get absolute path to resource, works for dev and for PyInstaller """
+    """ Get absolute path to resource, needed for PyInstaller """
     try:
         base_path = sys._MEIPASS
     except Exception:
@@ -32,7 +32,7 @@ class SettingsJson():
     ####################################################
     # function to load default json file. -skylar
     def load_default(self):
-        with open(target_json_path, 'r') as self.json_file:
+        with open(resource_path(target_json_path), 'r') as self.json_file:
             self.default_json_data = json.load(self.json_file)
         self.automatic_csv_export = self.default_json_data['automatic csv export']
         self.automatic_prediction_clear_data = self.default_json_data['automatic prediction clear data']
@@ -42,7 +42,7 @@ class SettingsJson():
     ####################################################
     # function to load custom settings from json file. -skylar
     def load_custom_settings(self):
-        with open(default_json_path, 'r') as self.json_file:
+        with open(resource_path(default_json_path), 'r') as self.json_file:
             self.default_json_data = self.target_json_data
         self.automatic_csv_export = self.default_json_data['automatic csv export']
         self.automatic_prediction_clear_data = self.default_json_data['automatic prediction clear data']
@@ -53,7 +53,7 @@ class SettingsJson():
     # function to revert back to default settings. -skylar
     def revert_to_default(self):
         # Load default json data
-        with open(default_json_path, 'r') as self.json_file:
+        with open(resource_path(default_json_path), 'r') as self.json_file:
             self.default_json_data = json.load(self.json_file)
 
         # Overwrite target-settings.json with default data

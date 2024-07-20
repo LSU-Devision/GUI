@@ -213,7 +213,7 @@ class MainFrame(ttk.Frame):
         img = normalize(img, 1, 99.8, axis=(0,1))
 
         with tf.device(self.device):
-            labels, details = self.model.predict_instances(img, n_tiles = (2, 2))
+            labels, details = self.model.predict_instances(img, n_tiles = self.model._guess_n_tiles(img))
 
         # appends data
         date = datetime.datetime.now().date().strftime("%Y/%m/%d")
@@ -234,7 +234,7 @@ class MainFrame(ttk.Frame):
             save_path = os.path.join('output', f'prediction_{os.path.basename(image_path)}')
             if not os.path.exists(os.path.dirname(save_path)):
                 os.makedirs(os.path.dirname(save_path))
-            fig.savefig(save_path, dpi = 300)
+            fig.savefig(save_path, dpi = 500)
             plt.close(fig)
             self.prediction_files[image_path] = (save_path, len(details['points']))
         else:
