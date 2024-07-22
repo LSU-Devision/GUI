@@ -184,7 +184,7 @@ class SettingsWindow(tk.Toplevel):
             # reconfigure prediction data clear label
             self.automatic_prediction_data_clear_label.config(text=utils.boolean_text_conversion(self.settings.get_automatic_prediction_clear_data()))
             # reconfigure clear data on clear images label
-            self.clear_data_on_clear_images_label.config(text=utils.boolean_text_conversion(self.settings.get_clear_data_on_clear_images))
+            self.clear_data_on_clear_images_label.config(text=utils.boolean_text_conversion(self.settings.get_clear_data_on_clear_images()))
             # reconfigure save images output label
             self.save_images_output_label.config(text=utils.boolean_text_conversion(self.settings.get_save_images_output()))
 
