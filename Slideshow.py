@@ -67,10 +67,12 @@ class Slideshow(ttk.Frame):
     #     #new_frame.grid(row=4, column=0)
 
     def next_image(self):
-        self._to_index(self.current_index + 1)
+        if self.image_files:
+            self._to_index(self.current_index + 1)
 
     def prev_image(self):
-        self._to_index(self.current_index - 1)
+        if self.image_files:
+            self._to_index(self.current_index - 1)
 
     def _to_index(self, index):
         self.current_index = index % len(self.image_files)
