@@ -22,6 +22,7 @@ import Utilities as utils
 import CSVEditor as csv_editor
 from openpyxl import Workbook, load_workbook
 from SettingsWIndow import SettingsWindow
+from Predictions import Predictions
 '''
 Class Main Frame
 Author: Max
@@ -83,6 +84,8 @@ class MainFrame(ttk.Frame):
         # settings for save images output toggle -skylar,
         self.save_images_output_setting = self.settings.get_save_images_output()
 
+        # Create an instance of the Predictions class
+        self.predictions = Predictions(self.image_files, self, self.model, self)
 
         self.create_display()
         self.load_display()
@@ -106,7 +109,7 @@ class MainFrame(ttk.Frame):
         # creates the single predict button (this is commented out)
         self.predict_focused_button = ttk.Button(self, text='Predict', command=self.predict_focused, state=tk.DISABLED)
         # Creates the predict all button
-        self.predict_all_button = ttk.Button(self, text='Predict All', command=self.predict_all, state=tk.DISABLED)
+        self.predict_all_button = ttk.Button(self, text='Predict All', command=self.predictions.predict_all, state=tk.DISABLED)
         # make two buttons
         self.select_model_button = ttk.Button(self, text='Select Model', command=self.select_model)
         # creates the model label
@@ -191,128 +194,12 @@ class MainFrame(ttk.Frame):
         print(os.path.dirname(model_path))
         with tf.device(self.device):
             self.model = StarDist2D(None, name=os.path.basename(model_path), basedir=os.path.dirname(model_path))
+        self.predictions.model = self.model
         self.model_label.config(text=os.path.basename(model_path))
         if not self.model_selected:
             self.predict_focused_button.config(state=tk.NORMAL)
             self.predict_all_button.config(state=tk.NORMAL)
             self.model_selected = True
-
-    '''opens image, converts to grayscale, normalizes, predicts, appends data to predictions_data,
-    saves predicted image if toggle set to true. -skylar'''
-    def _predict(self, image_path):
-
-        img = Image.open(image_path)
-
-        if img.mode != 'L':
-            img = img.convert('L')
-        
-        # Convert the PIL image to a NumPy array
-        img = np.array(img)
-
-        # Normalize the image
-        img = normalize(img, 1, 99.8, axis=(0,1))
-
-        with tf.device(self.device):
-            labels, details = self.model.predict_instances(img, n_tiles = self.model._guess_n_tiles(img))
-
-        # appends data
-        date = datetime.datetime.now().date().strftime("%Y/%m/%d")
-        time = datetime.datetime.now().time().strftime("%H:%M:%S")
-        self.predictions_data.append((self.predict_index,date,time,os.path.basename(image_path), len(details['points'])))
-        self.predict_index = 1 + self.predict_index
-        # Save the predicted image to output folder if setting is true
-        # changed if statement to use a boolean from settings function -skylar
-        if self.settings.get_save_images_output():
-            # Visualization of predicted image
-            fig, ax = plt.subplots(figsize=(13, 10))
-            ax.imshow(img, cmap="gray")
-            ax.imshow(labels, cmap=self.lbl_cmap, alpha=0.5)
-            ax.set_title(f"Predicted Objects: {len(np.unique(labels)) - 1}", fontsize=16)
-            ax.axis("off")
-            plt.tight_layout()
-            # saving predicted image
-            save_path = os.path.join('output', f'prediction_{os.path.basename(image_path)}')
-            if not os.path.exists(os.path.dirname(save_path)):
-                os.makedirs(os.path.dirname(save_path))
-            fig.savefig(save_path, dpi = 500)
-            plt.close(fig)
-            self.prediction_files[image_path] = (save_path, len(details['points']))
-        else:
-            #plt.close(fig)
-            self.prediction_files[image_path] = (None, len(details['points']))
-
-    # added threading to keep gui loaded -skylar
-    def predict_all(self):
-        threading.Thread(target=self.thread_predict_all).start()
-    
-    '''changed predict_all to be threaded for updating gui
-    adds updating counter for predicted images
-    adds estimated time to finish predicting all images -skylar'''
-    def thread_predict_all(self):
-
-        # popup for progress bar and estimation time
-        self.create_progress_popup()
-
-        total_images = len(self.image_files)
-        start_time = time.time()
-        self.progress_bar['maximum'] = total_images
-        self.progress_bar['value'] = 0
-        self.predicted_images_label.config(text=f'Predicted 0/{total_images} images')
-        self.estimated_time_label.config(text='Estimated time remaining: Calculating...')
-
-        for i, image_path in enumerate(self.image_files):
-            self._predict(image_path)
-            elapsed_time = time.time() - start_time
-            avg_time_per_image = elapsed_time / (i + 1)
-            remaining_time = int(avg_time_per_image * (total_images - (i + 1)))
-
-            print(f"Predicted {i + 1}/{total_images} images. Estimated time remaining: {remaining_time} seconds")
-            
-            # Schedule GUI update on the main thread
-            self.progress_bar.after(0, self.update_progress, i + 1, total_images, remaining_time)
-        self.predict_index = 1
-        # if true, appends data to csv at end of predictions
-        if self.settings.get_automatic_csv_export:
-            self.export_predictions_to_csv()
-
-        self.slideshow.update_image()
-        total_elapsed_time = int(time.time() - start_time)
-        print(f"Predicted {total_images} images in {total_elapsed_time} seconds")
-        # Schedule messagebox on the main thread
-        self.progress_bar.after(0, self.show_completion_message, total_images, total_elapsed_time)
-
-    '''
-    Author: Skylar Wilson
-    Creates a pop-up window to display progress information
-    '''
-    def create_progress_popup(self):
-        self.progress_popup = tk.Toplevel(self)
-        self.progress_popup.title("Prediction Progress")
-
-        self.progress_bar = ttk.Progressbar(self.progress_popup, orient='horizontal', mode='determinate', length=300)
-        self.predicted_images_label = ttk.Label(self.progress_popup, text='Predicted 0/0 images')
-        self.estimated_time_label = ttk.Label(self.progress_popup, text='Estimated time remaining: N/A')
-
-        self.progress_bar.grid(row=0, column=0, pady=5)
-        self.predicted_images_label.grid(row=1, column=0, pady=5)
-        self.estimated_time_label.grid(row=2, column=0, pady=5)
-
-    # function to update the progress bar and estimated time -skylar
-    def update_progress(self, current, total, remaining_time):
-        if self.progress_popup and self.progress_popup.winfo_exists():
-            self.progress_bar['value'] = current
-            self.predicted_images_label.config(text=f'Predicted {current}/{total} images')
-            self.estimated_time_label.config(text=f'Estimated time remaining: {remaining_time} seconds')
-            self.update_idletasks()
-    
-    # function to show completion of predictions -skylar
-    def show_completion_message(self, total_images, total_elapsed_time):
-        if self.progress_popup and self.progress_popup.winfo_exists():
-            messagebox.showinfo("Prediction Complete", f"Predicted {total_images} images in {total_elapsed_time} seconds")
-            self.estimated_time_label.config(text='Estimated time remaining: N/A')
-            self.predicted_images_label.config(text=f'Predicted {total_images}/{total_images} images')
-            self.progress_bar['value'] = 0
-            self.progress_popup.destroy()
 
     def predict_focused(self):
         image_path = self.image_files[self.slideshow.current_index]
