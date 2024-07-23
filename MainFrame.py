@@ -39,7 +39,6 @@ Methods:
     select model: method for selecting the model for prediction
     predict: method for predicting egg count for the frog eggs. outputs the photos saved with the number count
     predict all: predicts the values of all the loaded files in the GUI
-    predict focused: predicts the current image of the GUI (Method has been removed from buttons)
     export to csv: Outputs the files to csv
     clear images: Clears the images from the GUI
     help page: creates a help page pop up for the users
@@ -106,8 +105,6 @@ class MainFrame(ttk.Frame):
         self.model_label = ttk.Label(self, text='2D_demo')
         # initialize buttons as disabled until a model is selected
         self.model_selected = False
-        # creates the single predict button (this is commented out)
-        self.predict_focused_button = ttk.Button(self, text='Predict', command=self.predict_focused, state=tk.DISABLED)
         # Creates the predict all button
         self.predict_all_button = ttk.Button(self, text='Predict All', command=self.predictions.predict_all, state=tk.DISABLED)
         # make two buttons
@@ -197,14 +194,8 @@ class MainFrame(ttk.Frame):
         self.predictions.model = self.model
         self.model_label.config(text=os.path.basename(model_path))
         if not self.model_selected:
-            self.predict_focused_button.config(state=tk.NORMAL)
             self.predict_all_button.config(state=tk.NORMAL)
             self.model_selected = True
-
-    def predict_focused(self):
-        image_path = self.image_files[self.slideshow.current_index]
-        self._predict(image_path)
-        self.slideshow.update_image()
 
     '''
     function to export filenames, predicted counts, and date/time to a csv file in the
