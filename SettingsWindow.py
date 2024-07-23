@@ -26,11 +26,13 @@ class SettingsWindow(tk.Toplevel):
     container: the App window
     settings: the settings object
     '''
-    def __init__(self, master=None,container=None,settings = None):
+    def __init__(self, master=None,container=None,settings=None):
         # creates class variables for the settings window
         super().__init__(master=master)
         # creates a class variable for the App window
         self.container = container
+        # creates a class variable for the settings object
+        self.settings = settings
         # variable for the width of the main window
         main_window_width = self.container.winfo_width()
         # variable for the height of the main window
@@ -47,8 +49,7 @@ class SettingsWindow(tk.Toplevel):
         self.title('Settings')
         # set the geometry of the pop up window
         self.geometry(f'{pop_up_window_width}x{pop_up_window_height}+{x}+{y}')
-        # inherit the settings object from the mai
-        self.settings = settings
+
 
         '''
         method: create page

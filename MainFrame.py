@@ -21,8 +21,9 @@ import Settings
 import Utilities as utils
 import CSVEditor as csv_editor
 from openpyxl import Workbook, load_workbook
-from SettingsWIndow import SettingsWindow
+from SettingsWindow import SettingsWindow
 from Predictions import Predictions
+from ExcelWindow import ExcelWindow
 '''
 Class Main Frame
 Author: Max
@@ -122,6 +123,8 @@ class MainFrame(ttk.Frame):
         # Create settings page
         self.settings_page_button = ttk.Button(self, text='Settings', command=lambda: SettingsWindow(master=self, container=self.container, settings=self.settings))
 
+        self.test_button = ttk.Button(self, text='Test', command=lambda : ExcelWindow(master=self, container=self.container, excel_editor=self.csv_editor) )
+
 
         # Create the progress bar
         # Create a label to display progress of predicted images
@@ -164,6 +167,7 @@ class MainFrame(ttk.Frame):
         # self.progress_bar.grid(row=11, column=0, pady=5)
         # self.predicted_images_label.grid(row=12, column=0, pady=5)
         # self.estimated_time_label.grid(row=13, column=0, pady=5)
+        self.test_button.grid(row=0, column=1, pady=5)
 
     '''****************************************************************************************'''
     '''Destroys current frame and reloads MainFrame for the purpose of dynamic display. -skylar'''
@@ -231,6 +235,7 @@ class MainFrame(ttk.Frame):
         for prediction in self.predictions_data:
             prediction_list = list(prediction)
             prediction_list[0] = prediction_list[0] + last_index_value
+            print(prediction_list)
             ws.append(prediction_list)
         try:
             wb.save(self.csv_editor.get_csv_file())
@@ -298,6 +303,7 @@ class MainFrame(ttk.Frame):
         self.csv_editor.set_csv_label(None)
         self.csv_label_title.config(text='None')
     # change test added here
+    '''
     def csv_save_page(self):
         if self.is_csv_save_page_open == False:
             # create the pop up window
@@ -375,26 +381,13 @@ class MainFrame(ttk.Frame):
             self.clear_prediction_data_button.grid(row=2, column=1, pady=15, padx=15)
             # add the clear csv file button to the pop up window
             self.window.clear_csv_file_button.grid(row=2, column=2, pady=15, padx=15)
-            '''
-            self.window.csv_index_column_toggle.grid(row=1, column=3, pady=15, padx=15)
-            self.window.csv_index_column_dropdown.grid(row=1, column=4, pady=15, padx=15)
-
-            self.window.csv_date_column_toggle.grid(row=2, column=3, pady=15, padx=15)
-            self.window.csv_date_column_dropdown.grid(row=2, column=4, pady=15, padx=15)
-
-            self.window.csv_time_column_toggle.grid(row=3, column=3, pady=15, padx=15)
-            self.window.csv_time_column_dropdown.grid(row=3, column=4, pady=15, padx=15)
-
-            self.window.csv_file_name_column_toggle.grid(row=4, column=3, pady=15, padx=15)
-            self.window.csv_file_name_column_dropdown.grid(row=4, column=4, pady=15, padx=15)
-
-            self.window.csv_total_count_column_toggle.grid(row=5, column=3, pady=15, padx=15)
-            self.window.csv_total_count_column_dropdown.grid(row=5, column=4, pady=15, padx=15)
-
-            self.window.save_csv_column_button.grid(row=6, column=3, pady=15, padx=15)
-            '''
+            
+            
+            
 
         if self.is_csv_save_page_open == False:
             self.is_csv_save_page_open = True
             inner_create_page(self)
             inner_load_page(self)
+            
+    '''
