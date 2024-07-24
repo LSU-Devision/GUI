@@ -178,6 +178,12 @@ class MainFrame(ttk.Frame):
         # Add the new frame to the container using grid
         new_frame.grid(row=0, column=0, sticky='nsew')
 
+    def disable_button(self, button):
+        button.config(state = tk.DISABLED)
+
+    def enable_button(self, button):
+        button.config(state = tk.NORMAL)
+
     def select_files(self):
         files = filedialog.askopenfilenames(initialdir='/home/max/development/stardist/data')
         self.image_files.extend(files)
