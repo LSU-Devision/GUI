@@ -39,7 +39,6 @@ class Predictions:
 
     def _predict(self, image_path):
         img = Image.open(image_path)
-
         if img.mode != 'L':
             img = img.convert('L')
         
@@ -48,7 +47,6 @@ class Predictions:
 
         with tf.device(self.device):
             labels, details = self.model.predict_instances(img, n_tiles=self.model._guess_n_tiles(img))
-
         date = datetime.datetime.now().date().strftime("%Y/%m/%d")
         time = datetime.datetime.now().time().strftime("%H:%M:%S")
         self.predictions_data.append((self.predict_index, date, time, os.path.basename(image_path), len(details['points'])))
@@ -71,12 +69,14 @@ class Predictions:
             self.prediction_files[image_path] = (None, len(details['points']))
 
     def predict_all(self):
+        print('predict all image files len: ' + str(len(self.image_files)))
         threading.Thread(target=self.thread_predict_all).start()
 
     def thread_predict_all(self):
         self.create_progress_popup()
 
         total_images = len(self.image_files)
+        print(len(self.image_files))
         start_time = time.time()
         self.progress_bar['maximum'] = total_images
         self.progress_bar['value'] = 0

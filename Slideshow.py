@@ -13,8 +13,10 @@ class Slideshow(ttk.Frame):
         self.prediction_files = container.prediction_files
         # Creates a counter variable called current index
         self.current_index = 0
+        self.container = container
         self.create_frame()
         self.load_frame()
+
 
     def load_frame(self):
         self.filepath_label.grid(row=0, column=0, columnspan=2, pady=2)
@@ -44,7 +46,7 @@ class Slideshow(ttk.Frame):
         # end previous/next button frame
 
     def create_frame(self):
-        self.filepath_label = ttk.Label(self, font=25)
+        self.filepath_label = ttk.Label(self, font=50)
         # Creates an image frame for the base image
         self.base_image = ImageFrame(self)
         # Creates and Image frame for the predicted image
@@ -79,6 +81,7 @@ class Slideshow(ttk.Frame):
         self.update_image()
 
     def update_image(self):
+        print(str(len(self.image_files)) +  "  " + str(self.current_index))
         image_path = self.image_files[self.current_index]
 
         title = os.path.basename(image_path)
@@ -89,7 +92,7 @@ class Slideshow(ttk.Frame):
         # changes the label to the new title
         self.filepath_label.config(text=new_title)
 
-        prediction_path, num_labels = self.prediction_files.get(image_path, (None, ''))
+        prediction_path, num_labels = self.container.predictions.prediction_files.get(image_path, (None, ''))
 
         self.predicted_image.set_image(prediction_path)
         self.base_image.set_image(image_path)

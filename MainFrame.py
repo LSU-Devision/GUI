@@ -63,7 +63,6 @@ class MainFrame(ttk.Frame):
         self.csv_editor = csv_editor.CSVEditor()
         self.csv_editor.set_csv_file(None)
         self.csv_editor.set_csv_label(None)
-        # self.csv_label = None
         self.csv_label_index = 0
         self.is_csv_save_page_open = False
         self.is_settings_page_open = False
@@ -119,7 +118,7 @@ class MainFrame(ttk.Frame):
         # creates the csv label
         self.csv_label_title = ttk.Label(self, text=str(self.csv_editor.get_csv_label()),font=50)
         # creates the export to csv button
-        self.csv_save_page_button = ttk.Button(self,text='CSV Save Page',command=self.csv_save_page)
+        self.csv_save_page_button = ttk.Button(self,text='CSV Save Page',command= lambda : ExcelWindow(master=self, container=self.container, excel_editor=self.csv_editor) )
         # Create settings page
         self.settings_page_button = ttk.Button(self, text='Settings', command=lambda: SettingsWindow(master=self, container=self.container, settings=self.settings))
 
@@ -232,10 +231,9 @@ class MainFrame(ttk.Frame):
         elif has_index_column is True:
             for cell in ws['A']:
                 last_index_value = cell.value
-        for prediction in self.predictions_data:
+        for prediction in self.predictions.predictions_data:
             prediction_list = list(prediction)
             prediction_list[0] = prediction_list[0] + last_index_value
-            print(prediction_list)
             ws.append(prediction_list)
         try:
             wb.save(self.csv_editor.get_csv_file())
@@ -267,10 +265,23 @@ class MainFrame(ttk.Frame):
         # set the item count label to empty
         self.slideshow.item_count_label.config(text=' ')
         # resets the predictions file to the empty dictionary
+        self.predictions.prediction_files = {}
+
+        # sets the prediction files to empty
         self.prediction_files = {}
         # sets the slideshow prediction files to empty
         self.slideshow.prediction_files = self.prediction_files
+
+        self.predictions.image_files.clear()
+
+        self.image_files.clear()
+
+        self.slideshow.image_files.clear()
+
+        self.slideshow.current_index = 0
+
         if self.settings.get_clear_data_on_clear_images():
+            self.predictions.predictions_data.clear()
             self.predictions_data.clear()
         #
         messagebox.showinfo("Devision", "Images Cleared!")
@@ -296,7 +307,7 @@ class MainFrame(ttk.Frame):
         messagebox.showinfo(title,file_information)
 
     def clear_predicted_data(self):
-        self.predictions_data.clear()
+        self.predictions.predictions_data.clear()
 
     def clear_csv_file(self):
         self.csv_editor.set_csv_file(None)
