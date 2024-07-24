@@ -81,7 +81,6 @@ class Slideshow(ttk.Frame):
         self.update_image()
 
     def update_image(self):
-        print(str(len(self.image_files)) +  "  " + str(self.current_index))
         image_path = self.image_files[self.current_index]
 
         title = os.path.basename(image_path)

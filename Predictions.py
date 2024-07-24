@@ -69,14 +69,12 @@ class Predictions:
             self.prediction_files[image_path] = (None, len(details['points']))
 
     def predict_all(self):
-        print('predict all image files len: ' + str(len(self.image_files)))
         threading.Thread(target=self.thread_predict_all).start()
 
     def thread_predict_all(self):
         self.create_progress_popup()
 
         total_images = len(self.image_files)
-        print(len(self.image_files))
         start_time = time.time()
         self.progress_bar['maximum'] = total_images
         self.progress_bar['value'] = 0
@@ -96,7 +94,8 @@ class Predictions:
 
         if self.settings.get_automatic_csv_export:
             self.mainframe.export_predictions_to_csv()
-
+        self.slideshow.update_image()
+        self.slideshow.item_count_label.config(text= 'Number Predicted: ')
         self.slideshow.update_image()
         total_elapsed_time = int(time.time() - start_time)
         print(f"Predicted {total_images} images in {total_elapsed_time} seconds")

@@ -183,7 +183,7 @@ class MainFrame(ttk.Frame):
     def select_files(self):
         files = filedialog.askopenfilenames(initialdir='/home/max/development/stardist/data')
         self.image_files.extend(files)
-
+        self.predictions.image_files = self.image_files
         if self.image_files:
             self.slideshow.update_image()
 
@@ -271,12 +271,6 @@ class MainFrame(ttk.Frame):
         self.prediction_files = {}
         # sets the slideshow prediction files to empty
         self.slideshow.prediction_files = self.prediction_files
-
-        self.predictions.image_files.clear()
-
-        self.image_files.clear()
-
-        self.slideshow.image_files.clear()
 
         self.slideshow.current_index = 0
 
