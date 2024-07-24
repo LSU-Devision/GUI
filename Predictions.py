@@ -94,9 +94,7 @@ class Predictions:
 
         if self.settings.get_automatic_csv_export:
             self.mainframe.export_predictions_to_csv()
-        self.slideshow.update_image()
-        self.slideshow.item_count_label.config(text= 'Number Predicted: ')
-        self.slideshow.update_image()
+        self.mainframe.slideshow.update_image()
         total_elapsed_time = int(time.time() - start_time)
         print(f"Predicted {total_images} images in {total_elapsed_time} seconds")
         self.progress_bar.after(0, self.show_completion_message, total_images, total_elapsed_time)
