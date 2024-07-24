@@ -70,6 +70,7 @@ class Predictions:
 
     def predict_all(self):
         threading.Thread(target=self.thread_predict_all).start()
+        self.mainframe.disable_button(self.mainframe.predict_all_button)
 
     def thread_predict_all(self):
         self.create_progress_popup()
@@ -98,6 +99,7 @@ class Predictions:
         total_elapsed_time = int(time.time() - start_time)
         print(f"Predicted {total_images} images in {total_elapsed_time} seconds")
         self.progress_bar.after(0, self.show_completion_message, total_images, total_elapsed_time)
+        self.mainframe.enable_button(self.mainframe.predict_all_button)
 
     def create_progress_popup(self):
         self.progress_popup = tk.Toplevel(self.parent)
