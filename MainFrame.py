@@ -118,11 +118,10 @@ class MainFrame(ttk.Frame):
         # creates the csv label
         self.csv_label_title = ttk.Label(self, text=str(self.csv_editor.get_csv_label()),font=50)
         # creates the export to csv button
-        self.csv_save_page_button = ttk.Button(self,text='CSV Save Page',command= lambda : ExcelWindow(master=self, container=self.container, excel_editor=self.csv_editor) )
+        self.excel_window_button = ttk.Button(self, text='Excel Window', command= lambda : self.open_excel_window() )
         # Create settings page
         self.settings_page_button = ttk.Button(self, text='Settings', command=lambda: SettingsWindow(master=self, container=self.container, settings=self.settings))
 
-        self.test_button = ttk.Button(self, text='Test', command=lambda : ExcelWindow(master=self, container=self.container, excel_editor=self.csv_editor) )
 
 
         # Create the progress bar
@@ -159,14 +158,13 @@ class MainFrame(ttk.Frame):
         # adds the csv label to the window
         self.csv_label_title.grid(row=8, column=0, pady=0)
         # adds the csv save page to the window
-        self.csv_save_page_button.grid(row=9,column=0,pady=5)
+        self.excel_window_button.grid(row=9, column=0, pady=5)
         # adds the settings button to the window
         self.settings_page_button.grid(row=10,column=0,pady=5)
         # Add the progress bar and labels to the window -skylar
         # self.progress_bar.grid(row=11, column=0, pady=5)
         # self.predicted_images_label.grid(row=12, column=0, pady=5)
         # self.estimated_time_label.grid(row=13, column=0, pady=5)
-        self.test_button.grid(row=0, column=1, pady=5)
 
     '''****************************************************************************************'''
     '''Destroys current frame and reloads MainFrame for the purpose of dynamic display. -skylar'''
@@ -308,91 +306,13 @@ class MainFrame(ttk.Frame):
         self.csv_editor.set_csv_label(None)
         self.csv_label_title.config(text='None')
     # change test added here
+
     '''
-    def csv_save_page(self):
-        if self.is_csv_save_page_open == False:
-            # create the pop up window
-            self.window = tk.Toplevel(self.container)
-            # set the size of the pop up window
-            main_window_width = self.container.winfo_width()
-            # set the size of the pop up window
-            main_window_height = self.container.winfo_height()
-            # variables for the pop up window
-            pop_up_window_width = 300
-            # variables for the pop up window
-            pop_up_window_height = 200
-            # set the position of the pop up window
-            x = main_window_width + 75
-            # set the position of the pop up window
-            y = main_window_height // 2 - pop_up_window_height // 2  # center the pop-up window vertically
-            # set the title of the pop up window
-            self.window.wm_title('CSV Options')
-            # set the geometry of the pop up window
-            self.window.geometry(f'{pop_up_window_width}x{pop_up_window_height}+{x}+{y}')
-
-            if self.csv_editor.get_csv_file() is not None:
-                self.csv_editor.get_substring()
-
-        def close_window():
-            self.window.withdraw()
-            self.is_csv_save_page_open = False
-
-        def inner_create_page(self):
-            # create the export csv button
-            self.window.export_csv_button = ttk.Button(self.window, text='Export CSV',command=self.export_predictions_to_csv)
-            # create the load csv by selection button
-            self.window.load_csv_by_selection_button = ttk.Button(self.window, text='Load CSV',command=self.load_csv_by_selection)
-            # create the clear predictions button
-            self.clear_prediction_data_button = ttk.Button(self.window, text='Clear Predictions',command=self.clear_predicted_data)
-            # create the clear csv file button
-            self.window.clear_csv_file_button = ttk.Button(self.window, text='Clear CSV File', command=self.clear_csv_file)
-            self.window.protocol("WM_DELETE_WINDOW", lambda: close_window())
-
-            self.window.csv_index_column_toggle = ttk.Button(self.window, text='CSV Index Column')
-            self.window.csv_index_column_dropdown = ttk.Combobox(self.window,state='readonly',values=['None','1','2','3','4','5'])
-            self.window.csv_index_column_dropdown.set(self.csv_editor.get_csv_index_column_index())
-            self.window.csv_index_column_dropdown.bind("<<ComboboxSelected>>", lambda event: self.csv_editor.set_csv_index_column_value(self.window.csv_index_column_dropdown.get()))
-
-            self.window.csv_date_column_toggle = ttk.Button(self.window, text='CSV Date Column')
-            self.window.csv_date_column_dropdown = ttk.Combobox(self.window,state='readonly',values=['None','1','2','3','4','5'])
-            self.window.csv_date_column_dropdown.set(self.csv_editor.get_csv_date_column_index())
-            self.window.csv_date_column_dropdown.bind("<<ComboboxSelected>>", lambda event: self.csv_editor.set_csv_date_column_value(self.window.csv_date_column_dropdown.get()))
-
-            self.window.csv_time_column_toggle = ttk.Button(self.window, text='CSV Time Column')
-            self.window.csv_time_column_dropdown = ttk.Combobox(self.window,state='readonly',values=['None','1','2','3','4','5'])
-            self.window.csv_time_column_dropdown.set(self.csv_editor.get_csv_time_column_index())
-            self.window.csv_time_column_dropdown.bind("<<ComboboxSelected>>", lambda event: self.csv_editor.set_csv_time_column_value(self.window.csv_time_column_dropdown.get()))
-
-            self.window.csv_file_name_column_toggle = ttk.Button(self.window, text='CSV File Name Column')
-            self.window.csv_file_name_column_dropdown = ttk.Combobox(self.window, state='readonly', values=['None','1', '2', '3', '4', '5'])
-            self.window.csv_file_name_column_dropdown.set(self.csv_editor.get_csv_file_name_column_index())
-            self.window.csv_file_name_column_dropdown.bind("<<ComboboxSelected>>", lambda event: self.csv_editor.set_csv_file_name_column_value(self.window.csv_file_name_column_dropdown.get()))
-
-
-            self.window.csv_total_count_column_toggle = ttk.Button(self.window, text='CSV Total Count Column')
-            self.window.csv_total_count_column_dropdown = ttk.Combobox(self.window, state='readonly', values=['None','1', '2', '3', '4', '5'])
-            self.window.csv_total_count_column_dropdown.set(self.csv_editor.get_csv_total_count_column_index())
-            self.window.csv_total_count_column_dropdown.bind("<<ComboboxSelected>>", lambda event: self.csv_editor.set_csv_total_count_column_value(self.window.csv_total_count_column_dropdown.get()))
-
-            self.window.save_csv_column_button = ttk.Button(self.window, text='Save CSV Column',command=self.csv_editor.save_csv_settings)
-            self.window.save_csv_column_button.bind("<Button-1>", lambda event: messagebox.showinfo("Saved", "CSV Column Saved"))
-
-        def inner_load_page(self):
-            # add the export csv button to the pop up window
-            self.window.export_csv_button.grid(row=1, column=1, pady=15, padx=15)
-            # add the load csv by selection button to the pop up window
-            self.window.load_csv_by_selection_button.grid(row=1, column=2, pady=15, padx=15)
-            # add the clear predictions button to the pop up window
-            self.clear_prediction_data_button.grid(row=2, column=1, pady=15, padx=15)
-            # add the clear csv file button to the pop up window
-            self.window.clear_csv_file_button.grid(row=2, column=2, pady=15, padx=15)
-            
-            
-            
-
-        if self.is_csv_save_page_open == False:
-            self.is_csv_save_page_open = True
-            inner_create_page(self)
-            inner_load_page(self)
-            
+    function to open the excel window
     '''
+    def open_excel_window(self):
+        # check if the excel window is already open
+        if self.is_csv_save_page_open == False:
+            # open the excel window
+            ExcelWindow(master=self, container=self.container, excel_editor=self.csv_editor)
+

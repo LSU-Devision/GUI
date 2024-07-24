@@ -92,7 +92,7 @@ class Predictions:
 
         self.predict_index = 1
 
-        if self.settings.get_automatic_csv_export:
+        if self.settings.get_automatic_csv_export():
             self.mainframe.export_predictions_to_csv()
         self.mainframe.slideshow.update_image()
         total_elapsed_time = int(time.time() - start_time)
