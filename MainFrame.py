@@ -109,7 +109,7 @@ class MainFrame(ttk.Frame):
         # creates the export to excel button
         self.excel_window_button = ttk.Button(self, text='Excel Window', command= lambda : self.open_excel_window() )
         # Create settings page
-        self.settings_page_button = ttk.Button(self, text='Settings', command=lambda: SettingsWindow(master=self, container=self.container, settings=self.settings))
+        self.settings_page_button = ttk.Button(self, text='Settings', command=lambda: self.open_settings_window())
 
 
 
@@ -253,3 +253,12 @@ class MainFrame(ttk.Frame):
             # open the excel window
             ExcelWindow(master=self, container=self.container, excel_editor=self.excel_editor)
 
+    '''
+    method: open settings window
+    description: opens the settings window if it is not already open
+    '''
+    def open_settings_window(self):
+        # check if the settings window is already open
+        if self.is_settings_page_open == False:
+            # open the settings window
+            SettingsWindow(master=self, container=self.container, settings=self.settings)
