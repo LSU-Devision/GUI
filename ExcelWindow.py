@@ -45,13 +45,13 @@ class ExcelWindow(tk.Toplevel):
         # set the geometry of the pop up window
         self.geometry(f'{pop_up_window_width}x{pop_up_window_height}+{x}+{y}')
         # checks to see if the csv file is used, creates a substring if so
-        if self.excel_editor.get_csv_file() is not None:
+        if self.excel_editor.get_excel_file() is not None:
             self.excel_editor.get_substring()
         # creates the page
         self.run()
     def create_page(self):
         # create the export csv button
-        self.export_excel_button = ttk.Button(self, text='Export Excel', command=self.master.export_predictions_to_csv)
+        self.export_excel_button = ttk.Button(self, text='Export Excel', command=self.master.excel_editor.export_predictions_to_csv)
         # create the load csv by selection button
         self.load_excel_by_selection_button = ttk.Button(self, text='Load Excel',command=self.master.load_csv_by_selection)
         # create the clear predictions button

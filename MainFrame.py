@@ -19,7 +19,7 @@ from stardist import random_label_cmap
 from Slideshow import Slideshow
 import Settings
 import Utilities as utils
-import CSVEditor as csv_editor
+import ExcelEditor as excel_editor
 from openpyxl import Workbook, load_workbook
 from SettingsWindow import SettingsWindow
 from Predictions import Predictions
@@ -60,9 +60,9 @@ class MainFrame(ttk.Frame):
         # initialize lbl_cmap for random color map -skylar
         self.lbl_cmap = random_label_cmap()
         self.model = None
-        self.csv_editor = csv_editor.CSVEditor()
-        self.csv_editor.set_csv_file(None)
-        self.csv_editor.set_csv_label(None)
+        self.excel_editor = excel_editor.ExcelEditor(master=self)
+        self.excel_editor.set_excel_file(None)
+        self.excel_editor.set_csv_label(None)
         self.csv_label_index = 0
         self.is_csv_save_page_open = False
         self.is_settings_page_open = False
@@ -116,7 +116,7 @@ class MainFrame(ttk.Frame):
         # creates a help button that will display button usage
         self.show_info = ttk.Button(self, text='Help', command=self.help_page)
         # creates the csv label
-        self.csv_label_title = ttk.Label(self, text=str(self.csv_editor.get_csv_label()),font=50)
+        self.csv_label_title = ttk.Label(self, text=str(self.excel_editor.get_csv_label()), font=50)
         # creates the export to csv button
         self.excel_window_button = ttk.Button(self, text='Excel Window', command= lambda : self.open_excel_window() )
         # Create settings page
@@ -208,20 +208,21 @@ class MainFrame(ttk.Frame):
     function to export filenames, predicted counts, and date/time to a csv file in the
     output folder -skylar
     '''
+    '''
     def export_predictions_to_csv(self):
         current_time = datetime.datetime.now().strftime("%m-%d-%Y_%I-%M-%S %p")
-        if self.csv_editor.get_csv_file() is None:
-            self.csv_editor.set_csv_file(os.path.join('output', f'predictions_{current_time}.xlsx'))
+        if self.excel_editor.get_csv_file() is None:
+            self.excel_editor.set_csv_file(os.path.join('output', f'predictions_{current_time}.xlsx'))
         if not os.path.exists('output'):
             os.makedirs('output')
 
-        #with open(self.csv_editor.get_csv_file(), mode='w', newline='') as file:
+        #with open(self.excel_editor.get_csv_file(), mode='w', newline='') as file:
             #writer = csv.writer(file)
             #writer.writerow(['Index', 'Date', 'Time', 'File Name', ' Total Count'])
             #writer.writerows(self.predictions_data)
         does_file_exist = True
         try:
-            wb = load_workbook(self.csv_editor.get_csv_file())
+            wb = load_workbook(self.excel_editor.get_csv_file())
             ws = wb.active
         except FileNotFoundError:
             wb = Workbook()
@@ -240,12 +241,12 @@ class MainFrame(ttk.Frame):
             prediction_list[0] = prediction_list[0] + last_index_value
             ws.append(prediction_list)
         try:
-            wb.save(self.csv_editor.get_csv_file())
+            wb.save(self.excel_editor.get_csv_file())
         except PermissionError:
             messagebox.showerror("Permissions Error", "Excel file may have Read only attribute, please check permissions")
         if self.settings.get_automatic_prediction_clear_data():
             self.predictions_data.clear()
-
+    '''
     '''
     Clear Images: By Alex Mensen-Johnson
     Method for clearing Images from the GUI, resets all variables to their primary state.
@@ -286,9 +287,9 @@ class MainFrame(ttk.Frame):
 
     def load_csv_by_selection(self):
         csv_file = filedialog.askopenfilename(initialdir='/home/max/development/stardist/data')
-        self.csv_editor.set_csv_file(csv_file)
-        self.csv_editor.get_substring()
-        self.csv_label_title.config(text= str(self.csv_editor.get_csv_label()))
+        self.excel_editor.set_excel_file(csv_file)
+        self.excel_editor.get_substring()
+        self.csv_label_title.config(text= str(self.excel_editor.get_csv_label()))
 
     '''
     Help Page: by Alex Mensen-Johnson
@@ -308,8 +309,8 @@ class MainFrame(ttk.Frame):
         self.predictions.predictions_data.clear()
 
     def clear_csv_file(self):
-        self.csv_editor.set_csv_file(None)
-        self.csv_editor.set_csv_label(None)
+        self.excel_editor.set_excel_file(None)
+        self.excel_editor.set_csv_label(None)
         self.csv_label_title.config(text='None')
     # change test added here
 
@@ -320,5 +321,5 @@ class MainFrame(ttk.Frame):
         # check if the excel window is already open
         if self.is_csv_save_page_open == False:
             # open the excel window
-            ExcelWindow(master=self, container=self.container, excel_editor=self.csv_editor)
+            ExcelWindow(master=self, container=self.container, excel_editor=self.excel_editor)
 

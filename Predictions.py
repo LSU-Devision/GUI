@@ -19,7 +19,6 @@ from stardist import random_label_cmap
 from Slideshow import Slideshow
 import Settings
 import Utilities as utils
-import CSVEditor as csv_editor
 from openpyxl import Workbook, load_workbook
 import MainFrame
 
@@ -92,9 +91,9 @@ class Predictions:
             self.progress_bar.after(0, self.update_progress, i + 1, total_images, remaining_time)
 
         self.predict_index = 1
-
-        if self.settings.get_automatic_csv_export():
-            self.mainframe.export_predictions_to_csv()
+        print(f'bool value {self.mainframe.settings.get_automatic_csv_export()}')
+        if self.mainframe.settings.get_automatic_csv_export():
+            self.mainframe.excel_editor.export_predictions_to_csv()
         self.mainframe.slideshow.update_image()
         total_elapsed_time = int(time.time() - start_time)
         print(f"Predicted {total_images} images in {total_elapsed_time} seconds")
