@@ -3,24 +3,14 @@ from tkinter import ttk
 from tkinter import filedialog
 import tensorflow as tf
 import os.path
-import numpy as np
-from csbdeep.utils import normalize
-from PIL import Image
 from stardist.models import StarDist2D
 from tkinter import messagebox
-import csv
-import datetime
-import time
-import threading
 import matplotlib
 matplotlib.use('agg')
-import matplotlib.pyplot as plt
 from stardist import random_label_cmap
 from Slideshow import Slideshow
 import Settings
-import Utilities as utils
 import ExcelEditor as excel_editor
-from openpyxl import Workbook, load_workbook
 from SettingsWindow import SettingsWindow
 from Predictions import Predictions
 from ExcelWindow import ExcelWindow
@@ -204,54 +194,7 @@ class MainFrame(ttk.Frame):
             self.predict_all_button.config(state=tk.NORMAL)
             self.model_selected = True
 
-    '''
-    function to export filenames, predicted counts, and date/time to a csv file in the
-    output folder -skylar
-    '''
-    '''
-    def export_predictions_to_csv(self):
-        current_time = datetime.datetime.now().strftime("%m-%d-%Y_%I-%M-%S %p")
-        if self.excel_editor.get_csv_file() is None:
-            self.excel_editor.set_csv_file(os.path.join('output', f'predictions_{current_time}.xlsx'))
-        if not os.path.exists('output'):
-            os.makedirs('output')
 
-        #with open(self.excel_editor.get_csv_file(), mode='w', newline='') as file:
-            #writer = csv.writer(file)
-            #writer.writerow(['Index', 'Date', 'Time', 'File Name', ' Total Count'])
-            #writer.writerows(self.predictions_data)
-        does_file_exist = True
-        try:
-            wb = load_workbook(self.excel_editor.get_csv_file())
-            ws = wb.active
-        except FileNotFoundError:
-            wb = Workbook()
-            ws = wb.active
-            does_file_exist = False
-        has_index_column = 'Index' in [cell.value for cell in ws['A']]
-        last_index_value = 0
-        if does_file_exist is False:
-            headers = ['Index', 'Date', 'Time', 'File Name', ' Total Count']
-            ws.append(headers)
-        elif has_index_column is True:
-            for cell in ws['A']:
-                last_index_value = cell.value
-        for prediction in self.predictions.predictions_data:
-            prediction_list = list(prediction)
-            prediction_list[0] = prediction_list[0] + last_index_value
-            ws.append(prediction_list)
-        try:
-            wb.save(self.excel_editor.get_csv_file())
-        except PermissionError:
-            messagebox.showerror("Permissions Error", "Excel file may have Read only attribute, please check permissions")
-        if self.settings.get_automatic_prediction_clear_data():
-            self.predictions_data.clear()
-    '''
-    '''
-    Clear Images: By Alex Mensen-Johnson
-    Method for clearing Images from the GUI, resets all variables to their primary state.
-    
-    '''
     def clear_images(self):
         # Set the base image reference to None
         self.slideshow.base_image.image_ref = None
@@ -284,13 +227,6 @@ class MainFrame(ttk.Frame):
             self.predictions_data.clear()
         #
         messagebox.showinfo("Devision", "Images Cleared!")
-
-    def load_csv_by_selection(self):
-        csv_file = filedialog.askopenfilename(initialdir='/home/max/development/stardist/data')
-        self.excel_editor.set_excel_file(csv_file)
-        self.excel_editor.get_substring()
-        self.csv_label_title.config(text= str(self.excel_editor.get_csv_label()))
-
     '''
     Help Page: by Alex Mensen-Johnson
     Description: Loads the Help_Information.txt into a file, reads the file, and displays the information in a pop up
@@ -308,11 +244,6 @@ class MainFrame(ttk.Frame):
     def clear_predicted_data(self):
         self.predictions.predictions_data.clear()
 
-    def clear_csv_file(self):
-        self.excel_editor.set_excel_file(None)
-        self.excel_editor.set_csv_label(None)
-        self.csv_label_title.config(text='None')
-    # change test added here
 
     '''
     function to open the excel window

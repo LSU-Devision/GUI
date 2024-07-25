@@ -91,7 +91,6 @@ class Predictions:
             self.progress_bar.after(0, self.update_progress, i + 1, total_images, remaining_time)
 
         self.predict_index = 1
-        print(f'bool value {self.mainframe.settings.get_automatic_csv_export()}')
         if self.mainframe.settings.get_automatic_csv_export():
             self.mainframe.excel_editor.export_predictions_to_csv()
         self.mainframe.slideshow.update_image()

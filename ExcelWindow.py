@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
+from tkinter import filedialog
 
 '''
 Class: ExcelWindow
@@ -53,11 +54,11 @@ class ExcelWindow(tk.Toplevel):
         # create the export csv button
         self.export_excel_button = ttk.Button(self, text='Export Excel', command=self.master.excel_editor.export_predictions_to_csv)
         # create the load csv by selection button
-        self.load_excel_by_selection_button = ttk.Button(self, text='Load Excel',command=self.master.load_csv_by_selection)
+        self.load_excel_by_selection_button = ttk.Button(self, text='Load Excel', command=self.load_excel_by_selection)
         # create the clear predictions button
         self.clear_prediction_data_button = ttk.Button(self, text='Clear Predictions',command=self.master.clear_predicted_data)
         # create the clear csv file button
-        self.clear_excel_file_button = ttk.Button(self, text='Clear Excel File', command=self.master.clear_csv_file)
+        self.clear_excel_file_button = ttk.Button(self, text='Clear Excel File', command=self.clear_excel_file)
         # protocol for closing the window
         self.protocol("WM_DELETE_WINDOW", lambda: self.close_window())
 
@@ -137,6 +138,31 @@ class ExcelWindow(tk.Toplevel):
 
         self.window.save_csv_column_button.grid(row=6, column=3, pady=15, padx=15)
         '''
+
+    '''
+    method: clear_excel_file
+    description: method to clear the excel file from the program
+    '''
+    def clear_excel_file(self):
+        # clear the excel file from the excel editor
+        self.master.excel_editor.set_excel_file(None)
+        # clear the csv label
+        self.master.excel_editor.set_csv_label(None)
+        # set the csv label title to none
+        self.master.csv_label_title.config(text='None')
+    '''
+    method: load_excel_by_selection
+    description: method to load the excel file by selection
+    '''
+    def load_excel_by_selection(self):
+        # opens the file dialog to select the excel file
+        csv_file = filedialog.askopenfilename(initialdir='/home/max/development/stardist/data')
+        # set the excel file in the excel editor
+        self.master.excel_editor.set_excel_file(csv_file)
+        # create the substring for the excel file
+        self.master.excel_editor.get_substring()
+        # set the csv label title to the excel file
+        self.master.csv_label_title.config(text= str(self.excel_editor.get_csv_label()))
     '''
     method to close the window
     '''
