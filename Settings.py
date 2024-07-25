@@ -34,7 +34,7 @@ class SettingsJson():
     def load_default(self):
         with open(resource_path(target_json_path), 'r') as self.json_file:
             self.default_json_data = json.load(self.json_file)
-        self.automatic_csv_export = self.default_json_data['automatic csv export']
+        self.automatic_excel_export = self.default_json_data['automatic excel export']
         self.automatic_prediction_clear_data = self.default_json_data['automatic prediction clear data']
         self.clear_data_on_clear_images = self.default_json_data['clear data on clear images']
         self.save_images_output = self.default_json_data['save images output']
@@ -44,7 +44,7 @@ class SettingsJson():
     def load_custom_settings(self):
         with open(resource_path(default_json_path), 'r') as self.json_file:
             self.default_json_data = self.target_json_data
-        self.automatic_csv_export = self.default_json_data['automatic csv export']
+        self.automatic_excel_export = self.default_json_data['automatic excel export']
         self.automatic_prediction_clear_data = self.default_json_data['automatic prediction clear data']
         self.clear_data_on_clear_images = self.default_json_data['clear data on clear images']
         self.save_images_output = self.default_json_data['save images output']
@@ -79,8 +79,8 @@ class SettingsJson():
 
     ####################################################
     # now returns boolean values instead of strings -skylar
-    def get_automatic_csv_export(self):
-        return self.automatic_csv_export
+    def get_automatic_excel_export(self):
+        return self.automatic_excel_export
 
     def get_automatic_prediction_clear_data(self):
         return self.automatic_prediction_clear_data
@@ -93,9 +93,9 @@ class SettingsJson():
     
     ####################################################
     # each set function uses boolean input and writes as boolean -skylar
-    def set_automatic_csv_export(self, value):
-        self.automatic_csv_export = value
-        self.update_json('automatic csv export', value)
+    def set_automatic_excel_export(self, value):
+        self.automatic_excel_export = value
+        self.update_json('automatic excel export', value)
 
     def set_automatic_prediction_clear_data(self, value):
         self.automatic_prediction_clear_data = value

@@ -23,15 +23,15 @@ Will predict all the files in the slideshow.
 Clear Images
 This button will clear all images from the slide show.
 
-CSV Save Page
-Opens a new window with two options - Export CSV and and Load CSV.
+Excel Save Page
+Opens a new window with two options - Export Excel and and Load Excel.
 
-Load CSV  
+Load Excel
 Choose a file to which the results can be appended.
 
-Export CSV 
-Export results to the chosen CSV. 
-If no CSV is chosen, it will create a new file.
+Export Excel
+Export results to the chosen Excel.
+If no Excel is chosen, it will create a new file.
 
 
 Any feature requests for the GUI should be added under issues tab in GitHub.

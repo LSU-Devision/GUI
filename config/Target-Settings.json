@@ -1,6 +1,6 @@
 {
     "name": "Target-Settings.json",
-    "automatic csv export": true,
+    "automatic excel export": false,
     "automatic prediction clear data": false,
     "clear data on clear images": false,
     "save images output": true,

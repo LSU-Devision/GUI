@@ -11,7 +11,7 @@ Methods:
 init
 create_page
 load_page
-toggle_automatic_csv
+toggle_automatic_excel
 toggle_automatic_prediction_data_clear
 toggle_clear_data_on_clear_images
 toggle_save_images
@@ -56,10 +56,10 @@ class SettingsWindow(tk.Toplevel):
         creates the buttons and labels for the settings page and assigns the relative function
         '''
         def create_page():
-            # create the automatic csv export label
-            self.automatic_csv_export_label = ttk.Label(self, text=utils.boolean_text_conversion(self.settings.get_automatic_csv_export()), font=50)
-            # create the automatic csv export button
-            self.automatic_csv_export = ttk.Button(self, text='Automatic CSV Export',command=toggle_automatic_csv_export)
+            # create the automatic excel export label
+            self.automatic_excel_export_label = ttk.Label(self, text=utils.boolean_text_conversion(self.settings.get_automatic_excel_export()), font=50)
+            # create the automatic excel export button
+            self.automatic_excel_export = ttk.Button(self, text='Automatic Excel Export', command=toggle_automatic_excel_export)
             # create the automatic prediction data clear label
             self.automatic_prediction_data_clear_label = ttk.Label(self,text=utils.boolean_text_conversion(self.settings.get_automatic_prediction_clear_data()),font=50)
             # create the automatic prediction data clear button
@@ -82,10 +82,10 @@ class SettingsWindow(tk.Toplevel):
         creates the buttons and labels for the settings page and assigns the relative function
         '''
         def load_page():
-            # sets the automatic csv export button to the grid
-            self.automatic_csv_export.grid(row=0, column=0, pady=15, padx=15)
-            # sets the automatic csv export label to the grid
-            self.automatic_csv_export_label.grid(row=0, column=1, pady=15, padx=15)
+            # sets the automatic excel export button to the grid
+            self.automatic_excel_export.grid(row=0, column=0, pady=15, padx=15)
+            # sets the automatic excel export label to the grid
+            self.automatic_excel_export_label.grid(row=0, column=1, pady=15, padx=15)
             # sets the automatic prediction data clear button to the grid
             self.automatic_prediction_data_clear.grid(row=1, column=0, pady=15, padx=15)
             # sets the automatic prediction data clear label to the grid
@@ -102,20 +102,20 @@ class SettingsWindow(tk.Toplevel):
             self.default_settings_button.grid(row=4, column=0, pady=15, padx=15)
 
         '''
-        method: toggle automatic csv export
-        toggles the automatic csv export on and off
+        method: toggle automatic excel export
+        toggles the automatic excel export on and off
         '''
-        def toggle_automatic_csv_export():
-            if self.settings.get_automatic_csv_export() == True:
-                # set the automatic csv export to false
-                self.settings.set_automatic_csv_export(False)
-                # set the automatic csv export label to off
-                self.automatic_csv_export_label.config(text='Off')
+        def toggle_automatic_excel_export():
+            if self.settings.get_automatic_excel_export() == True:
+                # set the automatic excel export to false
+                self.settings.set_automatic_excel_export(False)
+                # set the automatic excel export label to off
+                self.automatic_excel_export_label.config(text='Off')
             else:
-                # set the automatic csv export to true
-                self.settings.set_automatic_csv_export(True)
-                # set the automatic csv export label to on
-                self.automatic_csv_export_label.config(text='On')
+                # set the automatic excel export to true
+                self.settings.set_automatic_excel_export(True)
+                # set the automatic excel export label to on
+                self.automatic_excel_export_label.config(text='On')
 
         '''
         method: toggle automatic prediction data clear
@@ -180,8 +180,8 @@ class SettingsWindow(tk.Toplevel):
         def reset_settings():
             # reset the settings
             self.settings.revert_to_default()
-            # reconfigure automatic csv_export label
-            self.automatic_csv_export_label.config(text=utils.boolean_text_conversion(self.settings.get_automatic_csv_export()))
+            # reconfigure automatic excel_export label
+            self.automatic_excel_export_label.config(text=utils.boolean_text_conversion(self.settings.get_automatic_excel_export()))
             # reconfigure prediction data clear label
             self.automatic_prediction_data_clear_label.config(text=utils.boolean_text_conversion(self.settings.get_automatic_prediction_clear_data()))
             # reconfigure clear data on clear images label

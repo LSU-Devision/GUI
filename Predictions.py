@@ -8,7 +8,6 @@ from csbdeep.utils import normalize
 from PIL import Image
 from stardist.models import StarDist2D
 from tkinter import messagebox
-import csv
 import datetime
 import time
 import threading
@@ -18,9 +17,6 @@ import matplotlib.pyplot as plt
 from stardist import random_label_cmap
 from Slideshow import Slideshow
 import Settings
-import Utilities as utils
-from openpyxl import Workbook, load_workbook
-import MainFrame
 
 class Predictions:
     def __init__(self, image_files, parent, model, main_frame):
@@ -91,8 +87,8 @@ class Predictions:
             self.progress_bar.after(0, self.update_progress, i + 1, total_images, remaining_time)
 
         self.predict_index = 1
-        if self.mainframe.settings.get_automatic_csv_export():
-            self.mainframe.excel_editor.export_predictions_to_csv()
+        if self.mainframe.settings.get_automatic_excel_export():
+            self.mainframe.excel_editor.export_predictions_to_excel()
         self.mainframe.slideshow.update_image()
         total_elapsed_time = int(time.time() - start_time)
         print(f"Predicted {total_images} images in {total_elapsed_time} seconds")

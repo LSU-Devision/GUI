@@ -30,7 +30,6 @@ Methods:
     select model: method for selecting the model for prediction
     predict: method for predicting egg count for the frog eggs. outputs the photos saved with the number count
     predict all: predicts the values of all the loaded files in the GUI
-    export to csv: Outputs the files to csv
     clear images: Clears the images from the GUI
     help page: creates a help page pop up for the users
 '''
@@ -52,17 +51,17 @@ class MainFrame(ttk.Frame):
         self.model = None
         self.excel_editor = excel_editor.ExcelEditor(master=self)
         self.excel_editor.set_excel_file(None)
-        self.excel_editor.set_csv_label(None)
-        self.csv_label_index = 0
-        self.is_csv_save_page_open = False
+        self.excel_editor.set_excel_label(None)
+        self.excel_label_index = 0
+        self.is_excel_save_page_open = False
         self.is_settings_page_open = False
         self.device = '/GPU:0' if tf.config.experimental.list_physical_devices('GPU') else '/CPU:0'
         self.progress_popup = None  # Initialize progress_popup to None
 
-        # settings for automatic csv export
+        # settings for automatic excel export
         # i made it so it can return a boolean value
-        self.automatic_csv_setting = self.settings.get_automatic_csv_export()
-        # print(self.automatic_csv_setting)
+        self.automatic_excel_setting = self.settings.get_automatic_excel_export()
+        # print(self.automatic_excel_setting)
         self.predict_index = 1
 
 
@@ -105,9 +104,9 @@ class MainFrame(ttk.Frame):
         self.clear_button = ttk.Button(self, text='Clear Images', command=self.clear_images)
         # creates a help button that will display button usage
         self.show_info = ttk.Button(self, text='Help', command=self.help_page)
-        # creates the csv label
-        self.csv_label_title = ttk.Label(self, text=str(self.excel_editor.get_csv_label()), font=50)
-        # creates the export to csv button
+        # creates the excel label
+        self.excel_label_title = ttk.Label(self, text=str(self.excel_editor.get_excel_label()), font=50)
+        # creates the export to excel button
         self.excel_window_button = ttk.Button(self, text='Excel Window', command= lambda : self.open_excel_window() )
         # Create settings page
         self.settings_page_button = ttk.Button(self, text='Settings', command=lambda: SettingsWindow(master=self, container=self.container, settings=self.settings))
@@ -145,9 +144,9 @@ class MainFrame(ttk.Frame):
         self.clear_button.grid(row=6, column=0, pady=5)
         # adds the button to the GUI
         self.show_info.grid(row=7, column=0, pady=5)
-        # adds the csv label to the window
-        self.csv_label_title.grid(row=8, column=0, pady=0)
-        # adds the csv save page to the window
+        # adds the excel label to the window
+        self.excel_label_title.grid(row=8, column=0, pady=0)
+        # adds the excel save page to the window
         self.excel_window_button.grid(row=9, column=0, pady=5)
         # adds the settings button to the window
         self.settings_page_button.grid(row=10,column=0,pady=5)
@@ -250,7 +249,7 @@ class MainFrame(ttk.Frame):
     '''
     def open_excel_window(self):
         # check if the excel window is already open
-        if self.is_csv_save_page_open == False:
+        if self.is_excel_save_page_open == False:
             # open the excel window
             ExcelWindow(master=self, container=self.container, excel_editor=self.excel_editor)
 

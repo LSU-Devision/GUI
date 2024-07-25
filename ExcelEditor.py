@@ -7,7 +7,7 @@ from openpyxl import Workbook, load_workbook
 from tkinter import messagebox
 
 # load default settings
-default_settings = 'config/csv_settings.json'
+default_settings = 'config/excel_settings.json'
 
 def resource_path(relative_path):
     """ Get absolute path to resource, needed for PyInstaller """
@@ -25,9 +25,9 @@ Params:
     master = master class aka MainFrame
 methods:
     __init__: initialize the class
-    load_csv_settings: load the csv settings
-    save_csv_settings: save the csv settings
-    export_predictions_to_csv: export the predictions to csv
+    load_excel_settings: load the excel settings
+    save_excel_settings: save the excel settings
+    export_predictions_to_excel: export the predictions to excel
     various getters and setter methods
 '''
 class ExcelEditor:
@@ -36,74 +36,74 @@ class ExcelEditor:
     description: initialize the class
     '''
     def __init__(self,master=None):
-        # set the csv file to none
-        self.csv_file = None
-        # set the csv label to none
-        self.csv_label = None
-        # set the csv index value to none
-        self.csv_index_value = 'None'
-        # set the csv date value to none
-        self.csv_date_value = 'None'
-        # set the csv time value to none
-        self.csv_time_value = 'None'
-        # set the csv file name value to none
-        self.csv_file_name_value = 'None'
-        # set the csv total count value to none
-        self.csv_total_count_value = 'None'
+        # set the excel file to none
+        self.excel_file = None
+        # set the excel label to none
+        self.excel_label = None
+        # set the excel index value to none
+        self.excel_index_value = 'None'
+        # set the excel date value to none
+        self.excel_date_value = 'None'
+        # set the excel time value to none
+        self.excel_time_value = 'None'
+        # set the excel file name value to none
+        self.excel_file_name_value = 'None'
+        # set the excel total count value to none
+        self.excel_total_count_value = 'None'
         # set the master to the mainframe
         self.master = master
-        # load the csv settings
-        self.load_csv_settings()
+        # load the excel settings
+        self.load_excel_settings()
 
     '''
-    method: load_csv_settings
-    description: load the csv settings in to the class
+    method: load_excel_settings
+    description: load the excel settings in to the class
     '''
-    def load_csv_settings(self):
+    def load_excel_settings(self):
         # create the self.data variable
         self.data = None
         # open the default settings
         with open(resource_path(default_settings)) as json_file:
             # load the default settings from the json file
             self.data = json.load(json_file)
-        # set the csv index value
-        self.csv_index_value = self.data['csv_index_column']
-        # set the csv date value
-        self.csv_date_value = self.data['csv_date_column']
-        # set the csv time value
-        self.csv_time_value = self.data['csv_time_column']
-        # set the csv file name value
-        self.csv_file_name_value = self.data['csv_file_name_column']
-        # set the csv total count value
-        self.csv_total_count_value = self.data['csv_total_count_column']
+        # set the excel index value
+        self.excel_index_value = self.data['excel_index_column']
+        # set the excel date value
+        self.excel_date_value = self.data['excel_date_column']
+        # set the excel time value
+        self.excel_time_value = self.data['excel_time_column']
+        # set the excel file name value
+        self.excel_file_name_value = self.data['excel_file_name_column']
+        # set the excel total count value
+        self.excel_total_count_value = self.data['excel_total_count_column']
 
     '''
-    method: save_csv_settings
-    description: save the csv settings in to the class
+    method: save_excel_settings
+    description: save the excel settings in to the class
     '''
-    def save_csv_settings(self):
+    def save_excel_settings(self):
         # create the self.data_save variable
         self.data_save = {}
-        # set the data save csv index column
-        self.data_save['csv_index_column'] = self.csv_index_value
-        # set the data save csv date column
-        self.data_save['csv_date_column'] = self.csv_date_value
-        # set the data save csv time column
-        self.data_save['csv_time_column'] = self.csv_time_value
-        # set the data save csv file name column
-        self.data_save['csv_file_name_column'] = self.csv_file_name_value
-        # set the data save csv total count column
-        self.data_save['csv_total_count_column'] = self.csv_total_count_value
+        # set the data save excel index column
+        self.data_save['excel_index_column'] = self.excel_index_value
+        # set the data save excel date column
+        self.data_save['excel_date_column'] = self.excel_date_value
+        # set the data save excel time column
+        self.data_save['excel_time_column'] = self.excel_time_value
+        # set the data save excel file name column
+        self.data_save['excel_file_name_column'] = self.excel_file_name_value
+        # set the data save excel total count column
+        self.data_save['excel_total_count_column'] = self.excel_total_count_value
         # open the default settings
         with open(resource_path(default_settings), 'w') as outfile:
             # dump the data to the json file
             json.dump(self.data_save, outfile,indent=4)
 
     '''
-    method: export_predictions_to_csv
-    description: export the predictions to csv
+    method: export_predictions_to_excel
+    description: export the predictions to excel
     '''
-    def export_predictions_to_csv(self):
+    def export_predictions_to_excel(self):
         # set the current time with a format
         current_time = datetime.datetime.now().strftime("%m-%d-%Y_%I-%M-%S %p")
         # check to see if the excel file exists
@@ -167,34 +167,33 @@ class ExcelEditor:
             # clear the predictions
             self.master.predictions.predictions_data.clear()
 
-    def get_csv_index_column_index(self):
-        return self.csv_index_value
-    def get_csv_date_column_index(self):
-        return self.csv_date_value
-    def get_csv_time_column_index(self):
-        return self.csv_time_value
-    def get_csv_file_name_column_index(self):
-        return self.csv_file_name_value
-    def get_csv_total_count_column_index(self):
-        return self.csv_total_count_value
+    def get_excel_index_column_index(self):
+        return self.excel_index_value
+    def get_excel_date_column_index(self):
+        return self.excel_date_value
+    def get_excel_time_column_index(self):
+        return self.excel_time_value
+    def get_excel_file_name_column_index(self):
+        return self.excel_file_name_value
+    def get_excel_total_count_column_index(self):
+        return self.excel_total_count_value
     def get_substring(self):
-        self.csv_label = utils.string_to_substring(self.csv_file)
+        self.excel_label = utils.string_to_substring(self.excel_file)
     def get_excel_file(self):
-        return self.csv_file
-    def get_csv_label(self):
-        return self.csv_label
-    def set_excel_file(self, csv_file):
-        self.csv_file = csv_file
-    def set_csv_label(self, csv_label):
-        self.csv_label = csv_label
-    def set_csv_index_column_value(self, csv_index):
-        self.csv_index_value = csv_index
-        print(self.csv_index_value)
-    def set_csv_date_column_value(self, csv_date):
-        self.csv_date_value = csv_date
-    def set_csv_time_column_value(self, csv_time):
-        self.csv_time_value = csv_time
-    def set_csv_file_name_column_value(self, csv_file_name):
-        self.csv_file_name_value = csv_file_name
-    def set_csv_total_count_column_value(self, csv_total_count):
-        self.csv_total_count_value = csv_total_count
+        return self.excel_file
+    def get_excel_label(self):
+        return self.excel_label
+    def set_excel_file(self, excel_file):
+        self.excel_file = excel_file
+    def set_excel_label(self, excel_label):
+        self.excel_label = excel_label
+    def set_excel_index_column_value(self, excel_index):
+        self.excel_index_value = excel_index
+    def set_excel_date_column_value(self, excel_date):
+        self.excel_date_value = excel_date
+    def set_excel_time_column_value(self, excel_time):
+        self.excel_time_value = excel_time
+    def set_excel_file_name_column_value(self, excel_file_name):
+        self.excel_file_name_value = excel_file_name
+    def set_excel_total_count_column_value(self, excel_total_count):
+        self.excel_total_count_value = excel_total_count
