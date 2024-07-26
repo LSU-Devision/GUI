@@ -136,10 +136,12 @@ class ExcelEditor:
         last_index_value = 0
         # if the file does not exist
         if does_file_exist is False:
-            # create the headers
-            headers = ['Index', 'Date', 'Time', 'File Name', ' Total Count']
+            # set the headers to the first row
+            ws.cell(row=1, column=1, value=self.get_excel_headers()[0])
             # append the headers to the worksheet
-            ws.append(headers)
+            for i, header in enumerate(self.get_excel_headers()[1:], start=2):
+                # add each header to the appropriate row
+                ws.cell(row=1, column=i, value=header)
         # if the index column does exist
         elif has_index_column is True:
             # get the last index value using a for loop
@@ -147,13 +149,29 @@ class ExcelEditor:
                 # update the last index value to the current cel value, traversing down the excel until out of values
                 last_index_value = cell.value
         # iterate over the predictions to append to the worksheet
-        for prediction in self.master.predictions.predictions_data:
-            # create a list for data manipulation, tuple's are immutable (not changable)
-            prediction_list = list(prediction)
-            # update the index values to reflect the values on the sheet
-            prediction_list[0] = prediction_list[0] + last_index_value
-            # append the list to the worksheet
-            ws.append(prediction_list)
+        if does_file_exist is False:
+            # get the index of the headers
+            index_list = self.get_headers_index()
+            # create an empty list for indexing
+            edited_prediction_list = []
+            # iterate over the predictions
+            for prediction in self.master.predictions.predictions_data:
+                # clear the prediction list
+                edited_prediction_list.clear()
+                # iterate over the index values
+                for index in index_list:
+                    # append the index value from predictins to the list
+                    edited_prediction_list.append(prediction[index])
+                # append the list to the worksheet
+                ws.append(edited_prediction_list)
+        else:
+            for prediction in self.master.predictions.predictions_data:
+                # create a list for data manipulation, tuple's are immutable (not changable)
+                prediction_list = list(prediction)
+                # update the index values to reflect the values on the sheet
+                prediction_list[0] = prediction_list[0] + last_index_value
+                # append the list to the worksheet
+                ws.append(prediction_list)
         # try statement to save the workbook
         try:
             # save the workbook
@@ -197,3 +215,92 @@ class ExcelEditor:
         self.excel_file_name_value = excel_file_name
     def set_excel_total_count_column_value(self, excel_total_count):
         self.excel_total_count_value = excel_total_count
+
+    '''
+    method: get_excel_headers
+    description: get and order the excel headers according to the settings
+    '''
+    def get_excel_headers(self):
+        # create a list of the header values
+        value_list = [
+            self.excel_index_value,
+            self.excel_date_value,
+            self.excel_time_value,
+            self.excel_file_name_value,
+            self.excel_total_count_value
+        ]
+        # create a new list to store the values
+        new_list = []
+        # iterate over the values in the header list
+        for value in value_list:
+            # if the value is not None, append it to the new list
+            if value != 'None':
+                # append the value
+                new_list.append(value)
+        # sort the new list by numerical value
+        new_list.sort()
+        # create a new list to store the index values of the header list
+        index_list = []
+        # iterate over the new list and store the index values in the index list
+        for index in new_list:
+            # append the index value
+            index_list.append(value_list.index(index))
+        # create a list for the headers
+        headers_list = []
+        # iterate over the index list
+        for index in index_list:
+            # if the index is for the Index
+            if index == 0:
+                # append the index to the headers list
+                headers_list.append('Index')
+                # if the index is for the Date
+            elif index == 1:
+                # append the date to the headers list
+                headers_list.append('Date')
+            # if the index is for the Time
+            elif index == 2:
+                # append the time to the headers list
+                headers_list.append('Time')
+            # if the index is for the File Name
+            elif index == 3:
+                # append the file name to the headers list
+                headers_list.append('File Name')
+            # if the index is for the Total Count
+            elif index == 4:
+                # append the total count to the headers list
+                headers_list.append('Total Count')
+        # return the headers list
+        return headers_list
+    '''
+    method: get_headers_index
+    description: get the index values of the headers
+    '''
+    def get_headers_index(self):
+        # create a list for the index values
+        index_list = []
+        # get the header list
+        header_list = self.get_excel_headers()
+        # iterate over the header list
+        for header in header_list:
+            # if the header is Index
+            if header == 'Index':
+                # append the index to the index list
+                index_list.append(0)
+            # if the header is Date
+            elif header == 'Date':
+                # append the date to the index list
+                index_list.append(1)
+            # if the header is Time
+            elif header == 'Time':
+                # append the time to the index list
+                index_list.append(2)
+            # if the header is File Name
+            elif header == 'File Name':
+                # append the file name to the index list
+                index_list.append(3)
+            # if the header is Total Count
+            elif header == 'Total Count':
+                # append the total count to the index list
+                index_list.append(4)
+        # return the index list
+        return index_list

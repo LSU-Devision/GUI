@@ -34,9 +34,9 @@ class ExcelWindow(tk.Toplevel):
         # set the size of the pop up window
         main_window_height = self.container.winfo_height()
         # variables for the pop up window
-        pop_up_window_width = 300
+        pop_up_window_width = 400
         # variables for the pop up window
-        pop_up_window_height = 200
+        pop_up_window_height = 400
         # set the position of the pop up window
         x = main_window_width + 75
         # set the position of the pop up window
@@ -59,7 +59,7 @@ class ExcelWindow(tk.Toplevel):
         # create the second tab
         self.tab2=ttk.Frame(self.notebook)
         # add the Basic tab
-        self.notebook.add(self.tab1,text="Basic")
+        self.notebook.add(self.tab1,text="Basic",)
         # add the Advanced tab
         self.notebook.add(self.tab2,text="Advanced")
         # creates the page
@@ -122,9 +122,9 @@ class ExcelWindow(tk.Toplevel):
         self.excel_total_count_column_dropdown.bind("<<ComboboxSelected>>", lambda event: self.excel_editor.set_excel_total_count_column_value(self.excel_total_count_column_dropdown.get()))
 
         # create the save excel column button
-        self.save_excel_column_button = ttk.Button(self.tab2, text='Save Excel Column', command=self.excel_editor.save_excel_settings)
+        self.save_excel_column_button = ttk.Button(self.tab2, text='Save Excel Column', command=self.save_excel_columns)
         # bind the event to the save excel column button
-        self.save_excel_column_button.bind("<Button-1>",lambda event: messagebox.showinfo("Saved", "Excel Column Saved"))
+        # self.save_excel_column_button.bind("<Button-1>",lambda event: messagebox.showinfo("Saved", "Excel Column Saved"))
     def load_page(self):
         # add the export excel button to the pop up window
         self.export_excel_button.grid(row=1, column=1, pady=15, padx=15)
@@ -134,24 +134,24 @@ class ExcelWindow(tk.Toplevel):
         self.clear_prediction_data_button.grid(row=2, column=1, pady=15, padx=15)
         # add the clear excel file button to the pop up window
         self.clear_excel_file_button.grid(row=2, column=2, pady=15, padx=15)
-        '''
-        self.window.excel_index_column_toggle.grid(row=1, column=3, pady=15, padx=15)
-        self.window.excel_index_column_dropdown.grid(row=1, column=4, pady=15, padx=15)
 
-        self.window.excel_date_column_toggle.grid(row=2, column=3, pady=15, padx=15)
-        self.window.excel_date_column_dropdown.grid(row=2, column=4, pady=15, padx=15)
+        self.excel_index_column_toggle.grid(row=1, column=1, pady=15, padx=15)
+        self.excel_index_column_dropdown.grid(row=1, column=2, pady=15, padx=15)
 
-        self.window.excel_time_column_toggle.grid(row=3, column=3, pady=15, padx=15)
-        self.window.excel_time_column_dropdown.grid(row=3, column=4, pady=15, padx=15)
+        self.excel_date_column_toggle.grid(row=2, column=1, pady=15, padx=15)
+        self.excel_date_column_dropdown.grid(row=2, column=2, pady=15, padx=15)
 
-        self.window.excel_file_name_column_toggle.grid(row=4, column=3, pady=15, padx=15)
-        self.window.excel_file_name_column_dropdown.grid(row=4, column=4, pady=15, padx=15)
+        self.excel_time_column_toggle.grid(row=3, column=1, pady=15, padx=15)
+        self.excel_time_column_dropdown.grid(row=3, column=2, pady=15, padx=15)
 
-        self.window.excel_total_count_column_toggle.grid(row=5, column=3, pady=15, padx=15)
-        self.window.excel_total_count_column_dropdown.grid(row=5, column=4, pady=15, padx=15)
+        self.excel_file_name_column_toggle.grid(row=4, column=1, pady=15, padx=15)
+        self.excel_file_name_column_dropdown.grid(row=4, column=2, pady=15, padx=15)
 
-        self.window.save_excel_column_button.grid(row=6, column=3, pady=15, padx=15)
-        '''
+        self.excel_total_count_column_toggle.grid(row=5, column=1, pady=15, padx=15)
+        self.excel_total_count_column_dropdown.grid(row=5, column=2, pady=15, padx=15)
+
+        self.save_excel_column_button.grid(row=6, column=1, pady=15, padx=15)
+
 
     '''
     method: clear_excel_file
@@ -195,4 +195,23 @@ class ExcelWindow(tk.Toplevel):
         self.load_page()
         # sets the boolean to true to prevent duplicates of the window
         self.master.is_excel_save_page_open = True
+
+    def save_excel_columns(self):
+
+        check_list = [self.master.excel_editor.get_excel_index_column_index(),
+                      self.master.excel_editor.get_excel_date_column_index(),
+                      self.master.excel_editor.get_excel_time_column_index(),
+                      self.master.excel_editor.get_excel_file_name_column_index(),
+                      self.master.excel_editor.get_excel_total_count_column_index()
+                      ]
+        check_value = True
+        for value in check_list:
+            for value2 in check_list[check_list.index(value) + 1:]:
+                if value == value2 and value2 != 'None':
+                    check_value = False
+        if check_value is True:
+            self.master.excel_editor.save_excel_settings()
+            messagebox.showinfo('Success', 'Excel Columns Saved')
+        else:
+            messagebox.showerror('Error', 'Excel Columns have the same column value, cannot save')
 
