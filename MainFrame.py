@@ -57,7 +57,7 @@ class MainFrame(ttk.Frame):
         self.is_settings_page_open = False
         self.device = '/GPU:0' if tf.config.experimental.list_physical_devices('GPU') else '/CPU:0'
         self.progress_popup = None  # Initialize progress_popup to None
-
+        self.model_path = ''
         # settings for automatic excel export
         # i made it so it can return a boolean value
         self.automatic_excel_setting = self.settings.get_automatic_excel_export()
@@ -181,14 +181,14 @@ class MainFrame(ttk.Frame):
             self.slideshow.update_image()
 
     def select_model(self):
-        model_path = filedialog.askdirectory()
-        print(model_path)
-        print(os.path.basename(model_path))
-        print(os.path.dirname(model_path))
+        self.model_path = filedialog.askdirectory()
+        print(self.model_path)
+        print(os.path.basename(self.model_path))
+        print(os.path.dirname(self.model_path))
         with tf.device(self.device):
-            self.model = StarDist2D(None, name=os.path.basename(model_path), basedir=os.path.dirname(model_path))
+            self.model = StarDist2D(None, name=os.path.basename(self.model_path), basedir=os.path.dirname(self.model_path))
         self.predictions.model = self.model
-        self.model_label.config(text=os.path.basename(model_path))
+        self.model_label.config(text=os.path.basename(self.model_path))
         if not self.model_selected:
             self.predict_all_button.config(state=tk.NORMAL)
             self.model_selected = True
