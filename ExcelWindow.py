@@ -42,7 +42,7 @@ class ExcelWindow(tk.Toplevel):
         # set the position of the pop up window
         y = main_window_height // 2 - pop_up_window_height // 2  # center the pop-up window vertically
         # set the title of the pop up window
-        self.title('Excel Options')
+        self.title('Excel Window')
 
 
         # set the geometry of the pop up window
@@ -171,6 +171,14 @@ class ExcelWindow(tk.Toplevel):
     def load_excel_by_selection(self):
         # opens the file dialog to select the excel file
         excel_file = filedialog.askopenfilename(initialdir='/home/max/development/stardist/data')
+        # split the excel file to check the extension
+        split_data = excel_file.split('.')
+        # check the extension
+        if split_data[-1] != 'xlsx' and split_data[-1] != 'xls' and split_data[-1] != 'csv':
+            # if the extension is not .xlsx, .xls, or .csv, show an error
+            messagebox.showerror("Incompatible File Extension", f"File must be .xlsx, .xls, or .csv, your file is .{split_data[-1]} ")
+            # return the function
+            return
         # set the excel file in the excel editor
         self.master.excel_editor.set_excel_file(excel_file)
         # create the substring for the excel file
