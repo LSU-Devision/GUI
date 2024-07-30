@@ -130,6 +130,7 @@ class ExcelEditor:
             ws = wb.active
             # set the boolean variable to false
             does_file_exist = False
+
         # create a boolean variable to check if the index column exists
         has_index_column = 'Index' in [cell.value for cell in ws['A']]
         # set a value for the last index value

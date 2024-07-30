@@ -1,7 +1,7 @@
 {
     "excel_index_column": "1",
     "excel_date_column": "2",
-    "excel_time_column": "None",
+    "excel_time_column": "3",
     "excel_file_name_column": "4",
-    "excel_total_count_column": "None"
+    "excel_total_count_column": "5"
 }

@@ -39,13 +39,13 @@ class Predictions:
         
         img = np.array(img)
         img = normalize(img, 1, 99.8, axis=(0,1))
-
+        # set's predict index to the length of predictions data + 1
+        self.predict_index = len(self.predictions_data) + 1
         with tf.device(self.device):
             labels, details = self.model.predict_instances(img, n_tiles=self.model._guess_n_tiles(img))
         date = datetime.datetime.now().date().strftime("%Y/%m/%d")
         time = datetime.datetime.now().time().strftime("%H:%M:%S")
         self.predictions_data.append((self.predict_index, date, time, os.path.basename(image_path), len(details['points'])))
-        self.predict_index += 1
 
         if self.settings.get_save_images_output():
             fig, ax = plt.subplots(figsize=(13, 10))
