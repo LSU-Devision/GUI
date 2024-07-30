@@ -1,25 +1,22 @@
-import tkinter as tk
-from tkinter import ttk
-from tkinter import filedialog
-import tensorflow as tf
-import os.path
-import numpy as np
 from csbdeep.utils import normalize
 from PIL import Image
 from skimage.measure import find_contours
+from Slideshow import Slideshow
 from stardist import random_label_cmap
-from tkinter import messagebox
+from tkinter import messagebox, ttk
 import datetime
 import json
-import sys
-import time
-import threading
 import matplotlib
-matplotlib.use('agg')
 import matplotlib.pyplot as plt
-from stardist import random_label_cmap
-from Slideshow import Slideshow
+import numpy as np
+import os.path
+import sys
+import tensorflow as tf
+import threading
+import time
+import tkinter as tk
 import Settings
+matplotlib.use('agg')
 
 def resource_path(relative_path):
     """ Get absolute path to resource, needed for PyInstaller """
@@ -33,7 +30,7 @@ class Predictions:
     def __init__(self, image_files, parent, model, main_frame):
         self.image_files = image_files
         self.parent = parent
-        self.device = '/cpu:0'  # Update this based on your device configuration
+        self.device = '/GPU:0' if tf.config.experimental.list_physical_devices('GPU') else '/CPU:0'
         # self.model = model
         self.lbl_cmap = random_label_cmap()
         self.predictions_data = []
@@ -46,7 +43,7 @@ class Predictions:
     def get_model_classes(self):
         config_file_path = f"{self.mainframe.model_path}/config.json"
         print(config_file_path)
-        with open(config_file_path, 'r') as file:
+        with open(resource_path(config_file_path), 'r') as file:
             config_data = json.load(file)
             n_classes = config_data.get('n_classes')
         return n_classes
@@ -54,7 +51,7 @@ class Predictions:
     def get_model_channels(self):
         config_file_path = f"{self.mainframe.model_path}/config.json"
         print(config_file_path)
-        with open(config_file_path, 'r') as file:
+        with open(resource_path(config_file_path), 'r') as file:
             config_data = json.load(file)
             n_channel = config_data.get('n_channel_in')
         return n_channel
@@ -100,7 +97,7 @@ class Predictions:
             self.prediction_files[image_path] = (None, len(details['points']))
 
     # Function to extract class information from the prediction result
-    def class_from_res(res):
+    def class_from_res(self, res):
         cls_dict = dict((i+1,c) for i,c in enumerate(res['class_id']))
         return cls_dict
 
@@ -108,7 +105,8 @@ class Predictions:
 
     def _predict_class(self, image_path, i):
         img = Image.open(image_path)
-        
+        original = img
+
         if self.get_model_channels() == 1:
             if img.mode != 'L':
                 img = img.convert('L')
@@ -120,8 +118,7 @@ class Predictions:
         img = np.array(img)
         img = normalize(img, 1, 99.8, axis=(0,1))
         
-        with tf.device(self.device):
-            labels, results = self.model.predict_instances(img, n_tiles = self.model._guess_n_tiles(img))
+        labels, results = self.model.predict_instances(img, n_tiles = self.model._guess_n_tiles(img))
 
         date = datetime.datetime.now().date().strftime("%Y/%m/%d")
         time = datetime.datetime.now().time().strftime("%H:%M:%S")
@@ -157,8 +154,8 @@ class Predictions:
 
         # Initialize a plot of specified size
         fig, ax = plt.subplots(figsize=(13, 10))
-
-        ax.imshow(labels, cmap=self.lbl_cmap, alpha=0.25)
+        ax.imshow(original)
+        #ax.imshow(labels, cmap=self.lbl_cmap, alpha=0.25)
 
         # Find contours for each label and plot them with the respective class color
         for region in np.unique(labels):
@@ -177,29 +174,12 @@ class Predictions:
         plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
         plt.tight_layout(pad=0)
 
-        # Save the figure to your specified directory
-        fig.savefig(f"prediction/prediction_test{i}.png", dpi=500, bbox_inches='tight', pad_inches=0)
+        save_path = os.path.join('output', f'prediction_{os.path.basename(image_path)}')
+        if not os.path.exists(os.path.dirname(save_path)):
+            os.makedirs(os.path.dirname(save_path))
+        fig.savefig(save_path, dpi=500, bbox_inches='tight', pad_inches=0)
         plt.close(fig)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-    
     def predict_all(self):
         threading.Thread(target=self.thread_predict_all).start()
         self.mainframe.disable_button(self.mainframe.predict_all_button)
