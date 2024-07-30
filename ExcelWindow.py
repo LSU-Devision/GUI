@@ -132,16 +132,16 @@ class ExcelWindow(tk.Toplevel):
         delay = 0.5 
 
         #create tooltips for each button
-        ToolTip(self.export_excel_button, msg=" ", delay=delay)
-        ToolTip(self.load_excel_by_selection_button, msg=" ", delay=delay)
-        ToolTip(self.clear_prediction_data_button, msg=" ", delay=delay)
-        ToolTip(self.clear_excel_file_button, msg=" ", delay=delay)
-        ToolTip(self.excel_index_column_toggle, msg=" ", delay=delay)
-        ToolTip(self.excel_date_column_toggle, msg=" ", delay=delay)
-        ToolTip(self.excel_time_column_toggle, msg=" ", delay=delay)
-        ToolTip(self.excel_file_name_column_toggle, msg=" ", delay=delay)
-        ToolTip(self.excel_total_count_column_toggle, msg=" ", delay=delay)
-        ToolTip(self.save_excel_column_button, msg=" ", delay=delay)
+        ToolTip(self.export_excel_button, msg="Export predictions to excel", delay=delay)
+        ToolTip(self.load_excel_by_selection_button, msg="Choose an excel file to save predictions on", delay=delay)
+        ToolTip(self.clear_prediction_data_button, msg="Clear predictions from program", delay=delay)
+        ToolTip(self.clear_excel_file_button, msg="Remove loaded excel file", delay=delay)
+        #ToolTip(self.excel_index_column_toggle, msg=" ", delay=delay)
+        #ToolTip(self.excel_date_column_toggle, msg=" ", delay=delay)
+        #ToolTip(self.excel_time_column_toggle, msg=" ", delay=delay)
+        #ToolTip(self.excel_file_name_column_toggle, msg=" ", delay=delay)
+        #ToolTip(self.excel_total_count_column_toggle, msg=" ", delay=delay)
+        #ToolTip(self.save_excel_column_button, msg=" ", delay=delay)
     
     def load_page(self):
         # add the export excel button to the pop up window

@@ -85,11 +85,11 @@ class SettingsWindow(tk.Toplevel):
         delay = 0.5 
 
         #create tooltips for each button
-        ToolTip(self.automatic_excel_export, msg=" ", delay=delay)
-        ToolTip(self.automatic_prediction_data_clear, msg=" ", delay=delay)
-        ToolTip(self.clear_data_on_clear_images_button, msg=" ", delay=delay)
-        ToolTip(self.save_images_output_button, msg=" ", delay=delay)
-        ToolTip(self.default_settings_button, msg=" ", delay=delay)
+        ToolTip(self.automatic_excel_export, msg="Automatically save preictions to excel file", delay=delay)
+        ToolTip(self.automatic_prediction_data_clear, msg="Automatically clear prediction data when predictions are completed", delay=delay)
+        ToolTip(self.clear_data_on_clear_images_button, msg="Clear the prediction data when clearing images", delay=delay)
+        ToolTip(self.save_images_output_button, msg="Save predicted images to output folder \nShow predicted images in second slideshow frame", delay=delay)
+        ToolTip(self.default_settings_button, msg="Restore default settings", delay=delay)
 
     '''
     method: load page

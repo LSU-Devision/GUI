@@ -128,12 +128,12 @@ class MainFrame(ttk.Frame):
         delay = 0.5 
 
         #create tooltips for each button
-        ToolTip(self.select_files_button, msg="Select Pictures", delay=delay)
-        ToolTip(self.select_model_button, msg="Select Prediction Model", delay=delay)
-        ToolTip(self.predict_all_button, msg="Run the Model on the Selected Pictures", delay=delay)
-        ToolTip(self.clear_button, msg="Remove All Images from the Slideshow", delay=delay)
+        ToolTip(self.select_files_button, msg="Select pictures", delay=delay)
+        ToolTip(self.select_model_button, msg="Select prediction model", delay=delay)
+        ToolTip(self.predict_all_button, msg="Run the model on the selected pictures", delay=delay)
+        ToolTip(self.clear_button, msg="Remove all images from the slideshow", delay=delay)
         ToolTip(self.show_info, msg="More Information", delay=delay)
-        ToolTip(self.excel_window_button, msg="Opens Excel Settings", delay=delay)
+        ToolTip(self.excel_window_button, msg="Opens excel settings", delay=delay)
         
 
     '''
