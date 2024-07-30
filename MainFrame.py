@@ -175,7 +175,17 @@ class MainFrame(ttk.Frame):
 
     def select_files(self):
         files = filedialog.askopenfilenames(initialdir='/home/max/development/stardist/data')
-        self.image_files.extend(files)
+        file_list = []
+        for image in files:
+            file_name_split = image.split('.')
+            if file_name_split[-1] != 'tif' and file_name_split[-1] != 'tiff' and file_name_split[-1] != 'png' and file_name_split[-1] != 'jpg' and file_name_split[-1] != 'jpeg' and file_name_split[-1] != 'gif' and file_name_split[-1] != 'bmp' and file_name_split[-1] != 'npy' and file_name_split[-1] != 'npz' and file_name_split[-1] != 'heic':
+                answer = messagebox.askyesno('Warning', f'A selected file is not a .tif, .tiff, .png, .jpg, .jpeg, .gif, .bmp, .npy, .npz, or .heic file.\n Would you like to remove the file and continue?\n Select no to abort the action\n your file type is {file_name_split[-1]}')
+                if answer == True:
+                    break
+                else:
+                    return
+            file_list.append(image)
+        self.image_files.extend(file_list)
         self.predictions.image_files = self.image_files
         if self.image_files:
             self.slideshow.update_image()
