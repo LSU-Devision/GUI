@@ -169,6 +169,12 @@ class ExcelEditor:
                     edited_prediction_list.append(prediction[index])
                 # append the list to the worksheet
                 ws.append(edited_prediction_list)
+                # update the internal excel label with the substring
+                self.get_substring()
+                # update the Mainframe excel label
+                self.master.excel_label_title.config(text=self.get_excel_label())
+
+
         else:
             for prediction in self.master.predictions.predictions_data:
                 # create a list for data manipulation, tuple's are immutable (not changable)
