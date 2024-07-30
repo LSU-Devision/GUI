@@ -187,15 +187,21 @@ class ExcelEditor:
         try:
             # save the workbook
             wb.save(self.get_excel_file())
+            # show success
+            messagebox.showinfo("Success", "Successfully exported predictions to excel")
         # if the file is read only
         except PermissionError:
             # show an error
             messagebox.showerror("Permissions Error", "Excel file may be open, or you may have Read only attributes, please close the excel file or check permissions")
+            # exit the method
+            return
         # boolean check for clearing variables
         self.master.is_data_cleared = False
+        # boolean check for automatic prediction clearing
         if self.master.settings.get_automatic_prediction_clear_data():
             # clear the predictions
             self.master.predictions.predictions_data.clear()
+            # set the boolean check to True
             self.master.is_data_cleared = True
 
 
