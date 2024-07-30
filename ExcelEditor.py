@@ -104,6 +104,10 @@ class ExcelEditor:
     description: export the predictions to excel
     '''
     def export_predictions_to_excel(self):
+        if self.master.is_data_cleared == False:
+            no_cancel = messagebox.askokcancel(title='Data Not Cleared',message='Data has not been cleared since last export. Do you want to continue?',parent=self.master)
+            if no_cancel == False:
+                return
         # set the current time with a format
         current_time = datetime.datetime.now().strftime("%m-%d-%Y_%I-%M-%S %p")
         # check to see if the excel file exists
@@ -180,11 +184,14 @@ class ExcelEditor:
         # if the file is read only
         except PermissionError:
             # show an error
-            messagebox.showerror("Permissions Error", "Excel file may have Read only attribute, please check permissions")
+            messagebox.showerror("Permissions Error", "Excel file may be open, or you may have Read only attributes, please close the excel file or check permissions")
         # boolean check for clearing variables
+        self.master.is_data_cleared = False
         if self.master.settings.get_automatic_prediction_clear_data():
             # clear the predictions
             self.master.predictions.predictions_data.clear()
+            self.master.is_data_cleared = True
+
 
     def get_excel_index_column_index(self):
         return self.excel_index_value

@@ -74,7 +74,7 @@ class MainFrame(ttk.Frame):
 
         # Create an instance of the Predictions class
         self.predictions = Predictions(self.image_files, self, self.model, self)
-
+        self.is_data_cleared = True
         self.create_display()
         self.load_display()
 
@@ -224,6 +224,7 @@ class MainFrame(ttk.Frame):
         if self.settings.get_clear_data_on_clear_images():
             self.predictions.predictions_data.clear()
             self.predictions_data.clear()
+            self.is_data_cleared = True
         #
         messagebox.showinfo("Devision", "Images Cleared!")
     '''
@@ -242,6 +243,7 @@ class MainFrame(ttk.Frame):
 
     def clear_predicted_data(self):
         self.predictions.predictions_data.clear()
+        self.is_data_cleared = True
 
 
     '''
