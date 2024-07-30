@@ -161,7 +161,7 @@ class ExcelEditor:
                 edited_prediction_list.clear()
                 # iterate over the index values
                 for index in index_list:
-                    # append the index value from predictins to the list
+                    # append the index value from predictions to the list
                     edited_prediction_list.append(prediction[index])
                 # append the list to the worksheet
                 ws.append(edited_prediction_list)
