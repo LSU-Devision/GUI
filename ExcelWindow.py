@@ -127,15 +127,18 @@ class ExcelWindow(tk.Toplevel):
         # bind the event to the save excel column button
         # self.save_excel_column_button.bind("<Button-1>",lambda event: messagebox.showinfo("Saved", "Excel Column Saved"))
 
+    #create tooltips for each button
     def create_tooltips(self):
         # time, in s, it takes for the tooltip to appear
         delay = 0.5 
 
-        #create tooltips for each button
+        #Tooltips for basic settings
         ToolTip(self.export_excel_button, msg="Export predictions to excel", delay=delay)
         ToolTip(self.load_excel_by_selection_button, msg="Choose an excel file to save predictions on", delay=delay)
         ToolTip(self.clear_prediction_data_button, msg="Clear predictions from program", delay=delay)
         ToolTip(self.clear_excel_file_button, msg="Remove loaded excel file", delay=delay)
+
+        #Tooltips for avanced settings
         #ToolTip(self.excel_index_column_toggle, msg=" ", delay=delay)
         #ToolTip(self.excel_date_column_toggle, msg=" ", delay=delay)
         #ToolTip(self.excel_time_column_toggle, msg=" ", delay=delay)
