@@ -139,12 +139,12 @@ class ExcelWindow(tk.Toplevel):
         ToolTip(self.clear_excel_file_button, msg="Remove loaded excel file", delay=delay)
 
         #Tooltips for avanced settings
-        #ToolTip(self.excel_index_column_toggle, msg=" ", delay=delay)
-        #ToolTip(self.excel_date_column_toggle, msg=" ", delay=delay)
-        #ToolTip(self.excel_time_column_toggle, msg=" ", delay=delay)
-        #ToolTip(self.excel_file_name_column_toggle, msg=" ", delay=delay)
-        #ToolTip(self.excel_total_count_column_toggle, msg=" ", delay=delay)
-        #ToolTip(self.save_excel_column_button, msg=" ", delay=delay)
+        ToolTip(self.excel_index_column_toggle, msg="Picture index", delay=delay)
+        ToolTip(self.excel_date_column_toggle, msg="Date when picture was taken", delay=delay)
+        ToolTip(self.excel_time_column_toggle, msg="Time when picture was taken", delay=delay)
+        ToolTip(self.excel_file_name_column_toggle, msg="Name of excel file", delay=delay)
+        ToolTip(self.excel_total_count_column_toggle, msg="Total predicted count", delay=delay)
+        ToolTip(self.save_excel_column_button, msg="Save the order of the columns in the exported excel file \nIt will not save if more than one column has the same number \nIf 'None' is selected, the column will not be included", delay=delay)
     
     def load_page(self):
         # add the export excel button to the pop up window
