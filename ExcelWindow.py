@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
 from tkinter import filedialog
+from tktooltip import ToolTip
 
 '''
 Class: ExcelWindow
@@ -125,6 +126,23 @@ class ExcelWindow(tk.Toplevel):
         self.save_excel_column_button = ttk.Button(self.tab2, text='Save Excel Column', command=self.save_excel_columns)
         # bind the event to the save excel column button
         # self.save_excel_column_button.bind("<Button-1>",lambda event: messagebox.showinfo("Saved", "Excel Column Saved"))
+
+    def create_tooltips(self):
+        # time, in s, it takes for the tooltip to appear
+        delay = 0.5 
+
+        #create tooltips for each button
+        ToolTip(self.export_excel_button, msg=" ", delay=delay)
+        ToolTip(self.load_excel_by_selection_button, msg=" ", delay=delay)
+        ToolTip(self.clear_prediction_data_button, msg=" ", delay=delay)
+        ToolTip(self.clear_excel_file_button, msg=" ", delay=delay)
+        ToolTip(self.excel_index_column_toggle, msg=" ", delay=delay)
+        ToolTip(self.excel_date_column_toggle, msg=" ", delay=delay)
+        ToolTip(self.excel_time_column_toggle, msg=" ", delay=delay)
+        ToolTip(self.excel_file_name_column_toggle, msg=" ", delay=delay)
+        ToolTip(self.excel_total_count_column_toggle, msg=" ", delay=delay)
+        ToolTip(self.save_excel_column_button, msg=" ", delay=delay)
+    
     def load_page(self):
         # add the export excel button to the pop up window
         self.export_excel_button.grid(row=1, column=1, pady=15, padx=15)
@@ -191,6 +209,8 @@ class ExcelWindow(tk.Toplevel):
     def run(self):
         # create the page
         self.create_page()
+        # create tooltips
+        self.create_tooltips()
         # load the page
         self.load_page()
         # sets the boolean to true to prevent duplicates of the window

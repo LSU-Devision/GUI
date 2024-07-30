@@ -15,6 +15,7 @@ import ExcelEditor as excel_editor
 from SettingsWindow import SettingsWindow
 from Predictions import Predictions
 from ExcelWindow import ExcelWindow
+
 '''
 Class Main Frame
 Author: Max
@@ -123,7 +124,17 @@ class MainFrame(ttk.Frame):
         # self.estimated_time_label = ttk.Label(self, text='Estimated time remaining: N/A')
 
     def create_tooltips(self):
-        ToolTip(self.select_files_button, msg="Select Your Pictures to Predict", delay=0.5)
+        # time, in s, it takes for the tooltip to appear
+        delay = 0.5 
+
+        #create tooltips for each button
+        ToolTip(self.select_files_button, msg="Select Pictures", delay=delay)
+        ToolTip(self.select_model_button, msg="Select Prediction Model", delay=delay)
+        ToolTip(self.predict_all_button, msg="Run the Model on the Selected Pictures", delay=delay)
+        ToolTip(self.clear_button, msg="Remove All Images from the Slideshow", delay=delay)
+        ToolTip(self.show_info, msg="More Information", delay=delay)
+        ToolTip(self.excel_window_button, msg="Opens Excel Settings", delay=delay)
+        
 
     '''
     Author: Alex Mensen-Johnson

@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+from tktooltip import ToolTip
 import Utilities as utils
 
 '''
@@ -78,6 +79,17 @@ class SettingsWindow(tk.Toplevel):
         self.default_settings_button = ttk.Button(self, text='Reset To Default Settings',command=self.reset_settings)
         # future button to eliminate duplicate windows
         self.protocol("WM_DELETE_WINDOW", lambda: self.close_window())
+
+    def create_tooltips(self):
+        # time, in s, it takes for the tooltip to appear
+        delay = 0.5 
+
+        #create tooltips for each button
+        ToolTip(self.automatic_excel_export, msg=" ", delay=delay)
+        ToolTip(self.automatic_prediction_data_clear, msg=" ", delay=delay)
+        ToolTip(self.clear_data_on_clear_images_button, msg=" ", delay=delay)
+        ToolTip(self.save_images_output_button, msg=" ", delay=delay)
+        ToolTip(self.default_settings_button, msg=" ", delay=delay)
 
     '''
     method: load page
@@ -209,6 +221,8 @@ class SettingsWindow(tk.Toplevel):
     def run(self):
         # create the page
         self.create_page()
+        # create tooltips
+        self.create_tooltips()
         # load the page
         self.load_page()
         # set boolean to True to disable a new window
