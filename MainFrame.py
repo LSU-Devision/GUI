@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
+from tktooltip import ToolTip
 import tensorflow as tf
 import os.path
 from stardist.models import StarDist2D
@@ -14,6 +15,7 @@ import ExcelEditor as excel_editor
 from SettingsWindow import SettingsWindow
 from Predictions import Predictions
 from ExcelWindow import ExcelWindow
+
 '''
 Class Main Frame
 Author: Max
@@ -76,6 +78,7 @@ class MainFrame(ttk.Frame):
         self.predictions = Predictions(self.image_files, self, self.model, self)
         self.is_data_cleared = True
         self.create_display()
+        self.create_tooltips()
         self.load_display()
 
     '''
@@ -119,6 +122,19 @@ class MainFrame(ttk.Frame):
         # self.progress_bar = ttk.Progressbar(self, orient='horizontal', mode='determinate', length=300)
         # self.predicted_images_label = ttk.Label(self, text='Predicted 0/0 images')
         # self.estimated_time_label = ttk.Label(self, text='Estimated time remaining: N/A')
+
+    def create_tooltips(self):
+        # time, in s, it takes for the tooltip to appear
+        delay = 0.5 
+
+        #create tooltips for each button
+        ToolTip(self.select_files_button, msg="Select pictures", delay=delay)
+        ToolTip(self.select_model_button, msg="Select prediction model", delay=delay)
+        ToolTip(self.predict_all_button, msg="Run the model on the selected pictures", delay=delay)
+        ToolTip(self.clear_button, msg="Remove all images from the slideshow", delay=delay)
+        ToolTip(self.show_info, msg="More Information", delay=delay)
+        ToolTip(self.excel_window_button, msg="Opens excel settings", delay=delay)
+        
 
     '''
     Author: Alex Mensen-Johnson

@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
 from tkinter import filedialog
+from tktooltip import ToolTip
 
 '''
 Class: ExcelWindow
@@ -125,6 +126,26 @@ class ExcelWindow(tk.Toplevel):
         self.save_excel_column_button = ttk.Button(self.tab2, text='Save Excel Column', command=self.save_excel_columns)
         # bind the event to the save excel column button
         # self.save_excel_column_button.bind("<Button-1>",lambda event: messagebox.showinfo("Saved", "Excel Column Saved"))
+
+    #create tooltips for each button
+    def create_tooltips(self):
+        # time, in s, it takes for the tooltip to appear
+        delay = 0.5 
+
+        #Tooltips for basic settings
+        ToolTip(self.export_excel_button, msg="Export predictions to excel", delay=delay)
+        ToolTip(self.load_excel_by_selection_button, msg="Choose an excel file to save predictions on", delay=delay)
+        ToolTip(self.clear_prediction_data_button, msg="Clear predictions from program", delay=delay)
+        ToolTip(self.clear_excel_file_button, msg="Remove loaded excel file", delay=delay)
+
+        #Tooltips for avanced settings
+        ToolTip(self.excel_index_column_toggle, msg="Picture index", delay=delay)
+        ToolTip(self.excel_date_column_toggle, msg="Date when picture was taken", delay=delay)
+        ToolTip(self.excel_time_column_toggle, msg="Time when picture was taken", delay=delay)
+        ToolTip(self.excel_file_name_column_toggle, msg="Name of excel file", delay=delay)
+        ToolTip(self.excel_total_count_column_toggle, msg="Total predicted count", delay=delay)
+        ToolTip(self.save_excel_column_button, msg="Save the order of the columns in the exported excel file \nIt will not save if more than one column has the same number \nIf 'None' is selected, the column will not be included", delay=delay)
+    
     def load_page(self):
         # add the export excel button to the pop up window
         self.export_excel_button.grid(row=1, column=1, pady=15, padx=15)
@@ -199,6 +220,8 @@ class ExcelWindow(tk.Toplevel):
     def run(self):
         # create the page
         self.create_page()
+        # create tooltips
+        self.create_tooltips()
         # load the page
         self.load_page()
         # sets the boolean to true to prevent duplicates of the window
