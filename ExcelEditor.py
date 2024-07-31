@@ -104,6 +104,7 @@ class ExcelEditor:
     description: export the predictions to excel
     '''
     def export_predictions_to_excel(self):
+        re_order_settings = False
         if self.master.is_data_cleared == False:
             no_cancel = messagebox.askokcancel(title='Data Not Cleared',message='Data has not been cleared since last export. Do you want to continue?',parent=self.master)
             if no_cancel == False:
@@ -176,13 +177,61 @@ class ExcelEditor:
 
 
         else:
-            for prediction in self.master.predictions.predictions_data:
-                # create a list for data manipulation, tuple's are immutable (not changable)
-                prediction_list = list(prediction)
-                # update the index values to reflect the values on the sheet
-                prediction_list[0] = prediction_list[0] + last_index_value
-                # append the list to the worksheet
-                ws.append(prediction_list)
+            possible_headers = ['Index', 'Date', 'Time', 'File Name', 'Total Count']
+            # get the headers from the excel file
+            excel_header_list = []
+            for cell in ws[1]:
+                if cell.value in possible_headers:
+                    excel_header_list.append(cell.value)
+                else:
+                    messagebox.showerror("Error", f"Invalid headers in excel file. This is the invalid header {cell.value}")
+                    return
+            if len(excel_header_list) > 5:
+                messagebox.showerror("Error", "Headers in excel file are greater than 5. This is not supported.")
+                return
+            if len(excel_header_list) != len(set(excel_header_list)):
+                messagebox.showerror("Error", "Headers in excel file are not unique. This is not supported.")
+                return
+            order_check = True
+            current_header_list = self.get_excel_headers()
+            index = 0
+            for header in excel_header_list:
+                if header != current_header_list[index]:
+                    order_check = False
+                    break
+                else:
+                    order_check = True
+                index += 1
+            if order_check is False:
+                re_order_settings = messagebox.askyesno("Notice", "Headers in excel file are not in the correct order. Would you like to reorder the settings to match the order in the excel file?")
+                excel_header_index = self.get_headers_index(excel_header_list)
+                edited_excel_prediction_list = []
+                for prediction in self.master.predictions.predictions_data:
+                    edited_excel_prediction_list.clear()
+                    for index in excel_header_index:
+                        edited_excel_prediction_list.append(prediction[index])
+                    ws.append(edited_excel_prediction_list)
+            else:
+                for prediction in self.master.predictions.predictions_data:
+                    # create a list for data manipulation, tuple's are immutable (not changable)
+                    prediction_list = list(prediction)
+                    # update the index values to reflect the values on the sheet
+                    prediction_list[0] = prediction_list[0] = prediction_list[0] + last_index_value
+                    # append the list to the worksheet
+                    ws.append(prediction_list)
+            if re_order_settings is True:
+                header_dict = {}
+                for header in possible_headers:
+                    try:
+                        header_dict[header] = excel_header_list.index(header)
+                    except ValueError:
+                        header_dict[header] = 'None'
+                self.excel_index_value = header_dict['Index']
+                self.excel_date_value = header_dict['Date']
+                self.excel_time_value = header_dict['Time']
+                self.excel_file_name_value = header_dict['File Name']
+                self.excel_total_count_value = header_dict['Total Count']
+                self.save_excel_settings()
         # try statement to save the workbook
         try:
             # save the workbook
@@ -203,6 +252,7 @@ class ExcelEditor:
             self.master.predictions.predictions_data.clear()
             # set the boolean check to True
             self.master.is_data_cleared = True
+        return re_order_settings
 
 
     def get_excel_index_column_index(self):
@@ -295,11 +345,12 @@ class ExcelEditor:
     method: get_headers_index
     description: get the index values of the headers
     '''
-    def get_headers_index(self):
+    def get_headers_index(self,header_list=None):
         # create a list for the index values
         index_list = []
         # get the header list
-        header_list = self.get_excel_headers()
+        if header_list is None:
+            header_list = self.get_excel_headers()
         # iterate over the header list
         for header in header_list:
             # if the header is Index

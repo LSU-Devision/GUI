@@ -237,4 +237,14 @@ class ExcelWindow(tk.Toplevel):
             messagebox.showinfo('Success', 'Excel Columns Saved')
         else:
             messagebox.showerror('Error', 'Excel Columns have the same column value, cannot save')
+            return False
 
+
+    def export_excel_wrapper(self):
+        check = self.master.excel_editor.export_predictions_to_excel()
+        if check is True:
+            self.excel_index_column_dropdown.set(self.master.excel_editor.get_excel_index_column_index())
+            self.excel_date_column_dropdown.set(self.master.excel_editor.get_excel_date_column_index())
+            self.excel_time_column_dropdown.set(self.master.excel_editor.get_excel_time_column_index())
+            self.excel_file_name_column_dropdown.set(self.master.excel_editor.get_excel_file_name_column_index())
+            self.excel_total_count_column_dropdown.set(self.master.excel_editor.get_excel_total_count_column_index())
