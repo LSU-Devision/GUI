@@ -42,7 +42,6 @@ class Predictions:
 
     def get_model_classes(self):
         config_file_path = f"{self.mainframe.model_path}/config.json"
-        print(config_file_path)
         with open(resource_path(config_file_path), 'r') as file:
             config_data = json.load(file)
             n_classes = config_data.get('n_classes')
@@ -50,7 +49,6 @@ class Predictions:
     
     def get_model_channels(self):
         config_file_path = f"{self.mainframe.model_path}/config.json"
-        print(config_file_path)
         with open(resource_path(config_file_path), 'r') as file:
             config_data = json.load(file)
             n_channel = config_data.get('n_channel_in')
@@ -125,60 +123,66 @@ class Predictions:
         self.predictions_data.append((self.predict_index, date, time, os.path.basename(image_path), len(results['points'])))
         self.predict_index += 1
 
-        # Extract counts and key/value pairs from the labels image
-        unique_labels, counts = np.unique(labels, return_counts=True)
-        label_counts = dict(zip(unique_labels, counts))
+        if self.settings.get_save_images_output():
+            # Extract counts and key/value pairs from the labels image
+            unique_labels, counts = np.unique(labels, return_counts=True)
+            label_counts = dict(zip(unique_labels, counts))
 
-        # Remove the background label (assumed to be 0)
-        if 0 in label_counts:
-            del label_counts[0]
+            # Remove the background label (assumed to be 0)
+            if 0 in label_counts:
+                del label_counts[0]
 
-        # Extract classes if available
-        cls_dict = self.class_from_res(results)
+            # Extract classes if available
+            cls_dict = self.class_from_res(results)
 
-        class_counts = {}
-        if cls_dict:
-            for key, value in cls_dict.items():
-                if value == 0:
+            class_counts = {}
+            if cls_dict:
+                for key, value in cls_dict.items():
+                    if value == 0:
+                        continue
+                    if value in class_counts:
+                        class_counts[value] += 1
+                    else:
+                        class_counts[value] = 1
+
+            # Create the class count string for the title in ascending order
+            class_counts_str = ", ".join(f"Class {k}: {v}" for k, v in sorted(class_counts.items()))
+
+            # Calculate the number of predicted objects based on the class counts
+            num_objects = sum(class_counts.values())
+
+
+            # Initialize a plot of specified size
+            fig, ax = plt.subplots(figsize=(13, 10))
+            ax.imshow(original)
+            #ax.imshow(labels, cmap=self.lbl_cmap, alpha=0.25)
+
+            # Find contours for each label and plot them with the respective class color
+            for region in np.unique(labels):
+                if region == 0:
                     continue
-                if value in class_counts:
-                    class_counts[value] += 1
-                else:
-                    class_counts[value] = 1
+                class_id = cls_dict.get(region, 0)
+                color = self.colors[class_id % len(self.colors)]  # Select color based on class ID
+                contours = find_contours(labels == region, 0.5)
+                for contour in contours:
+                    ax.plot(contour[:, 1], contour[:, 0], linewidth=2, color=color)
+    
+            ax.set_title(f"Predicted Objects: {num_objects}\n({class_counts_str})", fontsize=16)
+            ax.axis("off")
 
-        # Create the class count string for the title in ascending order
-        class_counts_str = ", ".join(f"Class {k}: {v}" for k, v in sorted(class_counts.items()))
+            # Adjust subplot parameters to remove extra whitespace
+            plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
+            plt.tight_layout(pad=0)
 
-        # Calculate the number of predicted objects based on the class counts
-        num_objects = sum(class_counts.values())
+            save_path = os.path.join('output', f'prediction_{os.path.basename(image_path)}')
+            if not os.path.exists(os.path.dirname(save_path)):
+                os.makedirs(os.path.dirname(save_path))
+            fig.savefig(save_path, dpi=500, bbox_inches='tight', pad_inches=0)
+            plt.close(fig)
 
-        # Initialize a plot of specified size
-        fig, ax = plt.subplots(figsize=(13, 10))
-        ax.imshow(original)
-        #ax.imshow(labels, cmap=self.lbl_cmap, alpha=0.25)
-
-        # Find contours for each label and plot them with the respective class color
-        for region in np.unique(labels):
-            if region == 0:
-                continue
-            class_id = cls_dict.get(region, 0)
-            color = self.colors[class_id % len(self.colors)]  # Select color based on class ID
-            contours = find_contours(labels == region, 0.5)
-            for contour in contours:
-                ax.plot(contour[:, 1], contour[:, 0], linewidth=2, color=color)
-   
-        ax.set_title(f"Predicted Objects: {num_objects}\n({class_counts_str})", fontsize=16)
-        ax.axis("off")
-
-        # Adjust subplot parameters to remove extra whitespace
-        plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
-        plt.tight_layout(pad=0)
-
-        save_path = os.path.join('output', f'prediction_{os.path.basename(image_path)}')
-        if not os.path.exists(os.path.dirname(save_path)):
-            os.makedirs(os.path.dirname(save_path))
-        fig.savefig(save_path, dpi=500, bbox_inches='tight', pad_inches=0)
-        plt.close(fig)
+            self.prediction_files[image_path] = (save_path, len(results['points']))
+        else:
+            self.prediction_files[image_path] = (None, len(results['points']))
 
     def predict_all(self):
         threading.Thread(target=self.thread_predict_all).start()
