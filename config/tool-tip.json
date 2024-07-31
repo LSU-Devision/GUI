@@ -1,0 +1,29 @@
+{
+  "main_frame": {
+    "select_model": "Select a folder containing the model for predictions.",
+    "select_files": "Select the images you want to predict. You can choose multiple files at once. Only image file types will be accepted",
+    "predict_all": "Predict all the images in the slideshow using the model selected.",
+    "clear_images": "Clear all images from the slide show. If clear data on clear images setting is on, then this will clear the predicted data as well.",
+    "help": "Opens the help page which contains information about the program.",
+    "excel window": "Opens the excel window which contains basic functions for exporting and loading excel files, as well as advanced settings for column ordering.",
+    "settings_window": "Opens the settings page which contains customizable settings for the program."
+  },
+  "excel_window": {
+    "export_to_excel": "Exports the data in the predictions to a new excel file or appends to an existing excel file. If a new file is created than the program will load the new file into the program.",
+    "load_excel": "Loads an excel file into the program to append predictions to it. Export to excel will not create a new file if a file is loaded into the program.",
+    "clear_predictions": "Manually clears all predictions from the program.",
+    "clear_excel_file": "Removes the loaded excel file from the program.",
+    "excel_index_column": "Sets the order of the index column in the excel file. If 'None' is selected, the column will not be included.",
+    "excel_date_column": "Sets the order of the date column in the excel file. If 'None' is selected, the column will not be included.",
+    "excel_time_column": "Sets the order of the time column in the excel file. If 'None' is selected, the column will not be included.",
+    "excel_file_name_column": "Sets the order of the file name column in the excel file. If 'None' is selected, the column will not be included.",
+    "excel_total_count_column": "Sets the order of the total count column in the excel file. If 'None' is selected, the column will not be included."
+  },
+  "settings": {
+    "automatic_export_to_excel": "If turned on, data will automatically export to a new or current excel file after the predict all button is clicked. All settings autosave on toggle",
+    "automatic_clear_data_on_predict": "If turned on, data will automatically be cleared after the predict all button is pressed. All settings autosave on toggle",
+    "clear_data_when_clearing_images": "If turned on, predictions will be cleared after the clear images button is clicked. All settings autosave on toggle",
+    "save_images_to_output" : "If turned on, images will be saved to the output folder after the predict all button is clicked. Loading the program with this setting on will enable two screens instead of one. Predictions will be twice as fast with this button off. All settings autosave on toggle",
+    "reset_to_default_settings" : "Resets all settings to default."
+  }
+}

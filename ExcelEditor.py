@@ -104,6 +104,10 @@ class ExcelEditor:
     description: export the predictions to excel
     '''
     def export_predictions_to_excel(self):
+        if self.master.is_data_cleared == False:
+            no_cancel = messagebox.askokcancel(title='Data Not Cleared',message='Data has not been cleared since last export. Do you want to continue?',parent=self.master)
+            if no_cancel == False:
+                return
         # set the current time with a format
         current_time = datetime.datetime.now().strftime("%m-%d-%Y_%I-%M-%S %p")
         # check to see if the excel file exists
@@ -130,6 +134,7 @@ class ExcelEditor:
             ws = wb.active
             # set the boolean variable to false
             does_file_exist = False
+
         # create a boolean variable to check if the index column exists
         has_index_column = 'Index' in [cell.value for cell in ws['A']]
         # set a value for the last index value
@@ -160,10 +165,16 @@ class ExcelEditor:
                 edited_prediction_list.clear()
                 # iterate over the index values
                 for index in index_list:
-                    # append the index value from predictins to the list
+                    # append the index value from predictions to the list
                     edited_prediction_list.append(prediction[index])
                 # append the list to the worksheet
                 ws.append(edited_prediction_list)
+                # update the internal excel label with the substring
+                self.get_substring()
+                # update the Mainframe excel label
+                self.master.excel_label_title.config(text=self.get_excel_label())
+
+
         else:
             for prediction in self.master.predictions.predictions_data:
                 # create a list for data manipulation, tuple's are immutable (not changable)
@@ -176,14 +187,23 @@ class ExcelEditor:
         try:
             # save the workbook
             wb.save(self.get_excel_file())
+            # show success
+            messagebox.showinfo("Success", "Successfully exported predictions to excel")
         # if the file is read only
         except PermissionError:
             # show an error
-            messagebox.showerror("Permissions Error", "Excel file may have Read only attribute, please check permissions")
+            messagebox.showerror("Permissions Error", "Excel file may be open, or you may have Read only attributes, please close the excel file or check permissions")
+            # exit the method
+            return
         # boolean check for clearing variables
+        self.master.is_data_cleared = False
+        # boolean check for automatic prediction clearing
         if self.master.settings.get_automatic_prediction_clear_data():
             # clear the predictions
             self.master.predictions.predictions_data.clear()
+            # set the boolean check to True
+            self.master.is_data_cleared = True
+
 
     def get_excel_index_column_index(self):
         return self.excel_index_value

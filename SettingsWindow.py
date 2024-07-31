@@ -1,10 +1,11 @@
 import tkinter as tk
 from tkinter import ttk
+from tktooltip import ToolTip
 import Utilities as utils
 
 '''
 Class SettingsWindow
-Contributors: Skylar Wilson, Alex Mensen-Johnson
+Contributors: Skylar Wilson, Alex Mensen-Johnson, Sunella Ramnath
 Class: Settings Window
 Description: Settings Window for the main frame
 Methods:
@@ -61,24 +62,33 @@ class SettingsWindow(tk.Toplevel):
         # create the automatic excel export label
         self.automatic_excel_export_label = ttk.Label(self, text=utils.boolean_text_conversion(self.settings.get_automatic_excel_export()), font=50)
         # create the automatic excel export button
-        self.automatic_excel_export = ttk.Button(self, text='Automatic Excel Export', command=self.toggle_automatic_excel_export)
+        self.automatic_excel_export = ttk.Button(self, text='Automatic Export To Excel', command= lambda : self.toggle_label('self.settings.automatic_excel_export',self.automatic_excel_export_label))
         # create the automatic prediction data clear label
         self.automatic_prediction_data_clear_label = ttk.Label(self,text=utils.boolean_text_conversion(self.settings.get_automatic_prediction_clear_data()),font=50)
         # create the automatic prediction data clear button
-        self.automatic_prediction_data_clear = ttk.Button(self,text='Automatic Prediction Data Clear',command=self.toggle_automatic_prediction_data_clear)
+        self.automatic_prediction_data_clear = ttk.Button(self,text='Automatic Clear Data On Predict',command= lambda : self.toggle_label('self.settings.automatic_prediction_clear_data',self.automatic_prediction_data_clear_label))
         # create the clear data on clear images label
         self.clear_data_on_clear_images_label = ttk.Label(self, text=utils.boolean_text_conversion(self.settings.get_clear_data_on_clear_images()), font=50)
         # create the clear data on clear images button
-        self.clear_data_on_clear_images_button = ttk.Button(self, text='Clear Data on Clear Images',command=self.toggle_clear_data_on_clear_images)
+        self.clear_data_on_clear_images_button = ttk.Button(self, text='Clear Data When Clearing Images',command=lambda  : self.toggle_label('self.settings.clear_data_on_clear_images',self.clear_data_on_clear_images_label))
         # create the save images output label
         self.save_images_output_label = ttk.Label(self, text=utils.boolean_text_conversion(self.settings.get_save_images_output()), font=50)
         # create the save images output button
-        self.save_images_output_button = ttk.Button(self, text='Save images to Output',command=self.toggle_save_images_output)
+        self.save_images_output_button = ttk.Button(self, text='Save Images To Output',command= lambda : self.toggle_label('self.settings.save_images_output',self.save_images_output_label))
         # create the reset settings button
         self.default_settings_button = ttk.Button(self, text='Reset To Default Settings',command=self.reset_settings)
         # future button to eliminate duplicate windows
         self.protocol("WM_DELETE_WINDOW", lambda: self.close_window())
 
+
+    def button_dict(self):
+        return {
+            'automatic_export_to_excel': self.automatic_excel_export,
+            'automatic_clear_data_on_predict': self.automatic_prediction_data_clear,
+            'clear_data_when_clearing_images': self.clear_data_on_clear_images_button,
+            'save_images_to_output': self.save_images_output_button,
+            'reset_to_default_settings': self.default_settings_button
+        }
     '''
     method: load page
     creates the buttons and labels for the settings page and assigns the relative function
@@ -103,79 +113,9 @@ class SettingsWindow(tk.Toplevel):
         # sets the default settings button to the grid
         self.default_settings_button.grid(row=4, column=0, pady=15, padx=15)
 
-
-
-    '''
-    method: toggle automatic excel export
-    toggles the automatic excel export on and off
-    '''
-    def toggle_automatic_excel_export(self):
-        if self.settings.get_automatic_excel_export() == True:
-        # set the automatic excel export to false
-            self.settings.set_automatic_excel_export(False)
-            # set the automatic excel export label to off
-            self.automatic_excel_export_label.config(text='Off')
-        else:
-            # set the automatic excel export to true
-            self.settings.set_automatic_excel_export(True)
-            # set the automatic excel export label to on
-            self.automatic_excel_export_label.config(text='On')
-
-    '''
-    method: toggle automatic prediction data clear
-    toggles the automatic prediction data clear on and off
-    '''
-    def toggle_automatic_prediction_data_clear(self):
-        # toggle the automatic prediction data clear
-        if self.settings.get_automatic_prediction_clear_data() == True:
-            # set the automatic prediction data clear to false
-            self.settings.set_automatic_prediction_clear_data(False)
-            # set the automatic prediction data clear label to off
-            self.automatic_prediction_data_clear_label.config(text='Off')
-        else:
-            # set the automatic prediction data clear to true
-            self.settings.set_automatic_prediction_clear_data(True)
-            # set the automatic prediction data clear label to on
-            self.automatic_prediction_data_clear_label.config(text='On')
-
-    '''
-    method: toggle clear data on clear images
-    toggles the clear data on clear images on and off
-    '''
-    def toggle_clear_data_on_clear_images(self):
-        # toggle the clear data on clear images
-        if self.settings.get_clear_data_on_clear_images() == True:
-            # set the clear data on clear images to false
-            self.settings.set_clear_data_on_clear_images(False)
-            # set the clear data on clear images label to off
-            self.clear_data_on_clear_images_label.config(text='Off')
-        else:
-            # set the clear data on clear images to true
-            self.settings.set_clear_data_on_clear_images(True)
-            # set the clear data on clear images label to on
-            self.clear_data_on_clear_images_label.config(text='On')
-
     ####################################################
     # added save images toggle. reloads display for dynamic image and prediction frame
     # uses boolean values -skylar
-    '''
-    method: toggle save images output
-    toggles the save images output on and off
-    '''
-    def toggle_save_images_output(self):
-        # toggle the save images output
-        if self.settings.get_save_images_output() == True:
-            # set the save images output to false
-            self.settings.set_save_images_output(False)
-            # set the save images output label to off
-            self.save_images_output_label.config(text='Off')
-            # self.update_display()
-        else:
-            # set the save images output to true
-            self.settings.set_save_images_output(True)
-            # set the save images output label to on
-            self.save_images_output_label.config(text='On')
-            # self.update_display()
 
     '''
     method: reset settings
@@ -209,7 +149,35 @@ class SettingsWindow(tk.Toplevel):
     def run(self):
         # create the page
         self.create_page()
+        # create tooltips
+        utils.ToolTips(self.button_dict(),'settings',2)
         # load the page
         self.load_page()
         # set boolean to True to disable a new window
         self.master.is_settings_page_open = True
+
+    '''
+    method: toggle label
+    param: boolean_string: this represents the value you wish to pass, pass the boolean as a string with no parentheses
+    description: toggles a boolean value from the settings class
+    '''
+    def toggle_label(self,boolean_string,tk_label):
+        # split the boolean string by the dots
+        code_split_by_dots = boolean_string.split('.')
+        # construct the get code to run
+        get_code = f'{code_split_by_dots[0]}.{code_split_by_dots[1]}.get_{code_split_by_dots[2]}()'
+        # construct the set code to run
+        set_code = f'{code_split_by_dots[0]}.{code_split_by_dots[1]}.set_{code_split_by_dots[2]}'
+        # run the get code
+        if eval(get_code) == True:
+            # set the save images output to false
+            eval(f'{set_code}(False)')
+            # set the save images output label to off
+            tk_label.config(text='Off')
+        else:
+            # set the save images output to true
+            eval(f'{set_code}(True)')
+            # set the save images output label to on
+            tk_label.config(text='On')
+
+

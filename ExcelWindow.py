@@ -1,11 +1,11 @@
 import tkinter as tk
-from tkinter import ttk
-from tkinter import messagebox
-from tkinter import filedialog
+from tkinter import ttk, messagebox,filedialog
+from tktooltip import ToolTip
+import Utilities as utils
 
 '''
 Class: ExcelWindow
-Contributors: Alex Mensen-Johnson
+Contributors: Alex Mensen-Johnson, Sunella Ramnath
 Description: Class for the Excel Window
 Params:
     master = master class aka MainFrame
@@ -42,7 +42,7 @@ class ExcelWindow(tk.Toplevel):
         # set the position of the pop up window
         y = main_window_height // 2 - pop_up_window_height // 2  # center the pop-up window vertically
         # set the title of the pop up window
-        self.title('Excel Options')
+        self.title('Excel Window')
 
 
         # set the geometry of the pop up window
@@ -66,7 +66,7 @@ class ExcelWindow(tk.Toplevel):
         self.run()
     def create_page(self):
         # create the export excel button
-        self.export_excel_button = ttk.Button(self.tab1, text='Export Excel', command=self.master.excel_editor.export_predictions_to_excel)
+        self.export_excel_button = ttk.Button(self.tab1, text='Export to Excel', command=self.master.excel_editor.export_predictions_to_excel)
         # create the load excel by selection button
         self.load_excel_by_selection_button = ttk.Button(self.tab1, text='Load Excel', command=self.load_excel_by_selection)
         # create the clear predictions button
@@ -77,7 +77,7 @@ class ExcelWindow(tk.Toplevel):
         self.protocol("WM_DELETE_WINDOW", lambda: self.close_window())
 
         # create the excel index column
-        self.excel_index_column_toggle = ttk.Button(self.tab2, text='Excel Index Column')
+        self.excel_index_column_label = ttk.Label(self.tab2, text='Excel Index Column')
         # create the excel index column dropdown
         self.excel_index_column_dropdown = ttk.Combobox(self.tab2, state='readonly',values=['None', '1', '2', '3', '4', '5'])
         # set the excel index column dropdown to the current value
@@ -86,7 +86,7 @@ class ExcelWindow(tk.Toplevel):
         self.excel_index_column_dropdown.bind("<<ComboboxSelected>>", lambda event: self.excel_editor.set_excel_index_column_value(self.excel_index_column_dropdown.get()))
 
         # create the excel date column
-        self.excel_date_column_toggle = ttk.Button(self.tab2, text='Excel Date Column')
+        self.excel_date_column_label = ttk.Label(self.tab2, text='Excel Date Column')
         # create the excel date column dropdown
         self.excel_date_column_dropdown = ttk.Combobox(self.tab2, state='readonly',values=['None', '1', '2', '3', '4', '5'])
         # set the excel date column dropdown to the current value
@@ -95,7 +95,7 @@ class ExcelWindow(tk.Toplevel):
         self.excel_date_column_dropdown.bind("<<ComboboxSelected>>", lambda event: self.excel_editor.set_excel_date_column_value(self.excel_date_column_dropdown.get()))
 
         # create the excel time column
-        self.excel_time_column_toggle = ttk.Button(self.tab2, text='Excel Time Column')
+        self.excel_time_column_label = ttk.Label(self.tab2, text='Excel Time Column')
         # create the excel time column dropdown
         self.excel_time_column_dropdown = ttk.Combobox(self.tab2, state='readonly',values=['None', '1', '2', '3', '4', '5'])
         # set the excel time column dropdown to the current value
@@ -104,7 +104,7 @@ class ExcelWindow(tk.Toplevel):
         self.excel_time_column_dropdown.bind("<<ComboboxSelected>>", lambda event: self.excel_editor.set_excel_time_column_value(self.excel_time_column_dropdown.get()))
 
         # create the excel file name column
-        self.excel_file_name_column_toggle = ttk.Button(self.tab2, text='Excel File Name Column')
+        self.excel_file_name_column_label = ttk.Label(self.tab2, text='Excel File Name Column')
         # create the excel file name column dropdown
         self.excel_file_name_column_dropdown = ttk.Combobox(self.tab2, state='readonly',values=['None', '1', '2', '3', '4', '5'])
         # set the excel file name column dropdown to the current value
@@ -113,7 +113,7 @@ class ExcelWindow(tk.Toplevel):
         self.excel_file_name_column_dropdown.bind("<<ComboboxSelected>>", lambda event: self.excel_editor.set_excel_file_name_column_value(self.excel_file_name_column_dropdown.get()))
 
         # create the excel total count column
-        self.excel_total_count_column_toggle = ttk.Button(self.tab2, text='Excel Total Count Column')
+        self.excel_total_count_column_label = ttk.Label(self.tab2, text='Excel Total Count Column')
         # create the excel total count column dropdown
         self.excel_total_count_column_dropdown = ttk.Combobox(self.tab2, state='readonly',values=['None', '1', '2', '3', '4', '5'])
         # set the excel total count column dropdown to the current value
@@ -122,9 +122,22 @@ class ExcelWindow(tk.Toplevel):
         self.excel_total_count_column_dropdown.bind("<<ComboboxSelected>>", lambda event: self.excel_editor.set_excel_total_count_column_value(self.excel_total_count_column_dropdown.get()))
 
         # create the save excel column button
-        self.save_excel_column_button = ttk.Button(self.tab2, text='Save Excel Column', command=self.save_excel_columns)
-        # bind the event to the save excel column button
-        # self.save_excel_column_button.bind("<Button-1>",lambda event: messagebox.showinfo("Saved", "Excel Column Saved"))
+        self.save_excel_column_button = ttk.Button(self.tab2, text='Save Excel Column Order', command=self.save_excel_columns)
+
+
+    def button_dict(self):
+        return {
+            'export_to_excel': self.export_excel_button,
+            'load_excel': self.load_excel_by_selection_button,
+            'clear_predictions': self.clear_prediction_data_button,
+            'clear_excel_file': self.clear_excel_file_button,
+            'excel_index_column': self.excel_index_column_dropdown,
+            'excel_date_column': self.excel_date_column_dropdown,
+            'excel_time_column': self.excel_time_column_dropdown,
+            'excel_file_name_column': self.excel_file_name_column_dropdown,
+            'excel_total_count_column': self.excel_total_count_column_dropdown
+        }
+
     def load_page(self):
         # add the export excel button to the pop up window
         self.export_excel_button.grid(row=1, column=1, pady=15, padx=15)
@@ -135,19 +148,19 @@ class ExcelWindow(tk.Toplevel):
         # add the clear excel file button to the pop up window
         self.clear_excel_file_button.grid(row=2, column=2, pady=15, padx=15)
 
-        self.excel_index_column_toggle.grid(row=1, column=1, pady=15, padx=15)
+        self.excel_index_column_label.grid(row=1, column=1, pady=15, padx=15)
         self.excel_index_column_dropdown.grid(row=1, column=2, pady=15, padx=15)
 
-        self.excel_date_column_toggle.grid(row=2, column=1, pady=15, padx=15)
+        self.excel_date_column_label.grid(row=2, column=1, pady=15, padx=15)
         self.excel_date_column_dropdown.grid(row=2, column=2, pady=15, padx=15)
 
-        self.excel_time_column_toggle.grid(row=3, column=1, pady=15, padx=15)
+        self.excel_time_column_label.grid(row=3, column=1, pady=15, padx=15)
         self.excel_time_column_dropdown.grid(row=3, column=2, pady=15, padx=15)
 
-        self.excel_file_name_column_toggle.grid(row=4, column=1, pady=15, padx=15)
+        self.excel_file_name_column_label.grid(row=4, column=1, pady=15, padx=15)
         self.excel_file_name_column_dropdown.grid(row=4, column=2, pady=15, padx=15)
 
-        self.excel_total_count_column_toggle.grid(row=5, column=1, pady=15, padx=15)
+        self.excel_total_count_column_label.grid(row=5, column=1, pady=15, padx=15)
         self.excel_total_count_column_dropdown.grid(row=5, column=2, pady=15, padx=15)
 
         self.save_excel_column_button.grid(row=6, column=1, pady=15, padx=15)
@@ -171,6 +184,14 @@ class ExcelWindow(tk.Toplevel):
     def load_excel_by_selection(self):
         # opens the file dialog to select the excel file
         excel_file = filedialog.askopenfilename(initialdir='/home/max/development/stardist/data')
+        # split the excel file to check the extension
+        split_data = excel_file.split('.')
+        # check the extension
+        if split_data[-1] != 'xlsx' and split_data[-1] != 'xls' and split_data[-1] != 'csv':
+            # if the extension is not .xlsx, .xls, or .csv, show an error
+            messagebox.showerror("Incompatible File Extension", f"File must be .xlsx, .xls, or .csv, your file is .{split_data[-1]} ")
+            # return the function
+            return
         # set the excel file in the excel editor
         self.master.excel_editor.set_excel_file(excel_file)
         # create the substring for the excel file
@@ -191,6 +212,8 @@ class ExcelWindow(tk.Toplevel):
     def run(self):
         # create the page
         self.create_page()
+        # create tooltips
+        utils.ToolTips(self.button_dict(),'excel_window',2)
         # load the page
         self.load_page()
         # sets the boolean to true to prevent duplicates of the window

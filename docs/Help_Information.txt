@@ -14,9 +14,6 @@ The name of the files will be located at the top of the slideshow.
 After prediction, the predicted value will be displayed at the bottom of the slideshow.
 You can use the prev/next buttons to cycle through the files in the slideshow.
 
-Predict
-The predict button will predict the current file in the slideshow.
-
 Predict All
 Will predict all the files in the slideshow.
 
