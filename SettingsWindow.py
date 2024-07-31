@@ -5,7 +5,7 @@ import Utilities as utils
 
 '''
 Class SettingsWindow
-Contributors: Skylar Wilson, Alex Mensen-Johnson
+Contributors: Skylar Wilson, Alex Mensen-Johnson, Sunella Ramnath
 Class: Settings Window
 Description: Settings Window for the main frame
 Methods:
@@ -62,35 +62,33 @@ class SettingsWindow(tk.Toplevel):
         # create the automatic excel export label
         self.automatic_excel_export_label = ttk.Label(self, text=utils.boolean_text_conversion(self.settings.get_automatic_excel_export()), font=50)
         # create the automatic excel export button
-        self.automatic_excel_export = ttk.Button(self, text='Automatic Excel Export', command= lambda : self.toggle_label('self.settings.automatic_excel_export',self.automatic_excel_export_label))
+        self.automatic_excel_export = ttk.Button(self, text='Automatic Export To Excel', command= lambda : self.toggle_label('self.settings.automatic_excel_export',self.automatic_excel_export_label))
         # create the automatic prediction data clear label
         self.automatic_prediction_data_clear_label = ttk.Label(self,text=utils.boolean_text_conversion(self.settings.get_automatic_prediction_clear_data()),font=50)
         # create the automatic prediction data clear button
-        self.automatic_prediction_data_clear = ttk.Button(self,text='Automatic Prediction Data Clear',command= lambda : self.toggle_label('self.settings.automatic_prediction_clear_data',self.automatic_prediction_data_clear_label))
+        self.automatic_prediction_data_clear = ttk.Button(self,text='Automatic Clear Data On Predict',command= lambda : self.toggle_label('self.settings.automatic_prediction_clear_data',self.automatic_prediction_data_clear_label))
         # create the clear data on clear images label
         self.clear_data_on_clear_images_label = ttk.Label(self, text=utils.boolean_text_conversion(self.settings.get_clear_data_on_clear_images()), font=50)
         # create the clear data on clear images button
-        self.clear_data_on_clear_images_button = ttk.Button(self, text='Clear Data on Clear Images',command=lambda  : self.toggle_label('self.settings.clear_data_on_clear_images',self.clear_data_on_clear_images_label))
+        self.clear_data_on_clear_images_button = ttk.Button(self, text='Clear Data When Clearing Images',command=lambda  : self.toggle_label('self.settings.clear_data_on_clear_images',self.clear_data_on_clear_images_label))
         # create the save images output label
         self.save_images_output_label = ttk.Label(self, text=utils.boolean_text_conversion(self.settings.get_save_images_output()), font=50)
         # create the save images output button
-        self.save_images_output_button = ttk.Button(self, text='Save images to Output',command= lambda : self.toggle_label('self.settings.save_images_output',self.save_images_output_label))
+        self.save_images_output_button = ttk.Button(self, text='Save Images To Output',command= lambda : self.toggle_label('self.settings.save_images_output',self.save_images_output_label))
         # create the reset settings button
         self.default_settings_button = ttk.Button(self, text='Reset To Default Settings',command=self.reset_settings)
         # future button to eliminate duplicate windows
         self.protocol("WM_DELETE_WINDOW", lambda: self.close_window())
 
-    def create_tooltips(self):
-        # time, in s, it takes for the tooltip to appear
-        delay = 0.5 
 
-        #create tooltips for each button
-        ToolTip(self.automatic_excel_export, msg="Automatically save preictions to excel file", delay=delay)
-        ToolTip(self.automatic_prediction_data_clear, msg="Automatically clear prediction data when predictions are completed", delay=delay)
-        ToolTip(self.clear_data_on_clear_images_button, msg="Clear the prediction data when clearing images", delay=delay)
-        ToolTip(self.save_images_output_button, msg="Save predicted images to output folder \nShow predicted images in second slideshow frame", delay=delay)
-        ToolTip(self.default_settings_button, msg="Restore default settings", delay=delay)
-
+    def button_dict(self):
+        return {
+            'automatic_export_to_excel': self.automatic_excel_export,
+            'automatic_clear_data_on_predict': self.automatic_prediction_data_clear,
+            'clear_data_when_clearing_images': self.clear_data_on_clear_images_button,
+            'save_images_to_output': self.save_images_output_button,
+            'reset_to_default_settings': self.default_settings_button
+        }
     '''
     method: load page
     creates the buttons and labels for the settings page and assigns the relative function
@@ -152,7 +150,7 @@ class SettingsWindow(tk.Toplevel):
         # create the page
         self.create_page()
         # create tooltips
-        self.create_tooltips()
+        utils.ToolTips(self.button_dict(),'settings',2)
         # load the page
         self.load_page()
         # set boolean to True to disable a new window

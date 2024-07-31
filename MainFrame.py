@@ -15,11 +15,12 @@ import ExcelEditor as excel_editor
 from SettingsWindow import SettingsWindow
 from Predictions import Predictions
 from ExcelWindow import ExcelWindow
+import Utilities as utils
 
 '''
 Class Main Frame
 Author: Max
-Contributors: Skylar Wilson, Alex Mensen-Johnson
+Contributors: Skylar Wilson, Alex Mensen-Johnson, Sunella Ramnath
 Class: Main Frame
 Description: Main Frame of GUI, all sub frames will be loaded inside of this class
 Params:
@@ -50,35 +51,42 @@ class MainFrame(ttk.Frame):
         self.predictions_data = []
         # initialize lbl_cmap for random color map -skylar
         self.lbl_cmap = random_label_cmap()
+        # variable for the model
         self.model = None
+        # initialize the excel editor class
         self.excel_editor = excel_editor.ExcelEditor(master=self)
+        # set the excel file to none
         self.excel_editor.set_excel_file(None)
+        # set the excel label to none
         self.excel_editor.set_excel_label(None)
+        # initialize the excel label index
         self.excel_label_index = 0
+        # boolean checker to see if the excel window is open
         self.is_excel_save_page_open = False
+        # boolean checker to see if the settings window is open
         self.is_settings_page_open = False
         self.device = '/GPU:0' if tf.config.experimental.list_physical_devices('GPU') else '/CPU:0'
         self.progress_popup = None  # Initialize progress_popup to None
-
         # settings for automatic excel export
         # i made it so it can return a boolean value
         self.automatic_excel_setting = self.settings.get_automatic_excel_export()
         # print(self.automatic_excel_setting)
         self.predict_index = 1
-
-
         # settings for automatic prediction data clear
         self.automatic_prediction_data_clear_setting = self.settings.get_automatic_prediction_clear_data()
         # settings for clear data on clear images toggle
         self.clear_data_on_clear_images_setting = self.settings.get_clear_data_on_clear_images()
         # settings for save images output toggle -skylar,
         self.save_images_output_setting = self.settings.get_save_images_output()
-
         # Create an instance of the Predictions class
         self.predictions = Predictions(self.image_files, self, self.model, self)
+        # boolean checker to see if the data has been cleared
         self.is_data_cleared = True
+        # create all the buttons for the display
         self.create_display()
-        self.create_tooltips()
+        # add tooltips
+        utils.ToolTips(self.button_dict(),'main_frame',2)
+        # load the display
         self.load_display()
 
     '''
@@ -115,26 +123,21 @@ class MainFrame(ttk.Frame):
         self.settings_page_button = ttk.Button(self, text='Settings', command=lambda: self.open_settings_window())
 
 
-
-        # Create the progress bar
-        # Create a label to display progress of predicted images
-        # Create a label to display estimated time remaining -skylar
-        # self.progress_bar = ttk.Progressbar(self, orient='horizontal', mode='determinate', length=300)
-        # self.predicted_images_label = ttk.Label(self, text='Predicted 0/0 images')
-        # self.estimated_time_label = ttk.Label(self, text='Estimated time remaining: N/A')
-
-    def create_tooltips(self):
-        # time, in s, it takes for the tooltip to appear
-        delay = 0.5 
-
-        #create tooltips for each button
-        ToolTip(self.select_files_button, msg="Select pictures", delay=delay)
-        ToolTip(self.select_model_button, msg="Select prediction model", delay=delay)
-        ToolTip(self.predict_all_button, msg="Run the model on the selected pictures", delay=delay)
-        ToolTip(self.clear_button, msg="Remove all images from the slideshow", delay=delay)
-        ToolTip(self.show_info, msg="More Information", delay=delay)
-        ToolTip(self.excel_window_button, msg="Opens excel settings", delay=delay)
-        
+    '''
+    method: button_dict
+    Author: Alex Mensen-Johnson
+    returns a dictionary of all the buttons for the creation of tooltips
+    '''
+    def button_dict(self):
+        return {
+            'select_model': self.select_model_button,
+            'select_files': self.select_files_button,
+            'predict_all': self.predict_all_button,
+            'clear_images': self.clear_button,
+            'help': self.show_info,
+            'excel window': self.excel_window_button,
+            'settings_window': self.settings_page_button
+        }
 
     '''
     Author: Alex Mensen-Johnson
@@ -144,8 +147,8 @@ class MainFrame(ttk.Frame):
     def load_display(self):
         # using grid layout -skylar
         self.grid_rowconfigure(0, weight=0)
+        # using grid layout -skylar
         self.grid_columnconfigure(0, weight=1)
-
         # loads the model label into the frame
         self.model_label.grid(row=1, column=0, pady=5)
         # loads the select model button into the frame
