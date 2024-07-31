@@ -77,7 +77,7 @@ class ExcelWindow(tk.Toplevel):
         self.protocol("WM_DELETE_WINDOW", lambda: self.close_window())
 
         # create the excel index column
-        self.excel_index_column_toggle = ttk.Button(self.tab2, text='Excel Index Column')
+        self.excel_index_column_label = ttk.Label(self.tab2, text='Excel Index Column')
         # create the excel index column dropdown
         self.excel_index_column_dropdown = ttk.Combobox(self.tab2, state='readonly',values=['None', '1', '2', '3', '4', '5'])
         # set the excel index column dropdown to the current value
@@ -86,7 +86,7 @@ class ExcelWindow(tk.Toplevel):
         self.excel_index_column_dropdown.bind("<<ComboboxSelected>>", lambda event: self.excel_editor.set_excel_index_column_value(self.excel_index_column_dropdown.get()))
 
         # create the excel date column
-        self.excel_date_column_toggle = ttk.Button(self.tab2, text='Excel Date Column')
+        self.excel_date_column_label = ttk.Label(self.tab2, text='Excel Date Column')
         # create the excel date column dropdown
         self.excel_date_column_dropdown = ttk.Combobox(self.tab2, state='readonly',values=['None', '1', '2', '3', '4', '5'])
         # set the excel date column dropdown to the current value
@@ -95,7 +95,7 @@ class ExcelWindow(tk.Toplevel):
         self.excel_date_column_dropdown.bind("<<ComboboxSelected>>", lambda event: self.excel_editor.set_excel_date_column_value(self.excel_date_column_dropdown.get()))
 
         # create the excel time column
-        self.excel_time_column_toggle = ttk.Button(self.tab2, text='Excel Time Column')
+        self.excel_time_column_label = ttk.Label(self.tab2, text='Excel Time Column')
         # create the excel time column dropdown
         self.excel_time_column_dropdown = ttk.Combobox(self.tab2, state='readonly',values=['None', '1', '2', '3', '4', '5'])
         # set the excel time column dropdown to the current value
@@ -104,7 +104,7 @@ class ExcelWindow(tk.Toplevel):
         self.excel_time_column_dropdown.bind("<<ComboboxSelected>>", lambda event: self.excel_editor.set_excel_time_column_value(self.excel_time_column_dropdown.get()))
 
         # create the excel file name column
-        self.excel_file_name_column_toggle = ttk.Button(self.tab2, text='Excel File Name Column')
+        self.excel_file_name_column_label = ttk.Label(self.tab2, text='Excel File Name Column')
         # create the excel file name column dropdown
         self.excel_file_name_column_dropdown = ttk.Combobox(self.tab2, state='readonly',values=['None', '1', '2', '3', '4', '5'])
         # set the excel file name column dropdown to the current value
@@ -113,7 +113,7 @@ class ExcelWindow(tk.Toplevel):
         self.excel_file_name_column_dropdown.bind("<<ComboboxSelected>>", lambda event: self.excel_editor.set_excel_file_name_column_value(self.excel_file_name_column_dropdown.get()))
 
         # create the excel total count column
-        self.excel_total_count_column_toggle = ttk.Button(self.tab2, text='Excel Total Count Column')
+        self.excel_total_count_column_label = ttk.Label(self.tab2, text='Excel Total Count Column')
         # create the excel total count column dropdown
         self.excel_total_count_column_dropdown = ttk.Combobox(self.tab2, state='readonly',values=['None', '1', '2', '3', '4', '5'])
         # set the excel total count column dropdown to the current value
@@ -122,7 +122,7 @@ class ExcelWindow(tk.Toplevel):
         self.excel_total_count_column_dropdown.bind("<<ComboboxSelected>>", lambda event: self.excel_editor.set_excel_total_count_column_value(self.excel_total_count_column_dropdown.get()))
 
         # create the save excel column button
-        self.save_excel_column_button = ttk.Button(self.tab2, text='Save Excel Column', command=self.save_excel_columns)
+        self.save_excel_column_button = ttk.Button(self.tab2, text='Save Excel Column Order', command=self.save_excel_columns)
 
 
     def button_dict(self):
@@ -148,19 +148,19 @@ class ExcelWindow(tk.Toplevel):
         # add the clear excel file button to the pop up window
         self.clear_excel_file_button.grid(row=2, column=2, pady=15, padx=15)
 
-        self.excel_index_column_toggle.grid(row=1, column=1, pady=15, padx=15)
+        self.excel_index_column_label.grid(row=1, column=1, pady=15, padx=15)
         self.excel_index_column_dropdown.grid(row=1, column=2, pady=15, padx=15)
 
-        self.excel_date_column_toggle.grid(row=2, column=1, pady=15, padx=15)
+        self.excel_date_column_label.grid(row=2, column=1, pady=15, padx=15)
         self.excel_date_column_dropdown.grid(row=2, column=2, pady=15, padx=15)
 
-        self.excel_time_column_toggle.grid(row=3, column=1, pady=15, padx=15)
+        self.excel_time_column_label.grid(row=3, column=1, pady=15, padx=15)
         self.excel_time_column_dropdown.grid(row=3, column=2, pady=15, padx=15)
 
-        self.excel_file_name_column_toggle.grid(row=4, column=1, pady=15, padx=15)
+        self.excel_file_name_column_label.grid(row=4, column=1, pady=15, padx=15)
         self.excel_file_name_column_dropdown.grid(row=4, column=2, pady=15, padx=15)
 
-        self.excel_total_count_column_toggle.grid(row=5, column=1, pady=15, padx=15)
+        self.excel_total_count_column_label.grid(row=5, column=1, pady=15, padx=15)
         self.excel_total_count_column_dropdown.grid(row=5, column=2, pady=15, padx=15)
 
         self.save_excel_column_button.grid(row=6, column=1, pady=15, padx=15)
