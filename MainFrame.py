@@ -1,11 +1,8 @@
 import tkinter as tk
-from tkinter import ttk
-from tkinter import filedialog
-from tktooltip import ToolTip
+from tkinter import ttk, filedialog,messagebox
 import tensorflow as tf
 import os.path
 from stardist.models import StarDist2D
-from tkinter import messagebox
 import matplotlib
 matplotlib.use('agg')
 from stardist import random_label_cmap
@@ -90,6 +87,8 @@ class MainFrame(ttk.Frame):
         utils.ToolTips(self.button_dict(),'main_frame',2)
         # load the display
         self.load_display()
+        # empty variable for excel window
+        self.excel_window = None
 
     '''
     Author: Alex Mensen-Johnson
@@ -284,7 +283,7 @@ class MainFrame(ttk.Frame):
         # check if the excel window is already open
         if self.is_excel_save_page_open == False:
             # open the excel window
-            ExcelWindow(master=self, container=self.container, excel_editor=self.excel_editor)
+            self.excel_window = ExcelWindow(master=self, container=self.container, excel_editor=self.excel_editor)
 
     '''
     method: open settings window

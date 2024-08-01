@@ -104,9 +104,13 @@ class ExcelEditor:
     description: export the predictions to excel
     '''
     def export_predictions_to_excel(self):
+        # check to see if the data has been cleared
         if self.master.is_data_cleared == False:
+            # check to see if the user wants to continue
             no_cancel = messagebox.askokcancel(title='Data Not Cleared',message='Data has not been cleared since last export. Do you want to continue?',parent=self.master)
+            # if the user does not want to continue
             if no_cancel == False:
+                # return the function
                 return
         # set the current time with a format
         current_time = datetime.datetime.now().strftime("%m-%d-%Y_%I-%M-%S %p")
@@ -120,12 +124,18 @@ class ExcelEditor:
             os.makedirs('output')
         # create boolean variable to check if the file exists
         does_file_exist = True
+        # create a list to store the headers
+        excel_headers = []
         # try to create the workbook
         try:
             # load the workbook
             wb = load_workbook(self.get_excel_file())
             # set the worksheet
             ws = wb.active
+            # iterate over the header row in the worksheet
+            for cell in ws[1]:
+                # append the headers to the list
+                excel_headers.append(cell.value)
         # if the file does not exist
         except FileNotFoundError:
             # create the workbook
@@ -134,9 +144,8 @@ class ExcelEditor:
             ws = wb.active
             # set the boolean variable to false
             does_file_exist = False
-
         # create a boolean variable to check if the index column exists
-        has_index_column = 'Index' in [cell.value for cell in ws['A']]
+        has_index_column = 'Index' in excel_headers
         # set a value for the last index value
         last_index_value = 0
         # if the file does not exist
@@ -149,9 +158,21 @@ class ExcelEditor:
                 ws.cell(row=1, column=i, value=header)
         # if the index column does exist
         elif has_index_column is True:
-            # get the last index value using a for loop
-            for cell in ws['A']:
-                # update the last index value to the current cel value, traversing down the excel until out of values
+            # get the index column position
+            index_column_position = excel_headers.index('Index')
+            # set the index column letter variable to none, later to be updated with the column letter of the index
+            index_column_letter = None
+            # iterate over the header row in the worksheet
+            for cell in ws[1]:
+                # check if the cell value is index
+                if cell.value == 'Index':
+                    # update the index column letter
+                    index_column_letter = cell.column_letter
+                    # break the loop
+                    break
+            # iterate over the index column
+            for cell in ws[index_column_letter]:
+                # update the last index value to the current cell value, traversing down the excel until out of values
                 last_index_value = cell.value
         # iterate over the predictions to append to the worksheet
         if does_file_exist is False:
@@ -173,16 +194,131 @@ class ExcelEditor:
                 self.get_substring()
                 # update the Mainframe excel label
                 self.master.excel_label_title.config(text=self.get_excel_label())
-
-
+        # if the file does exist
         else:
-            for prediction in self.master.predictions.predictions_data:
-                # create a list for data manipulation, tuple's are immutable (not changable)
-                prediction_list = list(prediction)
-                # update the index values to reflect the values on the sheet
-                prediction_list[0] = prediction_list[0] + last_index_value
-                # append the list to the worksheet
-                ws.append(prediction_list)
+            # get the possible headers
+            possible_headers = ['Index', 'Date', 'Time', 'File Name', 'Total Count']
+            # get the headers from the excel file
+            excel_header_list = []
+            # iterate over the headers
+            for cell in ws[1]:
+                # append the header to the list if it is in the possible headers
+                if cell.value in possible_headers:
+                    # append the header to the list
+                    excel_header_list.append(cell.value)
+                # if the header is not in the possible headers
+                elif cell.value is None:
+                    # show an error
+                    messagebox.showerror("Error", f"Invalid headers in excel file. There is an empty cell before the last value in the header row.")
+                    # return
+                    return
+                else:
+                    # show an error
+                    messagebox.showerror("Error", f"Invalid headers in excel file. This is the invalid header {cell.value}")
+                    # return
+                    return
+            # check to see if the header list is unique
+            if len(excel_header_list) != len(set(excel_header_list)):
+                # show an error
+                messagebox.showerror("Error", "Headers in excel file are not unique. This is not supported.")
+                # return
+                return
+            # check to see if the headers are in the same order as the program headers
+            order_check = True
+            # get the current header list
+            current_header_list = self.get_excel_headers()
+            # create an index for header access
+            index = 0
+            # iterate over the headers
+            for header in excel_header_list:
+                # check to see if the header is in the correct order
+                if header != current_header_list[index]:
+                    # set the boolean to false
+                    order_check = False
+                    # break out of the loop
+                    break
+                # increment the index
+                index += 1
+            # bool to check if the headers need to be reordered
+            re_order_settings = False
+            # if the headers are not in the correct order
+            if order_check is False:
+                # ask the user if they would like to reorder the settings
+                re_order_settings = messagebox.askyesno("Notice", "Headers in excel file are not in the correct order. Would you like to reorder the settings to match the order in the excel file?")
+                # create an index of the excel headers
+                excel_header_index = self.get_headers_index(excel_header_list)
+                # create an empty list for prediction data
+                edited_excel_prediction_list = []
+                # iterate over the predictions
+                for prediction in self.master.predictions.predictions_data:
+                    # clear the prediction list
+                    edited_excel_prediction_list.clear()
+                    # iterate over the index values
+                    for index in excel_header_index:
+                        # append the index value from predictions to the list
+                        edited_excel_prediction_list.append(prediction[index])
+                    # if the index column exists
+                    if has_index_column is True:
+                        # add the index value if the column exists
+                        edited_excel_prediction_list[index_column_position] = edited_excel_prediction_list[index_column_position] + last_index_value
+                    # append the list to the worksheet
+                    ws.append(edited_excel_prediction_list)
+            # if the headers are in the correct order
+            else:
+                # iterate over the predictions
+                excel_header_index = self.get_headers_index()
+                # create an empty list for prediction data
+                edited_excel_prediction_list = []
+                # iterate over the predictions
+                for prediction in self.master.predictions.predictions_data:
+                    # clear the list for new predictions
+                    edited_excel_prediction_list.clear()
+                    # update the index values to reflect the values on the sheet
+                    for index in excel_header_index:
+                        # append the index value from predictions to the list
+                        edited_excel_prediction_list.append(prediction[index])
+                    # update the index value
+                    if has_index_column is True:
+                        # add the index value if the column exists
+                        edited_excel_prediction_list[index_column_position] = edited_excel_prediction_list[index_column_position] + last_index_value
+                    # append the list to the worksheet
+                    ws.append(edited_excel_prediction_list)
+            # if the user wants to reorder the settings
+            if re_order_settings is True:
+                # create a dictionary of the headers
+                header_dict = {}
+                # iterate over the possible headers
+                for header in possible_headers:
+                    # try to get the index of the header
+                    try:
+                        # get the value of the index and append to the dictionary, adds plus 1 to shift 0-4 to 1-5
+                        header_dict[header] = excel_header_list.index(header) + 1
+                    # if the header is not in the excel file
+                    except ValueError:
+                        # set the value to None
+                        header_dict[header] = 'None'
+                # set the index value in the class
+                self.excel_index_value = str(header_dict['Index'])
+                # set the date value in the class
+                self.excel_date_value = str(header_dict['Date'])
+                # set the time value in the class
+                self.excel_time_value = str(header_dict['Time'])
+                # set the file name value in the class
+                self.excel_file_name_value = str(header_dict['File Name'])
+                # set the total count value in the class
+                self.excel_total_count_value = str(header_dict['Total Count'])
+                # save the excel settings
+                self.save_excel_settings()
+                # update the index dropdown value
+                self.master.excel_window.excel_index_column_dropdown.set(self.excel_index_value)
+                # update the date dropdown value
+                self.master.excel_window.excel_date_column_dropdown.set(self.excel_date_value)
+                # update the time dropdown value
+                self.master.excel_window.excel_time_column_dropdown.set(self.excel_time_value)
+                # update the file name dropdown value
+                self.master.excel_window.excel_file_name_column_dropdown.set(self.excel_file_name_value)
+                # update the total count dropdown value
+                self.master.excel_window.excel_total_count_column_dropdown.set(self.excel_total_count_value)
         # try statement to save the workbook
         try:
             # save the workbook
@@ -256,7 +392,7 @@ class ExcelEditor:
             # if the value is not None, append it to the new list
             if value != 'None':
                 # append the value
-                new_list.append(value)
+                new_list.append(str(value))
         # sort the new list by numerical value
         new_list.sort()
         # create a new list to store the index values of the header list
@@ -295,11 +431,12 @@ class ExcelEditor:
     method: get_headers_index
     description: get the index values of the headers
     '''
-    def get_headers_index(self):
+    def get_headers_index(self,header_list=None):
         # create a list for the index values
         index_list = []
         # get the header list
-        header_list = self.get_excel_headers()
+        if header_list is None:
+            header_list = self.get_excel_headers()
         # iterate over the header list
         for header in header_list:
             # if the header is Index

@@ -1,6 +1,5 @@
 import tkinter as tk
 from tkinter import ttk
-from tktooltip import ToolTip
 import Utilities as utils
 
 '''
