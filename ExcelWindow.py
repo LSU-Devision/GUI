@@ -1,6 +1,5 @@
 import tkinter as tk
 from tkinter import ttk, messagebox,filedialog
-from tktooltip import ToolTip
 import Utilities as utils
 
 '''
@@ -239,7 +238,7 @@ class ExcelWindow(tk.Toplevel):
             messagebox.showerror('Error', 'Excel Columns have the same column value, cannot save')
             return False
 
-
+    '''
     def export_excel_wrapper(self):
         check = self.master.excel_editor.export_predictions_to_excel()
         if check is True:
@@ -248,3 +247,5 @@ class ExcelWindow(tk.Toplevel):
             self.excel_time_column_dropdown.set(self.master.excel_editor.get_excel_time_column_index())
             self.excel_file_name_column_dropdown.set(self.master.excel_editor.get_excel_file_name_column_index())
             self.excel_total_count_column_dropdown.set(self.master.excel_editor.get_excel_total_count_column_index())
+
+    '''
