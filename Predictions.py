@@ -75,8 +75,7 @@ class Predictions:
         date = datetime.datetime.now().date().strftime("%Y/%m/%d")
         time = datetime.datetime.now().time().strftime("%H:%M:%S")
         self.predictions_data.append((self.predict_index, date, time, os.path.basename(image_path), len(details['points'])))
-
-        if self.settings.get_save_images_output():
+        if self.parent.settings.save_images_output == True:
             fig, ax = plt.subplots(figsize=(13, 10))
             ax.imshow(img, cmap="gray")
             ax.imshow(labels, cmap=self.lbl_cmap, alpha=0.5)
@@ -123,7 +122,12 @@ class Predictions:
         self.predictions_data.append((self.predict_index, date, time, os.path.basename(image_path), len(results['points'])))
         self.predict_index += 1
 
-        if self.settings.get_save_images_output():
+
+        print(f'settings is : {self.parent.settings.save_images_output}')
+        if self.parent.settings.save_images_output == True:
+
+
+
             # Extract counts and key/value pairs from the labels image
             unique_labels, counts = np.unique(labels, return_counts=True)
             label_counts = dict(zip(unique_labels, counts))
