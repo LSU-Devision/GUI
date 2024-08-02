@@ -8,11 +8,20 @@ matplotlib.use('agg')
 from stardist import random_label_cmap
 from Slideshow import Slideshow
 import Settings
+import sys
 import ExcelEditor as excel_editor
 from SettingsWindow import SettingsWindow
 from Predictions import Predictions
 from ExcelWindow import ExcelWindow
 import Utilities as utils
+
+def resource_path(relative_path):
+    """ Get absolute path to resource, needed for PyInstaller """
+    try:
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)
 
 '''
 Class Main Frame
@@ -263,7 +272,7 @@ class MainFrame(ttk.Frame):
     '''
     def help_page(self):
         # Load File
-        info_file = open("docs/Help_Information.txt")
+        info_file = open(resource_path("docs/Help_Information.txt"))
         # Read the file
         file_information = info_file.read()
         # Create the title string
