@@ -3,6 +3,6 @@
     "automatic excel export": false,
     "automatic prediction clear data": false,
     "clear data on clear images": true,
-    "save images output": true,
+    "save images output": false,
     "current settings": "Target-Settings.json"
 }

@@ -49,6 +49,18 @@ class SettingsWindow(tk.Toplevel):
         self.title('Settings')
         # set the geometry of the pop up window
         self.geometry(f'{pop_up_window_width}x{pop_up_window_height}+{x}+{y}')
+        # convert frame into notebook
+        self.notebook = ttk.Notebook(self)
+        # add the notebook using the grid method
+        self.notebook.grid(row=0, column=0)
+        # create the first tab
+        self.tab1 = ttk.Frame(self.notebook)
+        # create the second tab
+        self.tab2 = ttk.Frame(self.notebook)
+        # add the Basic tab
+        self.notebook.add(self.tab1, text="Basic", )
+        # add the Advanced tab
+        self.notebook.add(self.tab2, text="Advanced")
         # run the settings page
         self.run()
 
@@ -59,23 +71,23 @@ class SettingsWindow(tk.Toplevel):
         '''
     def create_page(self):
         # create the automatic excel export label
-        self.automatic_excel_export_label = ttk.Label(self, text=utils.boolean_text_conversion(self.settings.get_automatic_excel_export()), font=50)
+        self.automatic_excel_export_label = ttk.Label(self.tab1, text=utils.boolean_text_conversion(self.settings.get_automatic_excel_export()), font=50)
         # create the automatic excel export button
-        self.automatic_excel_export = ttk.Button(self, text='Automatic Export To Excel', command= lambda : self.toggle_label('self.settings.automatic_excel_export',self.automatic_excel_export_label))
+        self.automatic_excel_export = ttk.Button(self.tab1, text='Automatic Export To Excel', command= lambda : self.toggle_label('self.settings.automatic_excel_export',self.automatic_excel_export_label))
         # create the automatic prediction data clear label
-        self.automatic_prediction_data_clear_label = ttk.Label(self,text=utils.boolean_text_conversion(self.settings.get_automatic_prediction_clear_data()),font=50)
+        self.automatic_prediction_data_clear_label = ttk.Label(self.tab1,text=utils.boolean_text_conversion(self.settings.get_automatic_prediction_clear_data()),font=50)
         # create the automatic prediction data clear button
-        self.automatic_prediction_data_clear = ttk.Button(self,text='Automatic Clear Data On Predict',command= lambda : self.toggle_label('self.settings.automatic_prediction_clear_data',self.automatic_prediction_data_clear_label))
+        self.automatic_prediction_data_clear = ttk.Button(self.tab1,text='Automatic Clear Data On Predict',command= lambda : self.toggle_label('self.settings.automatic_prediction_clear_data',self.automatic_prediction_data_clear_label))
         # create the clear data on clear images label
-        self.clear_data_on_clear_images_label = ttk.Label(self, text=utils.boolean_text_conversion(self.settings.get_clear_data_on_clear_images()), font=50)
+        self.clear_data_on_clear_images_label = ttk.Label(self.tab1, text=utils.boolean_text_conversion(self.settings.get_clear_data_on_clear_images()), font=50)
         # create the clear data on clear images button
-        self.clear_data_on_clear_images_button = ttk.Button(self, text='Clear Data When Clearing Images',command=lambda  : self.toggle_label('self.settings.clear_data_on_clear_images',self.clear_data_on_clear_images_label))
+        self.clear_data_on_clear_images_button = ttk.Button(self.tab1, text='Clear Data When Clearing Images',command=lambda  : self.toggle_label('self.settings.clear_data_on_clear_images',self.clear_data_on_clear_images_label))
         # create the save images output label
-        self.save_images_output_label = ttk.Label(self, text=utils.boolean_text_conversion(self.settings.get_save_images_output()), font=50)
+        self.save_images_output_label = ttk.Label(self.tab1, text=utils.boolean_text_conversion(self.settings.get_save_images_output()), font=50)
         # create the save images output button
-        self.save_images_output_button = ttk.Button(self, text='Save Images To Output',command= lambda : self.toggle_label('self.settings.save_images_output',self.save_images_output_label))
+        self.save_images_output_button = ttk.Button(self.tab1, text='Save Images To Output',command= lambda : self.toggle_label('self.settings.save_images_output',self.save_images_output_label))
         # create the reset settings button
-        self.default_settings_button = ttk.Button(self, text='Reset To Default Settings',command=self.reset_settings)
+        self.default_settings_button = ttk.Button(self.tab1, text='Reset To Default Settings',command=self.reset_settings)
         # future button to eliminate duplicate windows
         self.protocol("WM_DELETE_WINDOW", lambda: self.close_window())
 
