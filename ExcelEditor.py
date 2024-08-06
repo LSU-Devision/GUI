@@ -156,6 +156,24 @@ class ExcelEditor:
             for i, header in enumerate(self.get_excel_headers()[1:], start=2):
                 # add each header to the appropriate row
                 ws.cell(row=1, column=i, value=header)
+                # get the index of the headers
+            index_list = self.get_headers_index()
+            # create an empty list for indexing
+            edited_prediction_list = []
+            # iterate over the predictions
+            for prediction in self.master.predictions.predictions_data:
+                # clear the prediction list
+                edited_prediction_list.clear()
+                # iterate over the index values
+                for index in index_list:
+                    # append the index value from predictions to the list
+                    edited_prediction_list.append(prediction[index])
+                # append the list to the worksheet
+                ws.append(edited_prediction_list)
+                # update the internal excel label with the substring
+                self.get_substring()
+                # update the Mainframe excel label
+                self.master.excel_label_title.config(text=self.get_excel_label())
         # if the index column does exist
         elif has_index_column is True:
             # get the index column position
@@ -175,27 +193,7 @@ class ExcelEditor:
                 # update the last index value to the current cell value, traversing down the excel until out of values
                 last_index_value = cell.value
         # iterate over the predictions to append to the worksheet
-        if does_file_exist is False:
-            # get the index of the headers
-            index_list = self.get_headers_index()
-            # create an empty list for indexing
-            edited_prediction_list = []
-            # iterate over the predictions
-            for prediction in self.master.predictions.predictions_data:
-                # clear the prediction list
-                edited_prediction_list.clear()
-                # iterate over the index values
-                for index in index_list:
-                    # append the index value from predictions to the list
-                    edited_prediction_list.append(prediction[index])
-                # append the list to the worksheet
-                ws.append(edited_prediction_list)
-                # update the internal excel label with the substring
-                self.get_substring()
-                # update the Mainframe excel label
-                self.master.excel_label_title.config(text=self.get_excel_label())
-        # if the file does exist
-        else:
+        if does_file_exist is True:
             # get the possible headers
             possible_headers = ['Index', 'Date', 'Time', 'File Name', 'Total Count']
             # get the headers from the excel file
