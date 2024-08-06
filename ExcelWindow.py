@@ -57,10 +57,14 @@ class ExcelWindow(tk.Toplevel):
         self.tab1=ttk.Frame(self.notebook)
         # create the second tab
         self.tab2=ttk.Frame(self.notebook)
+        # create the third tab
+        self.tab3=ttk.Frame(self.notebook)
         # add the Basic tab
         self.notebook.add(self.tab1,text="Basic",)
         # add the Advanced tab
-        self.notebook.add(self.tab2,text="Advanced")
+        self.notebook.add(self.tab2,text="Columns")
+        # add the File Names tab
+        self.notebook.add(self.tab3, text = 'File Names')
         # creates the page
         self.run()
     def create_page(self):
