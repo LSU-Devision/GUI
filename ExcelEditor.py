@@ -116,8 +116,13 @@ class ExcelEditor:
         current_time = datetime.datetime.now().strftime("%m-%d-%Y_%I-%M-%S %p")
         # check to see if the excel file exists
         if self.get_excel_file() is None:
-            # set the excel file with the specified name
-            self.set_excel_file(os.path.join('output', f'predictions_{current_time}.xlsx'))
+            # check to see if a name has been set to the excel_file_variable
+            if self.master.excel_window.get_excel_file_variable() is None:
+                # if none has been set, set the excel file to the default
+                self.set_excel_file(os.path.join('output', f'predictions_{current_time}.xlsx'))
+            else:
+                # if a name has been set, set the excel file to the name
+                self.set_excel_file(os.path.join('output', f'{self.master.excel_window.get_excel_file_variable()}.xlsx'))
         # check to see if the output folder exists
         if not os.path.exists('output'):
             # create the output folder

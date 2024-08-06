@@ -2,24 +2,30 @@ import tkinter as tk
 from tkinter import ttk, messagebox,filedialog
 import Utilities as utils
 
-'''
-Class: ExcelWindow
-Contributors: Alex Mensen-Johnson, Sunella Ramnath
-Description: Class for the Excel Window
-Params:
-    master = master class aka MainFrame
-    container = container class
-    excel_editor = excel editor class
-methods:
-    init: initialize the class
-    create_page: create the page
-    load_page: load the page
-    close_window: close the window
-    run: run the create and load methods
-    
-'''
 class ExcelWindow(tk.Toplevel):
+    """
+    Class: ExcelWindow
+    Contributors: Alex Mensen-Johnson, Sunella Ramnath
+    Description: Class for the Excel Window
+    Params:
+        master = master class aka MainFrame
+        container = container class
+        excel_editor = excel editor class
+    methods:
+        init: initialize the class
+        create_page: create the page
+        load_page: load the page
+        close_window: close the window
+        run: run the create and load methods
+    """
     def __init__(self, master=None , container=None, excel_editor=None):
+        """
+        method: init
+        description: initialize the class
+        :param master: Mainframe class from MainFrame.py
+        :param container: container of the Mainframe class
+        :param excel_editor: excel editor class from ExcelEditor.py
+        """
         # Initializes the master class
         super().__init__(master=master)
         # saves the master variable locally
@@ -65,9 +71,17 @@ class ExcelWindow(tk.Toplevel):
         self.notebook.add(self.tab2,text="Columns")
         # add the File Names tab
         self.notebook.add(self.tab3, text = 'File Names')
+
+        self.notebook.bind("<<NotebookTabChanged>>", self.on_tab_change)
+        self.excel_file_name = tk.StringVar()
+        self.excel_file_variable = None
         # creates the page
         self.run()
     def create_page(self):
+        """
+        method: create_page
+        description: creates the page
+        """
         # create the export excel button
         self.export_excel_button = ttk.Button(self.tab1, text='Export to Excel', command=self.master.excel_editor.export_predictions_to_excel)
         # create the load excel by selection button
@@ -127,8 +141,21 @@ class ExcelWindow(tk.Toplevel):
         # create the save excel column button
         self.save_excel_column_button = ttk.Button(self.tab2, text='Save Excel Column Order', command=self.save_excel_columns)
 
+        # tab 3
+
+        self.excel_name_label = ttk.Label(self.tab3, text='New Excel File Name : ')
+        self.excel_name_field= ttk.Entry(self.tab3, textvariable=self.excel_file_name)
+        self.excel_name_save_button = ttk.Button(self.tab3, text='Save Excel File Name', command=self.save_excel_file_name)
+
+
+
 
     def button_dict(self):
+        """
+        method: button dict
+        description: returns a dictionary of the buttons
+        :return: dictionary of buttons
+        """
         return {
             'export_to_excel': self.export_excel_button,
             'load_excel': self.load_excel_by_selection_button,
@@ -142,6 +169,11 @@ class ExcelWindow(tk.Toplevel):
         }
 
     def load_page(self):
+        """
+        method: load page
+        description: loads the page into the tkinter window
+        :return:
+        """
         # add the export excel button to the pop up window
         self.export_excel_button.grid(row=1, column=1, pady=15, padx=15)
         # add the load excel by selection button to the pop up window
@@ -168,23 +200,31 @@ class ExcelWindow(tk.Toplevel):
 
         self.save_excel_column_button.grid(row=6, column=1, pady=15, padx=15)
 
+        self.excel_name_label.grid(row=0,column=0,pady=15,padx=15)
+        self.excel_name_field.grid(row=0,column=1,pady=15,padx=15)
+        self.excel_name_save_button.grid(row=0,column=2,pady=15,padx=15)
 
-    '''
-    method: clear_excel_file
-    description: method to clear the excel file from the program
-    '''
+
+
     def clear_excel_file(self):
+        """
+        method: clear excel file
+        description: method to clear the excel file from the program
+        :return:
+        """
         # clear the excel file from the excel editor
         self.master.excel_editor.set_excel_file(None)
         # clear the excel label
         self.master.excel_editor.set_excel_label(None)
         # set the excel label title to none
         self.master.excel_label_title.config(text='None')
-    '''
-    method: load_excel_by_selection
-    description: method to load the excel file by selection
-    '''
+
     def load_excel_by_selection(self):
+        """
+        method: load excel by selection
+        description: method to load the excel file by selection
+        :return:
+        """
         # opens the file dialog to select the excel file
         excel_file = filedialog.askopenfilename(initialdir='/home/max/development/stardist/data')
         # split the excel file to check the extension
@@ -201,18 +241,24 @@ class ExcelWindow(tk.Toplevel):
         self.master.excel_editor.get_substring()
         # set the excel label title to the excel file
         self.master.excel_label_title.config(text= str(self.excel_editor.get_excel_label()))
-    '''
-    method to close the window
-    '''
+
     def close_window(self):
+        """
+        method: close window
+        description: method to close the window
+        :return:
+        """
         # close the window
         self.destroy()
         # set the boolean to True to enable a new window
         self.master.is_excel_save_page_open = False
-    '''
-    method to run the window
-    '''
+
     def run(self):
+        """
+        method: run
+        description: method to run the window
+        :return:
+        """
         # create the page
         self.create_page()
         # create tooltips
@@ -223,33 +269,88 @@ class ExcelWindow(tk.Toplevel):
         self.master.is_excel_save_page_open = True
 
     def save_excel_columns(self):
-
+        """
+        method: save excel columns
+        description: method to save the Excel columns
+        :return: False if the Excel columns have the same column value
+        """
+        # check list for if the Excel columns have the same column value
         check_list = [self.master.excel_editor.get_excel_index_column_index(),
                       self.master.excel_editor.get_excel_date_column_index(),
                       self.master.excel_editor.get_excel_time_column_index(),
                       self.master.excel_editor.get_excel_file_name_column_index(),
                       self.master.excel_editor.get_excel_total_count_column_index()
                       ]
+
+        # check if the Excel columns have the same column value
         check_value = True
+        # check if the Excel columns have the same column value
         for value in check_list:
+            # check if the Excel columns have the same column value
             for value2 in check_list[check_list.index(value) + 1:]:
+                # check if the Excel columns have the same column value
                 if value == value2 and value2 != 'None':
+                    # set the check value to false
                     check_value = False
+        # if the check value is true, save the Excel columns
         if check_value is True:
+            # save the Excel columns
             self.master.excel_editor.save_excel_settings()
+            # show a success message
             messagebox.showinfo('Success', 'Excel Columns Saved')
+        # if the check value is false, show an error message
         else:
+            # show an error message
             messagebox.showerror('Error', 'Excel Columns have the same column value, cannot save')
+            # return the function
             return False
 
-    '''
-    def export_excel_wrapper(self):
-        check = self.master.excel_editor.export_predictions_to_excel()
-        if check is True:
-            self.excel_index_column_dropdown.set(self.master.excel_editor.get_excel_index_column_index())
-            self.excel_date_column_dropdown.set(self.master.excel_editor.get_excel_date_column_index())
-            self.excel_time_column_dropdown.set(self.master.excel_editor.get_excel_time_column_index())
-            self.excel_file_name_column_dropdown.set(self.master.excel_editor.get_excel_file_name_column_index())
-            self.excel_total_count_column_dropdown.set(self.master.excel_editor.get_excel_total_count_column_index())
+
+    def resize_tab(self,index):
+        """
+            method: resize tab
+            description: method to resize the tab
+        :param index: index of the current tab
+        :return:
+        """
+        # if the index is 0, resize the tab to 300x200
+        if index == 0:
+            # resize the tab
+            self.geometry('300x200')
+        # if the index is 1, resize the tab to 400x400
+        elif index == 1:
+            # resize the tab
+            self.geometry('400x400')
+        # if the index is 2, resize the tab to 500x400
+        elif index == 2:
+            # resize the tab
+            self.geometry('500x400')
 
     '''
+    
+    '''
+    def on_tab_change(self):
+        """
+            method: on tab change
+            description: method to resize the tab
+        :return:
+        """
+        # get the index of the tab
+        tab_index = self.notebook.index(self.notebook.select())
+        # resize the tab
+        self.resize_tab(tab_index)
+
+
+    def save_excel_file_name(self):
+        """
+            method: save Excel file name
+            description: method to save the Excel file name
+        """
+        # set the Excel file variable
+        self.excel_file_variable = self.excel_name_field.get()
+
+    def get_excel_file_variable(self):
+        return self.excel_file_variable
+
+    def set_excel_file_variable(self, excel_file):
+        self.excel_file_variable = excel_file
