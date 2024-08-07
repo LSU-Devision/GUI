@@ -153,7 +153,7 @@ class ExcelWindow(tk.Toplevel):
     def button_dict(self):
         """
         method: button dict
-        description: returns a dictionary of the buttons
+        description: returns a dictionary of the buttons name strings and the buttons
         :return: dictionary of buttons
         """
         return {
@@ -308,10 +308,9 @@ class ExcelWindow(tk.Toplevel):
 
     def resize_tab(self,index):
         """
-            method: resize tab
-            description: method to resize the tab
+        method: resize tab
+        description: method to resize the tab
         :param index: index of the current tab
-        :return:
         """
         # if the index is 0, resize the tab to 300x200
         if index == 0:
@@ -329,11 +328,10 @@ class ExcelWindow(tk.Toplevel):
     '''
     
     '''
-    def on_tab_change(self):
+    def on_tab_change(self,event):
         """
-            method: on tab change
-            description: method to resize the tab
-        :return:
+        method: on tab change
+        description: method to resize the tab
         """
         # get the index of the tab
         tab_index = self.notebook.index(self.notebook.select())
@@ -343,11 +341,26 @@ class ExcelWindow(tk.Toplevel):
 
     def save_excel_file_name(self):
         """
-            method: save Excel file name
-            description: method to save the Excel file name
+        method: save Excel file name
+        description: method to save the Excel file name
         """
-        # set the Excel file variable
-        self.excel_file_variable = self.excel_name_field.get()
+        # call the string checker class
+        checker = utils.StringChecker()
+        # conditional statement to check the given string
+        if checker.filename_checker(self.excel_name_field.get()) is False:
+            # save the Excel file name to the variable
+            self.excel_file_variable = self.excel_name_field.get()
+            # show a success message
+            messagebox.showinfo("Success", "Excel File Name Saved")
+        # conditional statement to check the given string
+        else:
+            # show an error message, ask the user if they want to see what characters or names are invalid
+            flag = messagebox.askokcancel("Error", "Filename cannot be used.\nFilename contains invalid characters or names that cannot be used or is empty. \nDo you want to see what characters or names are invalid?")
+            # if the flag is true, show the invalid characters or names
+            if flag is True:
+                # show the invalid characters or names
+                messagebox.showinfo("Invalid naming conventions", 'Invalid characters: \n' + checker.get_invalid_characters_string() + '\nInvalid names: \n' + checker.get_reserved_filenames_string() + '\nAlso file names cannot end with periods or spaces')
+
 
     def get_excel_file_variable(self):
         return self.excel_file_variable
