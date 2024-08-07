@@ -109,14 +109,12 @@ class MainFrame(ttk.Frame):
         self.select_files_button = ttk.Button(self, text='Select Files', command=self.select_files)
         # Creates the slide show
         self.slideshow = Slideshow(self)
-        # Creates the select model button
-        self.select_model_button = ttk.Button(self, text='Select Model Folder', command=self.select_model)
         # initialize buttons as disabled until a model is selected
         self.model_selected = False
         # Creates the predict all button
         self.predict_all_button = ttk.Button(self, text='Predict All', command=self.predictions.predict_all, state=tk.DISABLED)
         # make two buttons
-        self.select_model_button = ttk.Button(self, text='Select Model', command=self.select_model)
+        self.select_model_button = ttk.Button(self, text='Select Model Folder', command=self.select_model)
         # creates the model label
         self.model_label = ttk.Label(self, text='No Model Selected',font=50)
         # creates clear button
