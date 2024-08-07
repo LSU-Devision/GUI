@@ -111,8 +111,6 @@ class MainFrame(ttk.Frame):
         self.slideshow = Slideshow(self)
         # Creates the select model button
         self.select_model_button = ttk.Button(self, text='Select Model Folder', command=self.select_model)
-        # Creates the model label
-        self.model_label = ttk.Label(self, text='2D_demo')
         # initialize buttons as disabled until a model is selected
         self.model_selected = False
         # Creates the predict all button
@@ -228,7 +226,7 @@ class MainFrame(ttk.Frame):
         with tf.device(self.device):
             self.model = StarDist2D(None, name=os.path.basename(self.model_path), basedir=os.path.dirname(self.model_path))
         self.predictions.model = self.model
-        self.model_label.config(text=os.path.basename(self.model_path))
+        self.model_label.config(text=f'Current Model: {os.path.basename(self.model_path)}')
         if not self.model_selected:
             self.predict_all_button.config(state=tk.NORMAL)
             self.model_selected = True
