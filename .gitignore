@@ -1,0 +1,8 @@
+# Ignore .pycache/ directories
+__pycache__/
+*.py[cod]
+
+# Ignore other common Python-related files
+*.pyo
+*.pyd
+*.pdb

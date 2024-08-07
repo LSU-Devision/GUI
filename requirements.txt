@@ -59,6 +59,7 @@ tensorflow-estimator==2.10.0
 tensorflow-io-gcs-filesystem==0.31.0
 termcolor==2.4.0
 tifffile==2024.5.22
+tkinter-tooltip==0.3.7
 tqdm==4.66.4
 typing_extensions==4.12.2
 urllib3==2.2.1
