@@ -97,6 +97,8 @@ class SettingsWindow(tk.Toplevel):
         self.check_version_button = ttk.Button(self.tab3, text='Check Version',command=self.check_version)
         # future button to eliminate duplicate windows
         self.protocol("WM_DELETE_WINDOW", lambda: self.close_window())
+        # button for user guide
+        self.user_guide_button = ttk.Button(self.tab3, text='User Guide',command=self.open_user_guide)
 
 
     def button_dict(self):
@@ -132,6 +134,8 @@ class SettingsWindow(tk.Toplevel):
         self.default_settings_button.grid(row=4, column=0, pady=15, padx=15)
         # sets the check version button to the grid
         self.check_version_button.grid(row=0, column=0, pady=15, padx=15)
+        # load the user guide button 
+        self.user_guide_button.grid(row=1, column=0, pady=15, padx=15)
 
     ####################################################
     # added save images toggle. reloads display for dynamic image and prediction frame
@@ -214,3 +218,19 @@ class SettingsWindow(tk.Toplevel):
                 webbrowser.open(scraper_class.get_update_page())
         else:
             messagebox.showinfo("Update", "You are on the latest version")
+            
+    
+    def open_user_guide(self):
+        """
+        description: grabs the user guide with checks 
+        """
+        scraper_user_guide_class = Scraper()
+        
+        if (scraper_user_guide_class.check_internet())  == False:
+            messagebox.showerror("Internet Issue", "Fix your internet to the point where you can load google.com")
+            return 
+        else: scraper_user_guide_class.get_user_guide()
+            
+        
+            
+    
