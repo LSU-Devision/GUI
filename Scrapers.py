@@ -1,7 +1,9 @@
 from bs4 import BeautifulSoup
 import requests
+import webbrowser
 
 GITHUB_TAGS = "https://github.com/LSU-Devision/GUI/tags"
+GITHUB_USER_GUIDE = "https://github.com/LSU-Devision/GUI/blob/main/Devision%20GUI%20user%20guide.pdf"
 CURRENT_VERSION = 1.2
 
 
@@ -87,4 +89,14 @@ class Scraper:
 
     def get_soup(self):
         return self.soup
-
+    
+    # grabs the user guide 
+    def get_user_guide(self):
+        """
+        method: get_user_guide
+        Author: Zach James
+        description: opens the user guide url in the user's default browser
+        :return: void
+        """
+        webbrowser.open(GITHUB_USER_GUIDE)
+        
