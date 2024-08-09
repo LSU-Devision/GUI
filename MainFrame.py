@@ -12,16 +12,8 @@ from SettingsWindow import SettingsWindow
 from Predictions import Predictions
 from ExcelWindow import ExcelWindow
 import Utilities as utils
+
 matplotlib.use('agg')
-
-
-def resource_path(relative_path):
-    """ Get absolute path to resource, needed for PyInstaller """
-    try:
-        base_path = sys._MEIPASS
-    except Exception:
-        base_path = os.path.abspath(".")
-    return os.path.join(base_path, relative_path)
 
 '''
 Class Main Frame
@@ -42,6 +34,8 @@ Methods:
     clear images: Clears the images from the GUI
     help page: creates a help page pop up for the users
 '''
+
+
 class MainFrame(ttk.Frame):
     """
     Class Main Frame
@@ -62,6 +56,7 @@ class MainFrame(ttk.Frame):
         clear images: Clears the images from the GUI
         help page: creates a help page pop up for the users
     """
+
     def __init__(self, container):
         """
         method: init
@@ -117,7 +112,7 @@ class MainFrame(ttk.Frame):
         # create all the buttons for the display
         self.create_display()
         # add tooltips
-        utils.ToolTips(self.button_dict(),'main_frame',2)
+        utils.ToolTips(self.button_dict(), 'main_frame', 2)
         # load the display
         self.load_display()
         # empty variable for excel window
@@ -136,11 +131,23 @@ class MainFrame(ttk.Frame):
         # initialize buttons as disabled until a model is selected
         self.model_selected = False
         # Creates the predict all button
-        self.predict_all_button = ttk.Button(self, text='Predict All', command=self.predictions.predict_all, state=tk.DISABLED)
+        self.predict_all_button = ttk.Button(self, text='Predict All', command=self.predictions.predict_all,
+                                             state=tk.DISABLED)
         # make two buttons
-        self.select_model_button = ttk.Button(self, text='Select Model Folder', command=self.select_model)
+        # self.select_model_button = ttk.Button(self, text='Select Model Folder', command=self.select_model)
+        self.select_model_dropdown = ttk.Combobox(self, state='readonly', values=
+        [
+            'Frog Egg Counter',
+            'Oyster Seed Counter',
+            'Frog Egg Classification',
+            'Select Model Folder Manually'
+        ])
+
+        self.select_model_dropdown.set('Select Model')
+
+        self.select_model_dropdown.bind('<<ComboboxSelected>>', lambda event: self.get_model_by_dropdown())
         # creates the model label
-        self.model_label = ttk.Label(self, text='No Model Selected',font=50)
+        self.model_label = ttk.Label(self, text='No Model Selected', font=50)
         # creates clear button
         self.clear_button = ttk.Button(self, text='Clear Images', command=self.clear_images)
         # creates a help button that will display button usage
@@ -148,9 +155,10 @@ class MainFrame(ttk.Frame):
         # creates the excel label
         self.excel_label_title = ttk.Label(self, text=str(self.excel_editor.get_excel_label()), font=50)
         # creates the export to excel button
-        self.excel_window_button = ttk.Button(self, text='Excel Window', command= lambda : self.open_excel_window() )
+        self.excel_window_button = ttk.Button(self, text='Excel Window', command=lambda: self.open_excel_window())
         # Create settings page
         self.settings_page_button = ttk.Button(self, text='Settings', command=lambda: self.open_settings_window())
+
 
     def button_dict(self):
         """
@@ -159,7 +167,7 @@ class MainFrame(ttk.Frame):
         :return: a dictionary of all the buttons for the creation of tooltips
         """
         return {
-            'select_model': self.select_model_button,
+            'select_model': self.select_model_dropdown,
             'select_files': self.select_files_button,
             'predict_all': self.predict_all_button,
             'clear_images': self.clear_button,
@@ -183,11 +191,12 @@ class MainFrame(ttk.Frame):
         # loads the model label into the frame
         self.model_label.grid(row=1, column=0, pady=5)
         # loads the select model button into the frame
-        self.select_model_button.grid(row=2,column=0,pady=5)
+        #self.select_model_button.grid(row=2, column=0, pady=5)
+        self.select_model_dropdown.grid(row=2, column=0, pady=5)
         # Loads the select files button into the page
         self.select_files_button.grid(row=3, column=0, pady=5)
         # loads the predict all button
-        self.predict_all_button.grid(row=4,column=0,pady=5)
+        self.predict_all_button.grid(row=4, column=0, pady=5)
         # loads the slide show frame into the display
         self.slideshow.grid(row=5, column=0)
         # adds clear button using grid method
@@ -199,7 +208,9 @@ class MainFrame(ttk.Frame):
         # adds the excel save page to the window
         self.excel_window_button.grid(row=9, column=0, pady=5)
         # adds the settings button to the window
-        self.settings_page_button.grid(row=10,column=0,pady=5)
+        self.settings_page_button.grid(row=10, column=0, pady=5)
+
+
 
     def update_display(self):
         """
@@ -251,9 +262,13 @@ class MainFrame(ttk.Frame):
             # split the file names by a period to check the file extension
             file_name_split = image.split('.')
             # check if the file is a .tif, .tiff, .png, .jpg, .jpeg, .gif, .bmp, .npy, .npz, or .heic
-            if file_name_split[-1] != 'tif' and file_name_split[-1] != 'tiff' and file_name_split[-1] != 'png' and file_name_split[-1] != 'jpg' and file_name_split[-1] != 'jpeg' and file_name_split[-1] != 'gif' and file_name_split[-1] != 'bmp' and file_name_split[-1] != 'npy' and file_name_split[-1] != 'npz' and file_name_split[-1] != 'heic':
+            if file_name_split[-1] != 'tif' and file_name_split[-1] != 'tiff' and file_name_split[-1] != 'png' and \
+                    file_name_split[-1] != 'jpg' and file_name_split[-1] != 'jpeg' and file_name_split[-1] != 'gif' and \
+                    file_name_split[-1] != 'bmp' and file_name_split[-1] != 'npy' and file_name_split[-1] != 'npz' and \
+                    file_name_split[-1] != 'heic':
                 # create a warning if the file is not compatible
-                answer = messagebox.askyesno('Incompatible File Type Warning', f'A selected file is not a .tif, .tiff, .png, .jpg, .jpeg, .gif, .bmp, .npy, .npz, or .heic file.\n Would you like to remove the file and continue?\n Select no to abort the action\n your file type is {file_name_split[-1]}')
+                answer = messagebox.askyesno('Incompatible File Type Warning',
+                                             f'A selected file is not a .tif, .tiff, .png, .jpg, .jpeg, .gif, .bmp, .npy, .npz, or .heic file.\n Would you like to remove the file and continue?\n Select no to abort the action\n your file type is {file_name_split[-1]}')
                 # if the user does not want to continue, move to the next iteration of the loop
                 if answer == True:
                     # move to the next iteration of the loop
@@ -272,25 +287,38 @@ class MainFrame(ttk.Frame):
             # update the slideshow
             self.slideshow.update_image()
 
-    def select_model(self):
+    def get_model_by_dropdown(self):
         """
-        method: select_model
-        Author: Skylar Wilson, Max
-        allows the user to manually select a model
-        :return:
+        method: get_model_by_dropdown
+        Author: Max, Alex Mensen-Johnson
+        description: gets the model from the dropdown
+        :return: Nothing
         """
-        # update the model path variable with a user selected model
-        self.model_path = filedialog.askdirectory()
+        # get the model from the dropdown
+        model_option = self.select_model_dropdown.get()
+        # print the model
+        print(f'{model_option} model selected')
+        # if the model is not selected, return
+        if model_option == 'Select Model':
+            return
+        # if the model is selected manually
+        elif model_option == 'Select Model Folder Manually':
+            # use the file dialog method to manually select the model
+            self.model_path = filedialog.askdirectory()
+        # If the model is selected from one of the options, load the option
+        else:
+            self.model_path = Predictions.get_model_path(self.predictions, model_option)
         # print the model path
         print(self.model_path)
         # print the full file name of the model path
         print(os.path.basename(self.model_path))
         # print the directory of the model path
         print(os.path.dirname(self.model_path))
-        # open with tensor flow
+        # open the model with tensorflow
         with tf.device(self.device):
             # set the model to the stardist model
-            self.model = StarDist2D(None, name=os.path.basename(self.model_path), basedir=os.path.dirname(self.model_path))
+            self.model = StarDist2D(None, name=os.path.basename(self.model_path),
+                                    basedir=os.path.dirname(self.model_path))
         # change prediction model to the current model
         self.predictions.model = self.model
         # configure the label to display the model
@@ -301,7 +329,6 @@ class MainFrame(ttk.Frame):
             self.predict_all_button.config(state=tk.NORMAL)
             # ste the model selected to true
             self.model_selected = True
-
 
     def clear_images(self):
         """
@@ -341,20 +368,19 @@ class MainFrame(ttk.Frame):
             # clear the data
             self.clear_predicted_data()
 
-
     def help_page(self):
         """
         Help Page: by Alex Mensen-Johnson
         Description: Loads the Help_Information.txt into a file, reads the file, and displays the information in a pop up
         """
         # Load File
-        info_file = open(resource_path("docs/Help_Information.txt"))
+        info_file = open(utils.resource_path("docs/Help_Information.txt"))
         # Read the file
         file_information = info_file.read()
         # Create the title string
         title = 'Help'
         # Create pop up with the information
-        messagebox.showinfo(title,file_information)
+        messagebox.showinfo(title, file_information)
 
     def clear_predicted_data(self):
         """
