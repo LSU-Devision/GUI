@@ -1,20 +1,11 @@
 import json
-import os
-import sys
+import Utilities as utils
 
 default_json_path = "config/default_settings.json"
 target_json_path = "config/Target-Settings.json"
 
-def resource_path(relative_path):
-    """ Get absolute path to resource, needed for PyInstaller """
-    try:
-        base_path = sys._MEIPASS
-    except Exception:
-        base_path = os.path.abspath(".")
-    return os.path.join(base_path, relative_path)
-
 class SettingsJson():
-    def __init__(self, json_file_path=resource_path(default_json_path)):
+    def __init__(self, json_file_path=utils.resource_path(default_json_path)):
         ####################################################
         # restructured loading -skylar
         # Load default json
@@ -22,7 +13,7 @@ class SettingsJson():
             self.default_json_data = json.load(default_json_file)
 
         # Load target json
-        with open(resource_path(target_json_path), 'r') as target_json_file:
+        with open(utils.resource_path(target_json_path), 'r') as target_json_file:
             self.target_json_data = json.load(target_json_file)
 
         # Initially load target settings
@@ -32,7 +23,7 @@ class SettingsJson():
     ####################################################
     # function to load default json file. -skylar
     def load_default(self):
-        with open(resource_path(target_json_path), 'r') as self.json_file:
+        with open(utils.resource_path(target_json_path), 'r') as self.json_file:
             self.default_json_data = json.load(self.json_file)
         self.automatic_excel_export = self.default_json_data['automatic excel export']
         self.automatic_prediction_clear_data = self.default_json_data['automatic prediction clear data']
@@ -42,7 +33,7 @@ class SettingsJson():
     ####################################################
     # function to load custom settings from json file. -skylar
     def load_custom_settings(self):
-        with open(resource_path(default_json_path), 'r') as self.json_file:
+        with open(utils.resource_path(default_json_path), 'r') as self.json_file:
             self.default_json_data = self.target_json_data
         self.automatic_excel_export = self.default_json_data['automatic excel export']
         self.automatic_prediction_clear_data = self.default_json_data['automatic prediction clear data']
@@ -53,11 +44,11 @@ class SettingsJson():
     # function to revert back to default settings. -skylar
     def revert_to_default(self):
         # Load default json data
-        with open(resource_path(default_json_path), 'r') as self.json_file:
+        with open(utils.resource_path(default_json_path), 'r') as self.json_file:
             self.default_json_data = json.load(self.json_file)
 
         # Overwrite target-settings.json with default data
-        with open(resource_path(target_json_path), 'w') as json_file:
+        with open(utils.resource_path(target_json_path), 'w') as json_file:
             json.dump(self.default_json_data, json_file, indent=4)
 
         # Load default settings
@@ -67,14 +58,14 @@ class SettingsJson():
     # updated function to use boolean values -skylar
     def update_json(self, key, value):
         # Load target-settings.json
-        with open(resource_path(target_json_path), 'r') as target_json_file:
+        with open(utils.resource_path(target_json_path), 'r') as target_json_file:
             self.json_file = json.load(target_json_file)
 
         # Update data
         self.json_file[key] = value
 
         # Overwrite all settings in target-settings.json with updated data
-        with open(resource_path(target_json_path), 'w') as json_file:
+        with open(utils.resource_path(target_json_path), 'w') as json_file:
             json.dump(self.json_file, json_file, indent=4)
 
     ####################################################

@@ -10,22 +10,17 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import os.path
-import sys
 import tensorflow as tf
 import threading
 import time
 import tkinter as tk
 import Settings
+import Utilities as utils
 matplotlib.use('agg')
 
-def resource_path(relative_path):
-    """ Get absolute path to resource, needed for PyInstaller """
-    try:
-        base_path = sys._MEIPASS
-    except Exception:
-        base_path = os.path.abspath(".")
-    return os.path.join(base_path, relative_path)
-
+FROG_EGG_COUNTER = "models/frog-egg-counter"
+OYSTER_SEED_COUNTER = "models/Oyster_model"
+FROG_EGG_CLASSIFICATION = "models/Xenopus Frog Embryos Classification Model"
 class Predictions:
     def __init__(self, image_files, parent, model, main_frame):
         self.image_files = image_files
@@ -42,14 +37,14 @@ class Predictions:
 
     def get_model_classes(self):
         config_file_path = f"{self.mainframe.model_path}/config.json"
-        with open(resource_path(config_file_path), 'r') as file:
+        with open(utils.resource_path(config_file_path), 'r') as file:
             config_data = json.load(file)
             n_classes = config_data.get('n_classes')
         return n_classes
     
     def get_model_channels(self):
         config_file_path = f"{self.mainframe.model_path}/config.json"
-        with open(resource_path(config_file_path), 'r') as file:
+        with open(utils.resource_path(config_file_path), 'r') as file:
             config_data = json.load(file)
             n_channel = config_data.get('n_channel_in')
         return n_channel
@@ -249,3 +244,19 @@ class Predictions:
             self.predicted_images_label.config(text=f'Predicted {total_images}/{total_images} images')
             self.progress_bar['value'] = 0
             self.progress_popup.destroy()
+
+    def get_model_path(self, option):
+        """
+        method: get_model_path
+        description: returns the path to the model selected by the user
+        :param option: option that the user selected
+        :return: string of the path to the model
+        """
+        if option == 'Frog Egg Counter':
+            return FROG_EGG_COUNTER
+        elif option == 'Oyster Seed Counter':
+            return OYSTER_SEED_COUNTER
+        elif option == 'Frog Egg Classification':
+            return FROG_EGG_CLASSIFICATION
+        else:
+            messagebox.showerror("Error", "Invalid model selected")

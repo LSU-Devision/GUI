@@ -1,7 +1,8 @@
 import tkinter as tk
-from tkinter import ttk
+import webbrowser
+from tkinter import ttk,messagebox
 import Utilities as utils
-
+from Scrapers import Scraper
 '''
 Class SettingsWindow
 Contributors: Skylar Wilson, Alex Mensen-Johnson, Sunella Ramnath
@@ -57,10 +58,14 @@ class SettingsWindow(tk.Toplevel):
         self.tab1 = ttk.Frame(self.notebook)
         # create the second tab
         self.tab2 = ttk.Frame(self.notebook)
+        # create the third tab
+        self.tab3 = ttk.Frame(self.notebook)
         # add the Basic tab
         self.notebook.add(self.tab1, text="Basic", )
         # add the Advanced tab
         self.notebook.add(self.tab2, text="Advanced")
+        # add the Program tab
+        self.notebook.add(self.tab3, text="Program")
         # run the settings page
         self.run()
 
@@ -88,8 +93,12 @@ class SettingsWindow(tk.Toplevel):
         self.save_images_output_button = ttk.Button(self.tab1, text='Save Images To Output',command= lambda : self.toggle_label('self.settings.save_images_output',self.save_images_output_label))
         # create the reset settings button
         self.default_settings_button = ttk.Button(self.tab1, text='Reset To Default Settings',command=self.reset_settings)
+        # create the check version button
+        self.check_version_button = ttk.Button(self.tab3, text='Check Version',command=self.check_version)
         # future button to eliminate duplicate windows
         self.protocol("WM_DELETE_WINDOW", lambda: self.close_window())
+        # button for user guide
+        self.user_guide_button = ttk.Button(self.tab3, text='User Guide',command=self.open_user_guide)
 
 
     def button_dict(self):
@@ -123,6 +132,10 @@ class SettingsWindow(tk.Toplevel):
         self.save_images_output_label.grid(row=3, column=1, pady=15, padx=15)
         # sets the default settings button to the grid
         self.default_settings_button.grid(row=4, column=0, pady=15, padx=15)
+        # sets the check version button to the grid
+        self.check_version_button.grid(row=0, column=0, pady=15, padx=15)
+        # load the user guide button 
+        self.user_guide_button.grid(row=1, column=0, pady=15, padx=15)
 
     ####################################################
     # added save images toggle. reloads display for dynamic image and prediction frame
@@ -192,3 +205,32 @@ class SettingsWindow(tk.Toplevel):
             tk_label.config(text='On')
 
 
+    def check_version(self):
+        scraper_class = Scraper()
+        flag1 = scraper_class.check_internet()
+        if flag1 is False:
+            messagebox.showerror("Error", "No Internet Connection")
+            return
+        flag2 = scraper_class.check_version()
+        if flag2 is True:
+            flag2 = messagebox.askyesno("Update", "There is a new version available. Do you want to update?")
+            if flag2 is True:
+                webbrowser.open(scraper_class.get_update_page())
+        else:
+            messagebox.showinfo("Update", "You are on the latest version")
+            
+    
+    def open_user_guide(self):
+        """
+        description: grabs the user guide with checks 
+        """
+        scraper_user_guide_class = Scraper()
+        
+        if (scraper_user_guide_class.check_internet())  == False:
+            messagebox.showerror("Internet Issue", "Fix your internet to the point where you can load google.com")
+            return 
+        else: scraper_user_guide_class.get_user_guide()
+            
+        
+            
+    

@@ -1,22 +1,12 @@
 import datetime
 import json
 import os
-import sys
 import Utilities as utils
 from openpyxl import Workbook, load_workbook
 from tkinter import messagebox
 
 # load default settings
 default_settings = 'config/excel_settings.json'
-
-def resource_path(relative_path):
-    """ Get absolute path to resource, needed for PyInstaller """
-    try:
-        base_path = sys._MEIPASS
-    except Exception:
-        base_path = os.path.abspath(".")
-    return os.path.join(base_path, relative_path)
-
 '''
 Class: ExcelEditor
 Contributors: Alex Mensen-Johnson, Skylar Wilson
@@ -36,23 +26,23 @@ class ExcelEditor:
     description: initialize the class
     '''
     def __init__(self,master=None):
-        # set the excel file to none
+        # set the Excel file to none
         self.excel_file = None
-        # set the excel label to none
+        # set the Excel label to none
         self.excel_label = None
-        # set the excel index value to none
+        # set the Excel index value to none
         self.excel_index_value = 'None'
-        # set the excel date value to none
+        # set the Excel date value to none
         self.excel_date_value = 'None'
-        # set the excel time value to none
+        # set the Excel time value to none
         self.excel_time_value = 'None'
-        # set the excel file name value to none
+        # set the Excel file name value to none
         self.excel_file_name_value = 'None'
-        # set the excel total count value to none
+        # set the Excel total count value to none
         self.excel_total_count_value = 'None'
         # set the master to the mainframe
         self.master = master
-        # load the excel settings
+        # load the Excel settings
         self.load_excel_settings()
 
     '''
@@ -63,18 +53,18 @@ class ExcelEditor:
         # create the self.data variable
         self.data = None
         # open the default settings
-        with open(resource_path(default_settings)) as json_file:
+        with open(utils.resource_path(default_settings)) as json_file:
             # load the default settings from the json file
             self.data = json.load(json_file)
-        # set the excel index value
+        # set the Excel index value
         self.excel_index_value = self.data['excel_index_column']
-        # set the excel date value
+        # set the Excel date value
         self.excel_date_value = self.data['excel_date_column']
-        # set the excel time value
+        # set the Excel time value
         self.excel_time_value = self.data['excel_time_column']
-        # set the excel file name value
+        # set the Excel file name value
         self.excel_file_name_value = self.data['excel_file_name_column']
-        # set the excel total count value
+        # set the Excel total count value
         self.excel_total_count_value = self.data['excel_total_count_column']
 
     '''
@@ -84,18 +74,18 @@ class ExcelEditor:
     def save_excel_settings(self):
         # create the self.data_save variable
         self.data_save = {}
-        # set the data save excel index column
+        # set the data save Excel index column
         self.data_save['excel_index_column'] = self.excel_index_value
-        # set the data save excel date column
+        # set the data save Excel date column
         self.data_save['excel_date_column'] = self.excel_date_value
-        # set the data save excel time column
+        # set the data save Excel time column
         self.data_save['excel_time_column'] = self.excel_time_value
-        # set the data save excel file name column
+        # set the data save Excel file name column
         self.data_save['excel_file_name_column'] = self.excel_file_name_value
-        # set the data save excel total count column
+        # set the data save Excel total count column
         self.data_save['excel_total_count_column'] = self.excel_total_count_value
         # open the default settings
-        with open(resource_path(default_settings), 'w') as outfile:
+        with open(utils.resource_path(default_settings), 'w') as outfile:
             # dump the data to the json file
             json.dump(self.data_save, outfile,indent=4)
 
@@ -114,14 +104,14 @@ class ExcelEditor:
                 return
         # set the current time with a format
         current_time = datetime.datetime.now().strftime("%m-%d-%Y_%I-%M-%S %p")
-        # check to see if the excel file exists
+        # check to see if the Excel file exists
         if self.get_excel_file() is None:
             # check to see if a name has been set to the excel_file_variable
             if self.master.excel_window.get_excel_file_variable() is None:
-                # if none has been set, set the excel file to the default
+                # if none has been set, set the Excel file to the default
                 self.set_excel_file(os.path.join('output', f'predictions_{current_time}.xlsx'))
             else:
-                # if a name has been set, set the excel file to the name
+                # if a name has been set, set the Excel file to the name
                 self.set_excel_file(os.path.join('output', f'{self.master.excel_window.get_excel_file_variable()}.xlsx'))
         # check to see if the output folder exists
         if not os.path.exists('output'):
@@ -195,13 +185,13 @@ class ExcelEditor:
                     break
             # iterate over the index column
             for cell in ws[index_column_letter]:
-                # update the last index value to the current cell value, traversing down the excel until out of values
+                # update the last index value to the current cell value, traversing down the Excel until out of values
                 last_index_value = cell.value
         # iterate over the predictions to append to the worksheet
         if does_file_exist is True:
             # get the possible headers
             possible_headers = ['Index', 'Date', 'Time', 'File Name', 'Total Count']
-            # get the headers from the excel file
+            # get the headers from the Excel file
             excel_header_list = []
             # iterate over the headers
             for cell in ws[1]:
@@ -248,7 +238,7 @@ class ExcelEditor:
             if order_check is False:
                 # ask the user if they would like to reorder the settings
                 re_order_settings = messagebox.askyesno("Notice", "Headers in excel file are not in the correct order. Would you like to reorder the settings to match the order in the excel file?")
-                # create an index of the excel headers
+                # create an index of the Excel headers
                 excel_header_index = self.get_headers_index(excel_header_list)
                 # create an empty list for prediction data
                 edited_excel_prediction_list = []
@@ -296,7 +286,7 @@ class ExcelEditor:
                     try:
                         # get the value of the index and append to the dictionary, adds plus 1 to shift 0-4 to 1-5
                         header_dict[header] = excel_header_list.index(header) + 1
-                    # if the header is not in the excel file
+                    # if the header is not in the Excel file
                     except ValueError:
                         # set the value to None
                         header_dict[header] = 'None'
@@ -310,7 +300,7 @@ class ExcelEditor:
                 self.excel_file_name_value = str(header_dict['File Name'])
                 # set the total count value in the class
                 self.excel_total_count_value = str(header_dict['Total Count'])
-                # save the excel settings
+                # save the Excel settings
                 self.save_excel_settings()
                 # update the index dropdown value
                 self.master.excel_window.excel_index_column_dropdown.set(self.excel_index_value)
