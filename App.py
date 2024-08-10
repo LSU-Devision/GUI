@@ -1,5 +1,6 @@
 import tkinter as tk
 import tensorflow as tf
+from tkinter import PhotoImage # for icons and image graphics
 from MainFrame import MainFrame
 
 class App(tk.Tk):
@@ -11,7 +12,11 @@ class App(tk.Tk):
 
         # set minimum window size
         self.minsize(750, 850)
-
+        
+        # set the window icon
+        window_icon = PhotoImage(file = './Icons/devision-eye_64x64.png')
+        self.iconphoto(True, window_icon) # if set to 'True', then 'applied to all future created toplevels as well'
+        
         ####################################################
         # Check if GPU is available and sends messages to console
         # moved from MainFrame because of newly implemented update display function in MainFrame -skylar

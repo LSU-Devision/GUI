@@ -1,2 +1,3 @@
+from tktooltip import ToolTip
 
-        self.configure(bg="#12EFE4")
+self.configure(bg="#12EFE4")
