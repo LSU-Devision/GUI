@@ -39,6 +39,9 @@ class SettingsJson():
         self.automatic_prediction_clear_data = self.runtime_json_data['automatic prediction clear data']
         self.clear_data_on_clear_images = self.runtime_json_data['clear data on clear images']
         self.save_images_output = self.runtime_json_data['save images output']
+        self.selected_model_name = self.saved_files_json_data['selected model name']
+        self.excel_file_name = self.saved_files_json_data['excel file name']
+        self.output_folder_name = self.saved_files_json_data['output folder name']
 
 
     def revert_to_default(self):
@@ -61,7 +64,14 @@ class SettingsJson():
             json.dump(self.default_json_data, json_file, indent=4)
 
         self.load_default()
-        
+
+    def clear_saves(self):
+        self.saved_files_json_data['selected model name'] = None
+        self.saved_files_json_data['excel file name'] = None
+        self.saved_files_json_data['output folder name'] = None
+        self.default_json_data['saved files'] = self.saved_files_json_data
+        with open(utils.resource_path(default_json_path), 'w') as json_file:
+            json.dump(self.default_json_data, json_file, indent=4)
 
     def update_json(self, key, value,section='runtime settings'):
         """
@@ -98,6 +108,15 @@ class SettingsJson():
     
     def get_save_images_output(self):
         return self.save_images_output
+
+    def get_selected_model_name(self):
+        return self.selected_model_name
+
+    def get_excel_file_name(self):
+        return self.excel_file_name
+
+    def get_output_folder_name(self):
+        return self.output_folder_name
     
     ####################################################
     # each set function uses boolean input and writes as boolean -skylar
@@ -116,3 +135,15 @@ class SettingsJson():
     def set_save_images_output(self, value):
         self.save_images_output = value
         self.update_json('save images output', value, 'runtime settings')
+
+    def set_selected_model_name(self, value):
+        self.selected_model_name = value
+        self.update_json('selected model name', value, 'saved files')
+
+    def set_excel_file_name(self, value):
+        self.excel_file_name = value
+        self.update_json('excel file name', value, 'saved files')
+
+    def set_output_folder_name(self, value):
+        self.output_folder_name = value
+        self.update_json('output folder name', value, 'saved files')

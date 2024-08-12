@@ -74,7 +74,7 @@ class SettingsWindow(tk.Toplevel):
         method: create page
         creates the buttons and labels for the settings page and assigns the relative function
         '''
-    def create_page(self):
+    def create_tab1(self):
         # create the automatic excel export label
         self.automatic_excel_export_label = ttk.Label(self.tab1, text=utils.boolean_text_conversion(self.settings.get_automatic_excel_export()), font=50)
         # create the automatic excel export button
@@ -93,12 +93,31 @@ class SettingsWindow(tk.Toplevel):
         self.save_images_output_button = ttk.Button(self.tab1, text='Save Images To Output',command= lambda : self.toggle_label('self.settings.save_images_output',self.save_images_output_label))
         # create the reset settings button
         self.default_settings_button = ttk.Button(self.tab1, text='Reset To Default Settings',command=self.reset_settings)
+
+    def create_tab2(self):
+        # create the save model selection button
+        self.save_model_selection_button = ttk.Button(self.tab2, text='Save Model Selection', command=None)
+        # create the model selection label
+        self.model_selection_label = ttk.Label(self.tab2, text='Empty', font=50)
+        # create the save excel output button
+        self.save_excel_output_button = ttk.Button(self.tab2, text='Save Excel Output', command=None)
+        # create the excel output label
+        self.excel_output_label = ttk.Label(self.tab2, text='Empty', font=50)
+        # create the save output path button
+        self.save_output_path_button = ttk.Button(self.tab2, text='Save Output Path', command=None)
+        # create the output path label
+        self.output_path_label = ttk.Label(self.tab2, text='Empty', font=50)
+
+    def create_tab3(self):
         # create the check version button
         self.check_version_button = ttk.Button(self.tab3, text='Check Version',command=self.check_version)
-        # future button to eliminate duplicate windows
+        # create the user guide button
+        self.user_guide_button = ttk.Button(self.tab3, text='User Guide', command=self.open_user_guide)
+
+    def create_protocols(self):
+        # eliminates duplicate windows
         self.protocol("WM_DELETE_WINDOW", lambda: self.close_window())
-        # button for user guide
-        self.user_guide_button = ttk.Button(self.tab3, text='User Guide',command=self.open_user_guide)
+
 
 
     def button_dict(self):
@@ -132,10 +151,30 @@ class SettingsWindow(tk.Toplevel):
         self.save_images_output_label.grid(row=3, column=1, pady=15, padx=15)
         # sets the default settings button to the grid
         self.default_settings_button.grid(row=4, column=0, pady=15, padx=15)
+
+
+    def load_tab2(self):
+        # sets the save model selection button to the grid
+        self.save_model_selection_button.grid(row=0, column=0, pady=15, padx=15)
+        # sets the model selection label to the grid
+        self.model_selection_label.grid(row=0, column=1, pady=15, padx=15)
+        # sets the save excel output button to the grid
+        self.save_excel_output_button.grid(row=1, column=0, pady=15, padx=15)
+        # sets the excel output label to the grid
+        self.excel_output_label.grid(row=1, column=1, pady=15, padx=15)
+        # sets the save output path button to the grid
+        self.save_output_path_button.grid(row=2, column=0, pady=15, padx=15)
+        # sets the output path label to the grid
+        self.output_path_label.grid(row=2, column=1, pady=15, padx=15)
+
+    def load_tab3(self):
         # sets the check version button to the grid
         self.check_version_button.grid(row=0, column=0, pady=15, padx=15)
-        # load the user guide button 
+        # load the user guide button to the grid
         self.user_guide_button.grid(row=1, column=0, pady=15, padx=15)
+
+
+
 
     ####################################################
     # added save images toggle. reloads display for dynamic image and prediction frame
@@ -172,11 +211,18 @@ class SettingsWindow(tk.Toplevel):
     '''
     def run(self):
         # create the page
-        self.create_page()
+        self.create_tab1()
+        self.create_tab2()
+        self.create_tab3()
+        self.create_protocols()
         # create tooltips
         utils.ToolTips(self.button_dict(),'settings',2)
         # load the page
         self.load_page()
+        # load the tab2
+        self.load_tab2()
+        # load the tab3
+        self.load_tab3()
         # set boolean to True to disable a new window
         self.master.is_settings_page_open = True
 
