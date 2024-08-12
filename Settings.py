@@ -2,71 +2,79 @@ import json
 import Utilities as utils
 
 default_json_path = "config/default_settings.json"
-target_json_path = "config/Target-Settings.json"
 
 class SettingsJson():
+    """
+    :class:`SettingsJson`
+    :description: Class for the SettingsJson to manage settings for the mainframe
+    authors: Alex Mensen-Johnson, Skylar Wilson
+    :param: json_file_path = path to the json file
+    :method: load_default
+    :method: revert_to_default
+    :method: get_automatic_excel_export
+    :method: get_automatic_prediction_clear_data
+    :method: get_clear_data_on_clear_images
+    :method: get_save_images_output
+    """
     def __init__(self, json_file_path=utils.resource_path(default_json_path)):
-        ####################################################
-        # restructured loading -skylar
-        # Load default json
+        """
+        :method: init
+        :param json_file_path:
+        """
         with open(json_file_path, 'r') as default_json_file:
             self.default_json_data = json.load(default_json_file)
-
-        # Load target json
-        with open(utils.resource_path(target_json_path), 'r') as target_json_file:
-            self.target_json_data = json.load(target_json_file)
-
-        # Initially load target settings
         self.json_file = self.default_json_data
-        self.load_custom_settings()
+        self.load_default()
 
-    ####################################################
-    # function to load default json file. -skylar
+
     def load_default(self):
-        with open(utils.resource_path(target_json_path), 'r') as self.json_file:
-            self.default_json_data = json.load(self.json_file)
+        """
+        :method: load_default
+        :description: Loads the default settings
+        :return: nothing
+        """
         self.automatic_excel_export = self.default_json_data['automatic excel export']
         self.automatic_prediction_clear_data = self.default_json_data['automatic prediction clear data']
         self.clear_data_on_clear_images = self.default_json_data['clear data on clear images']
         self.save_images_output = self.default_json_data['save images output']
 
-    ####################################################
-    # function to load custom settings from json file. -skylar
-    def load_custom_settings(self):
-        with open(utils.resource_path(default_json_path), 'r') as self.json_file:
-            self.default_json_data = self.target_json_data
-        self.automatic_excel_export = self.default_json_data['automatic excel export']
-        self.automatic_prediction_clear_data = self.default_json_data['automatic prediction clear data']
-        self.clear_data_on_clear_images = self.default_json_data['clear data on clear images']
-        self.save_images_output = self.default_json_data['save images output']
 
-    ####################################################
-    # function to revert back to default settings. -skylar
     def revert_to_default(self):
-        # Load default json data
-        with open(utils.resource_path(default_json_path), 'r') as self.json_file:
-            self.default_json_data = json.load(self.json_file)
+        """
+        :method: revert_to_default
+        :description: Reverts all settings to default
+        :return:
+        """
+        self.automatic_excel_export = False
+        self.automatic_prediction_clear_data = False
+        self.clear_data_on_clear_images = True
+        self.save_images_output = False
+        self.default_json_data['automatic excel export'] = self.automatic_excel_export
+        self.default_json_data['automatic prediction clear data'] = self.automatic_prediction_clear_data
+        self.default_json_data['clear data on clear images'] = self.clear_data_on_clear_images
+        self.default_json_data['save images output'] = self.save_images_output
 
-        # Overwrite target-settings.json with default data
-        with open(utils.resource_path(target_json_path), 'w') as json_file:
+        with open(utils.resource_path(default_json_path), 'w') as json_file:
             json.dump(self.default_json_data, json_file, indent=4)
 
-        # Load default settings
         self.load_default()
         
-    ####################################################
-    # updated function to use boolean values -skylar
+
     def update_json(self, key, value):
-        # Load target-settings.json
-        with open(utils.resource_path(target_json_path), 'r') as target_json_file:
-            self.json_file = json.load(target_json_file)
+        """
+        :method: update_json
+        :description: Updates the json file with new settings
+        :param key: key setting to update
+        :param value: the new value of the setting
+        :return: nothing
+        """
 
         # Update data
-        self.json_file[key] = value
+        self.default_json_data[key] = value
 
-        # Overwrite all settings in target-settings.json with updated data
-        with open(utils.resource_path(target_json_path), 'w') as json_file:
-            json.dump(self.json_file, json_file, indent=4)
+        # Overwrite all settings in default-settings.json with updated data
+        with open(utils.resource_path(default_json_path), 'w') as json_file:
+            json.dump(self.default_json_data, json_file, indent=4)
 
     ####################################################
     # now returns boolean values instead of strings -skylar
