@@ -1,8 +1,7 @@
 {
-    "name": "Target-Settings.json",
+    "name": "default_settings.json",
     "automatic excel export": false,
     "automatic prediction clear data": false,
     "clear data on clear images": true,
-    "save images output": false,
-    "current settings": "Target-Settings.json"
+    "save images output": false
 }
