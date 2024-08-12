@@ -63,9 +63,11 @@ class SettingsWindow(tk.Toplevel):
         # add the Basic tab
         self.notebook.add(self.tab1, text="Basic", )
         # add the Advanced tab
-        self.notebook.add(self.tab2, text="Advanced")
+        self.notebook.add(self.tab2, text="File Save")
         # add the Program tab
         self.notebook.add(self.tab3, text="Program")
+        # bind the tab change
+        self.notebook.bind("<<NotebookTabChanged>>", self.on_tab_change)
         # run the settings page
         self.run()
 
@@ -98,15 +100,25 @@ class SettingsWindow(tk.Toplevel):
         # create the save model selection button
         self.save_model_selection_button = ttk.Button(self.tab2, text='Save Model Selection', command=None)
         # create the model selection label
-        self.model_selection_label = ttk.Label(self.tab2, text='Empty', font=50)
+        self.model_selection_label = ttk.Label(self.tab2, text=self.master.settings.get_selected_model_name(), font=50)
+
+        self.clear_model_selection_button = ttk.Button(self.tab2, text='Clear Model Selection', command=None)
         # create the save excel output button
-        self.save_excel_output_button = ttk.Button(self.tab2, text='Save Excel Output', command=None)
+        self.save_excel_file_button = ttk.Button(self.tab2, text='Save Excel File', command=self.save_excel_file)
         # create the excel output label
-        self.excel_output_label = ttk.Label(self.tab2, text='Empty', font=50)
+        self.excel_file_label = ttk.Label(self.tab2, text=self.master.settings.get_excel_file_name('substring'), font=50)
+        # create the clear excel file button
+        self.clear_excel_file_button = ttk.Button(self.tab2, text='Clear Excel File', command=None)
         # create the save output path button
         self.save_output_path_button = ttk.Button(self.tab2, text='Save Output Path', command=None)
         # create the output path label
-        self.output_path_label = ttk.Label(self.tab2, text='Empty', font=50)
+        self.output_path_label = ttk.Label(self.tab2, text=self.master.settings.get_output_folder_name(), font=50)
+
+        self.clear_output_path_button = ttk.Button(self.tab2, text='Clear Output Path', command=None)
+
+        self.load_save_settings_button = ttk.Button(self.tab2, text='Load Save Settings On Startup', command=lambda : self.toggle_label('self.settings.load_save_settings_on_startup',self.load_save_settings_button_label))
+
+        self.load_save_settings_button_label = ttk.Label(self.tab2, text='Off', font=50)
 
     def create_tab3(self):
         # create the check version button
@@ -132,7 +144,7 @@ class SettingsWindow(tk.Toplevel):
     method: load page
     creates the buttons and labels for the settings page and assigns the relative function
     '''
-    def load_page(self):
+    def load_tab1(self):
         # sets the automatic excel export button to the grid
         self.automatic_excel_export.grid(row=0, column=0, pady=15, padx=15)
         # sets the automatic excel export label to the grid
@@ -158,14 +170,23 @@ class SettingsWindow(tk.Toplevel):
         self.save_model_selection_button.grid(row=0, column=0, pady=15, padx=15)
         # sets the model selection label to the grid
         self.model_selection_label.grid(row=0, column=1, pady=15, padx=15)
+
+        self.clear_model_selection_button.grid(row=0, column=2, pady=15, padx=15)
         # sets the save excel output button to the grid
-        self.save_excel_output_button.grid(row=1, column=0, pady=15, padx=15)
+        self.save_excel_file_button.grid(row=1, column=0, pady=15, padx=15)
         # sets the excel output label to the grid
-        self.excel_output_label.grid(row=1, column=1, pady=15, padx=15)
+        self.excel_file_label.grid(row=1, column=1, pady=15, padx=15)
+
+        self.clear_excel_file_button.grid(row=1, column=2, pady=15, padx=15)
         # sets the save output path button to the grid
         self.save_output_path_button.grid(row=2, column=0, pady=15, padx=15)
         # sets the output path label to the grid
         self.output_path_label.grid(row=2, column=1, pady=15, padx=15)
+
+        self.clear_output_path_button.grid(row=2, column=2, pady=15, padx=15)
+
+        self.load_save_settings_button.grid(row=3, column=0, pady=15, padx=15)
+        self.load_save_settings_button_label.grid(row=3, column=1, pady=15, padx=15)
 
     def load_tab3(self):
         # sets the check version button to the grid
@@ -218,7 +239,7 @@ class SettingsWindow(tk.Toplevel):
         # create tooltips
         utils.ToolTips(self.button_dict(),'settings',2)
         # load the page
-        self.load_page()
+        self.load_tab1()
         # load the tab2
         self.load_tab2()
         # load the tab3
@@ -276,7 +297,45 @@ class SettingsWindow(tk.Toplevel):
             messagebox.showerror("Internet Issue", "Fix your internet to the point where you can load google.com")
             return 
         else: scraper_user_guide_class.get_user_guide()
-            
-        
-            
-    
+
+    def resize_tab(self, index):
+        """
+        method: resize tab
+        description: method to resize the tab
+        :param index: index of the current tab
+        """
+        # if the index is 0, resize the tab to 300x200
+        if index == 0:
+            # resize the tab
+            self.geometry('300x200')
+        # if the index is 1, resize the tab to 400x400
+        elif index == 1:
+            # resize the tab
+            self.geometry('600x400')
+        # if the index is 2, resize the tab to 500x400
+        elif index == 2:
+            # resize the tab
+            self.geometry('200x200')
+
+    '''
+
+    '''
+
+    def on_tab_change(self, event):
+        """
+        method: on tab change
+        description: method to resize the tab
+        """
+        # get the index of the tab
+        tab_index = self.notebook.index(self.notebook.select())
+        # resize the tab
+        self.resize_tab(tab_index)
+
+    def save_excel_file(self):
+        excel_file = self.master.excel_editor.get_excel_file()
+        if excel_file is not None:
+            self.master.settings.set_excel_file_name(excel_file)
+            self.excel_file_label.config(text=self.master.excel_editor.get_excel_label())
+        else:
+            messagebox.showerror("Error", "No Excel File Loaded in the Program, Please Load an Excel File via Excel Window")
+

@@ -42,6 +42,7 @@ class SettingsJson():
         self.selected_model_name = self.saved_files_json_data['selected model name']
         self.excel_file_name = self.saved_files_json_data['excel file name']
         self.output_folder_name = self.saved_files_json_data['output folder name']
+        self.load_save_settings_on_startup = self.saved_files_json_data['load save settings on startup']
 
 
     def revert_to_default(self):
@@ -73,7 +74,7 @@ class SettingsJson():
         with open(utils.resource_path(default_json_path), 'w') as json_file:
             json.dump(self.default_json_data, json_file, indent=4)
 
-    def update_json(self, key, value,section='runtime settings'):
+    def update_json(self, key, value,section):
         """
         :method: update_json
         :description: Updates the json file with new settings
@@ -81,16 +82,13 @@ class SettingsJson():
         :param value: the new value of the setting
         :return: nothing
         """
-
         # Update data
-        self.runtime_json_data[key] = value
         if section == 'runtime settings':
             self.runtime_json_data[key] = value
             self.default_json_data['runtime settings'] = self.runtime_json_data
         elif section == 'saved files':
             self.saved_files_json_data[key] = value
             self.default_json_data['saved files'] = self.saved_files_json_data
-
         # Overwrite all settings in default-settings.json with updated data
         with open(utils.resource_path(default_json_path), 'w') as json_file:
             json.dump(self.default_json_data, json_file, indent=4)
@@ -112,11 +110,17 @@ class SettingsJson():
     def get_selected_model_name(self):
         return self.selected_model_name
 
-    def get_excel_file_name(self):
-        return self.excel_file_name
+    def get_excel_file_name(self,option=None):
+        if option == 'substring':
+            return utils.string_to_substring(self.excel_file_name)
+        else:
+            return self.excel_file_name
 
     def get_output_folder_name(self):
         return self.output_folder_name
+
+    def get_load_save_settings_on_startup(self):
+        return self.load_save_settings_on_startup
     
     ####################################################
     # each set function uses boolean input and writes as boolean -skylar
@@ -147,3 +151,7 @@ class SettingsJson():
     def set_output_folder_name(self, value):
         self.output_folder_name = value
         self.update_json('output folder name', value, 'saved files')
+
+    def set_load_save_settings_on_startup(self, value):
+        self.load_save_settings_on_startup = value
+        self.update_json('load settings on startup', value, 'saved files')

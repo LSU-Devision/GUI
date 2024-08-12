@@ -8,7 +8,9 @@
     },
     "saved files": {
         "selected model name": null,
-        "excel file name": null,
-        "output folder name": null
+        "excel file name": "C:/Users/alexm/PycharmProjects/GUI/output/predictions_08-12-2024_01-50-07 PM.xlsx",
+        "output folder name": null,
+        "load save settings on startup": false,
+        "load settings on startup": true
     }
 }
