@@ -2,6 +2,7 @@ import os
 import json
 import sys
 from tktooltip import ToolTip
+from tkinter import messagebox
 '''
 Contributors: Alex Mensen-Johnson, Skylar Wilson, Sunella Ramnath
 Class: Utilities
@@ -62,6 +63,28 @@ def string_to_boolean(string):
         return False
     else:
         raise ValueError('Error: Invalid boolean string')
+    
+def check_file_extension(file_name, file_type):
+
+    file_name_split = file_name.split('.')
+    excel_types = ['xlsx', 'xls', 'csv']
+    image_types = ['tif', 'tiff', 'png', 'jpg', 'jpeg', 'gif', 'bmp', 'npy', 'npz', 'heic']
+    message_title = 'Incompatible File Type Warning'
+    message_start = f'selected file is not a '
+    message_end = f'\n Would you like to remove the file and continue?\n Select no to abort the action\n your file type is {file_name_split[-1]}'
+
+    if file_type == 'excel':
+        if file_name_split[-1].lower() not in excel_types:
+            user_answer = messagebox.showerror(message_title,  message_start + f''.join([ str('.' + excel_type + ', ') for excel_type in excel_types]))
+            return False
+    elif file_type == 'image':
+        if file_name_split[-1].lower() not in image_types:
+            user_answer = messagebox.askyesno(message_title,  message_start + f''.join([ str('.' + image_type + ', ') for image_type in image_types]) + message_end)
+            return user_answer
+    
+    return None
+
+
 
 class ToolTips():
     """

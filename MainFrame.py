@@ -259,25 +259,16 @@ class MainFrame(ttk.Frame):
         file_list = []
         # loop through the selected files
         for image in files:
-            # split the file names by a period to check the file extension
-            file_name_split = image.split('.')
-            # check if the file is a .tif, .tiff, .png, .jpg, .jpeg, .gif, .bmp, .npy, .npz, or .heic
-            if file_name_split[-1] != 'tif' and file_name_split[-1] != 'tiff' and file_name_split[-1] != 'png' and \
-                    file_name_split[-1] != 'jpg' and file_name_split[-1] != 'jpeg' and file_name_split[-1] != 'gif' and \
-                    file_name_split[-1] != 'bmp' and file_name_split[-1] != 'npy' and file_name_split[-1] != 'npz' and \
-                    file_name_split[-1] != 'heic':
-                # create a warning if the file is not compatible
-                answer = messagebox.askyesno('Incompatible File Type Warning',
-                                             f'A selected file is not a .tif, .tiff, .png, .jpg, .jpeg, .gif, .bmp, .npy, .npz, or .heic file.\n Would you like to remove the file and continue?\n Select no to abort the action\n your file type is {file_name_split[-1]}')
+                answer = utils.check_file_extension(image, 'image')
                 # if the user does not want to continue, move to the next iteration of the loop
                 if answer == True:
                     # move to the next iteration of the loop
                     continue
-                else:
-                    # leave method
+                elif answer == False:
                     return
-            # append the image to the list
-            file_list.append(image)
+                else:
+                    # append the image to the list
+                    file_list.append(image)
         # add files to the image files variables
         self.image_files.extend(file_list)
         # update the predictions image files

@@ -14,7 +14,7 @@ class App(tk.Tk):
         self.minsize(750, 850)
         
         # set the window icon
-        window_icon = PhotoImage(file = './Icons/devision-eye_64x64.png')
+        window_icon = PhotoImage(file = '.\Icons\devision-eye_64x64.png')
         self.iconphoto(True, window_icon) # if set to 'True', then 'applied to all future created toplevels as well'
         
         ####################################################
@@ -26,7 +26,6 @@ class App(tk.Tk):
         else:
             print(f"Program will use: CPU. Warning, processing will be slower as a result. A CUDA compatible NVIDIA GPU is highly recommended.")
         ####################################################
-        
         # Use grid layout for the main window
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
