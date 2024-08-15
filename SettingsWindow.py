@@ -101,24 +101,26 @@ class SettingsWindow(tk.Toplevel):
         self.save_model_selection_button = ttk.Button(self.tab2, text='Save Model Selection', command=None)
         # create the model selection label
         self.model_selection_label = ttk.Label(self.tab2, text=self.master.settings.get_selected_model_name(), font=50)
-
+        # create the clear model selection button
         self.clear_model_selection_button = ttk.Button(self.tab2, text='Clear Model Selection', command=None)
         # create the save excel output button
         self.save_excel_file_button = ttk.Button(self.tab2, text='Save Excel File', command=self.save_excel_file)
         # create the excel output label
-        self.excel_file_label = ttk.Label(self.tab2, text=self.master.settings.get_excel_file_name('substring'), font=50)
+        self.excel_file_label = ttk.Label(self.tab2, text=self.master.settings.get_excel_file_name('string'), font=50)
         # create the clear excel file button
-        self.clear_excel_file_button = ttk.Button(self.tab2, text='Clear Excel File', command=None)
+        self.clear_excel_file_button = ttk.Button(self.tab2, text='Clear Excel File', command=self.clear_excel_file)
         # create the save output path button
         self.save_output_path_button = ttk.Button(self.tab2, text='Save Output Path', command=None)
         # create the output path label
         self.output_path_label = ttk.Label(self.tab2, text=self.master.settings.get_output_folder_name(), font=50)
-
+        # create the clear output path button
         self.clear_output_path_button = ttk.Button(self.tab2, text='Clear Output Path', command=None)
-
-        self.load_save_settings_button = ttk.Button(self.tab2, text='Load Save Settings On Startup', command=lambda : self.toggle_label('self.settings.load_save_settings_on_startup',self.load_save_settings_button_label))
-
-        self.load_save_settings_button_label = ttk.Label(self.tab2, text='Off', font=50)
+        # create the load save settings button
+        self.load_save_settings_button = ttk.Button(self.tab2, text='Load Save Settings On Startup', command=lambda : self.load_settings_toggle_wrapper('self.settings.load_save_settings_on_startup',self.load_save_settings_button_label))
+        # create the load save settings label
+        self.load_save_settings_button_label = ttk.Label(self.tab2, text=utils.boolean_text_conversion(self.master.settings.get_load_save_settings_on_startup()), font=50)
+        # create the clear save settings button
+        self.clear_save_settings_button = ttk.Button(self.tab2, text='Clear Save Settings', command= self.master.settings.clear_saves)
 
     def create_tab3(self):
         # create the check version button
@@ -133,6 +135,11 @@ class SettingsWindow(tk.Toplevel):
 
 
     def button_dict(self):
+        """
+        method: button_dict
+        description: returns a dictionary of all the buttons in the window
+        :return:
+        """
         return {
             'automatic_export_to_excel': self.automatic_excel_export,
             'automatic_clear_data_on_predict': self.automatic_prediction_data_clear,
@@ -140,11 +147,13 @@ class SettingsWindow(tk.Toplevel):
             'save_images_to_output': self.save_images_output_button,
             'reset_to_default_settings': self.default_settings_button
         }
-    '''
-    method: load page
-    creates the buttons and labels for the settings page and assigns the relative function
-    '''
+
     def load_tab1(self):
+        """
+        :method: load tab 1
+        :description: creates the buttons and labels for the basic settings Tab and positions them on the grid
+        :return: Nothing
+        """
         # sets the automatic excel export button to the grid
         self.automatic_excel_export.grid(row=0, column=0, pady=15, padx=15)
         # sets the automatic excel export label to the grid
@@ -166,17 +175,22 @@ class SettingsWindow(tk.Toplevel):
 
 
     def load_tab2(self):
+        """
+        :method: load tab 2
+        :description: creates the buttons and labels for the File Save settings Tab and postions them on the grid
+        :return: Nothing
+        """
         # sets the save model selection button to the grid
         self.save_model_selection_button.grid(row=0, column=0, pady=15, padx=15)
         # sets the model selection label to the grid
         self.model_selection_label.grid(row=0, column=1, pady=15, padx=15)
-
+        # sets the clear model selection button to the grid
         self.clear_model_selection_button.grid(row=0, column=2, pady=15, padx=15)
         # sets the save excel output button to the grid
         self.save_excel_file_button.grid(row=1, column=0, pady=15, padx=15)
         # sets the excel output label to the grid
         self.excel_file_label.grid(row=1, column=1, pady=15, padx=15)
-
+        # sets the clear excel output button to the grid
         self.clear_excel_file_button.grid(row=1, column=2, pady=15, padx=15)
         # sets the save output path button to the grid
         self.save_output_path_button.grid(row=2, column=0, pady=15, padx=15)
@@ -184,22 +198,24 @@ class SettingsWindow(tk.Toplevel):
         self.output_path_label.grid(row=2, column=1, pady=15, padx=15)
 
         self.clear_output_path_button.grid(row=2, column=2, pady=15, padx=15)
-
+        # sets the load save settings button to the grid
         self.load_save_settings_button.grid(row=3, column=0, pady=15, padx=15)
+        # sets the load save settings label to the grid
         self.load_save_settings_button_label.grid(row=3, column=1, pady=15, padx=15)
+        # sets the clear save settings button to the grid
+        self.clear_save_settings_button.grid(row=3, column=2, pady=15, padx=15)
+
 
     def load_tab3(self):
+        """
+        :method: load tab 3
+        :description: creates the buttons and labels for the User Guide Tab and postions them on the grid
+        :return: Nothing
+        """
         # sets the check version button to the grid
         self.check_version_button.grid(row=0, column=0, pady=15, padx=15)
         # load the user guide button to the grid
         self.user_guide_button.grid(row=1, column=0, pady=15, padx=15)
-
-
-
-
-    ####################################################
-    # added save images toggle. reloads display for dynamic image and prediction frame
-    # uses boolean values -skylar
 
     '''
     method: reset settings
@@ -217,32 +233,39 @@ class SettingsWindow(tk.Toplevel):
         # reconfigure save images output label
         self.save_images_output_label.config(text=utils.boolean_text_conversion(self.settings.get_save_images_output()))
 
-    '''
-    method: close window
-    closes the window
-    '''
+
     def close_window(self):
+        """
+        :method: close window
+        :description: closes the window
+        :return:
+        """
         # close the window
         self.destroy()
         # set the boolean to False to enable a new window
         self.master.is_settings_page_open = False
-    '''
-    method: run
-    runs the settings page
-    '''
+
     def run(self):
-        # create the page
+        """
+        :method: run
+        :description: runs the settings page
+        :return:
+        """
+        # create tab 1
         self.create_tab1()
+        # create tab 2
         self.create_tab2()
+        # create tab 3
         self.create_tab3()
+        # create protocols for the window
         self.create_protocols()
         # create tooltips
         utils.ToolTips(self.button_dict(),'settings',2)
-        # load the page
+        # load tab 1
         self.load_tab1()
-        # load the tab2
+        # load tab2
         self.load_tab2()
-        # load the tab3
+        # load tab3
         self.load_tab3()
         # set boolean to True to disable a new window
         self.master.is_settings_page_open = True
@@ -273,29 +296,42 @@ class SettingsWindow(tk.Toplevel):
 
 
     def check_version(self):
+        """
+        :method: check version
+        :description: checks if there is a new version
+        :return: Nothing
+        """
+        # create the scraper class
         scraper_class = Scraper()
-        flag1 = scraper_class.check_internet()
-        if flag1 is False:
+        # check if there is an internet connection
+        if scraper_class.check_internet() is False:
+            # if there is no internet connection, show an error
             messagebox.showerror("Error", "No Internet Connection")
             return
-        flag2 = scraper_class.check_version()
-        if flag2 is True:
-            flag2 = messagebox.askyesno("Update", "There is a new version available. Do you want to update?")
-            if flag2 is True:
+        # check if there is a new version
+        if scraper_class.check_version() is True:
+            # if there is a new version, ask if the user wants to update
+            flag = messagebox.askyesno("Update", "There is a new version available. Do you want to update?")
+            if flag is True:
+                # open the update page
                 webbrowser.open(scraper_class.get_update_page())
+        # if there is no new version show an info box
         else:
             messagebox.showinfo("Update", "You are on the latest version")
             
     
     def open_user_guide(self):
         """
+        :method: open user guide
         description: grabs the user guide with checks 
         """
         scraper_user_guide_class = Scraper()
-        
+        # check if there is an internet connection
         if (scraper_user_guide_class.check_internet())  == False:
+            # if there is no internet connection, show an error
             messagebox.showerror("Internet Issue", "Fix your internet to the point where you can load google.com")
-            return 
+            return
+        # open the user guide page
         else: scraper_user_guide_class.get_user_guide()
 
     def resize_tab(self, index):
@@ -307,7 +343,7 @@ class SettingsWindow(tk.Toplevel):
         # if the index is 0, resize the tab to 300x200
         if index == 0:
             # resize the tab
-            self.geometry('300x200')
+            self.geometry('300x300')
         # if the index is 1, resize the tab to 400x400
         elif index == 1:
             # resize the tab
@@ -316,10 +352,6 @@ class SettingsWindow(tk.Toplevel):
         elif index == 2:
             # resize the tab
             self.geometry('200x200')
-
-    '''
-
-    '''
 
     def on_tab_change(self, event):
         """
@@ -332,10 +364,56 @@ class SettingsWindow(tk.Toplevel):
         self.resize_tab(tab_index)
 
     def save_excel_file(self):
+        """
+        :method: save excel file
+        :description: saves the excel file to the default settings JSON file
+        :return: Nothing
+        """
+        # get the excel file
         excel_file = self.master.excel_editor.get_excel_file()
+        # check if there is an excel file
         if excel_file is not None:
+            # ask if the user wants to replace the excel file
+            if self.master.settings.get_excel_file_name() is not None:
+                user_answer = messagebox.askyesno("Save Excel File", "Do you want to replace your current excel file?")
+                # if the user does not want to replace the excel file, return
+                if user_answer is False:
+                    return
+            # set the excel file name in the settings
             self.master.settings.set_excel_file_name(excel_file)
+            # save the excel file
             self.excel_file_label.config(text=self.master.excel_editor.get_excel_label())
+        # if there is no excel file, show an error
         else:
             messagebox.showerror("Error", "No Excel File Loaded in the Program, Please Load an Excel File via Excel Window")
 
+    def clear_excel_file(self):
+        """
+        :method: clear excel file
+        :description: clears the excel file
+        :return:
+        """
+        # clear the excel file from the excel editor
+        self.master.excel_editor.set_excel_file(None)
+        # clear the excel file name from the settings
+        self.master.settings.set_excel_file_name(None)
+        # clear the excel file label
+        self.excel_file_label.config(text='')
+        # clear the excel label title
+        self.master.excel_label_title.config(text='None')
+
+    def load_settings_toggle_wrapper(self,boolean_string,tk_label):
+        """
+        :method: load settings toggle wrapper
+        :description: wrapper for the load save settings toggle
+        :param boolean_string: string containing the load save settings boolean
+        :param tk_label: load save settings boolean
+        :return: Nothing
+        """
+        # toggle the load save settings
+        self.toggle_label(boolean_string,tk_label)
+        # update the settings
+        if self.master.settings.get_load_save_settings_on_startup() is False:
+            self.output_path_label.config(text='None')
+            self.model_selection_label.config(text='None')
+            self.excel_file_label.config(text='None')

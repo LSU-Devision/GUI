@@ -115,8 +115,22 @@ class MainFrame(ttk.Frame):
         utils.ToolTips(self.button_dict(), 'main_frame', 2)
         # load the display
         self.load_display()
+        # start up operations
+        self.start_up_operations()
         # empty variable for excel window
         self.excel_window = None
+
+    def start_up_operations(self):
+        """
+        method: start up operations
+        description: operations required to be done after the create and load page are called
+        :return:
+        """
+        # change the labels if the start up setttings are on
+        if self.settings.get_load_save_settings_on_startup() is True:
+            self.excel_label_title.config(text=self.settings.get_excel_file_name('string'))
+            self.excel_editor.set_excel_file(self.settings.get_excel_file_name())
+
 
     def create_display(self):
         """

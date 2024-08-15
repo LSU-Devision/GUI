@@ -28,7 +28,6 @@ class SettingsJson():
         self.saved_files_json_data = self.default_json_data['saved files']
         self.load_default()
 
-
     def load_default(self):
         """
         :method: load_default
@@ -111,10 +110,28 @@ class SettingsJson():
         return self.selected_model_name
 
     def get_excel_file_name(self,option=None):
-        if option == 'substring':
-            return utils.string_to_substring(self.excel_file_name)
-        else:
-            return self.excel_file_name
+        """
+        :method: get_excel_file_name
+        :description: returns the name of the Excel file, or a substring of the name
+        :param option:
+        :return: string of the name of the Excel file or a substring of the name of the Excel file
+        """
+        # returns the full path name of the Excel file
+        if option is None:
+            # if the excel file name is None, return None
+            if self.excel_file_name is None:
+                return None
+            else:
+                return self.excel_file_name
+        # returns a substring of the name of the Excel file
+        elif option == 'string':
+            # if the excel file name is None, return None
+            if self.excel_file_name is None:
+                return 'None'
+            # if the excel file name is not None, return a substring of the name
+            else:
+                return utils.string_to_substring(self.excel_file_name)
+
 
     def get_output_folder_name(self):
         return self.output_folder_name
@@ -154,4 +171,4 @@ class SettingsJson():
 
     def set_load_save_settings_on_startup(self, value):
         self.load_save_settings_on_startup = value
-        self.update_json('load settings on startup', value, 'saved files')
+        self.update_json('load save settings on startup', value, 'saved files')
