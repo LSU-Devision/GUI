@@ -79,12 +79,9 @@ class ExcelWindow(tk.Toplevel):
         self.run()
     def create_page(self):
         """
-        method: create_page
-        description: creates the page
+        :method: create_page
+        :description: creates the page
         """
-
-        dropdown_values = ['None', '1', '2', '3', '4', '5']
-
         # create the export excel button
         self.export_excel_button = ttk.Button(self.tab1, text='Export to Excel', command=self.master.excel_editor.export_predictions_to_excel)
         # create the load excel by selection button
@@ -95,56 +92,11 @@ class ExcelWindow(tk.Toplevel):
         self.clear_excel_file_button = ttk.Button(self.tab1, text='Clear Excel File', command=self.clear_excel_file)
         # protocol for closing the window
         self.protocol("WM_DELETE_WINDOW", lambda: self.close_window())
-
-        # create the excel index column
-        self.excel_index_column_label = ttk.Label(self.tab2, text='Excel Index Column')
-        # create the excel index column dropdown
-        self.excel_index_column_dropdown = ttk.Combobox(self.tab2, state='readonly',values=dropdown_values)
-        # set the excel index column dropdown to the current value
-        self.excel_index_column_dropdown.set(self.excel_editor.get_excel_index_column_index())
-        # bind the event to the excel index column dropdown
-        self.excel_index_column_dropdown.bind("<<ComboboxSelected>>", lambda event: self.excel_editor.set_excel_index_column_value(self.excel_index_column_dropdown.get()))
-
-        '''
-        # create the excel date column
-        self.excel_date_column_label = ttk.Label(self.tab2, text='Excel Date Column')
-        # create the excel date column dropdown
-        self.excel_date_column_dropdown = ttk.Combobox(self.tab2, state='readonly',values=dropdown_values)
-        # set the excel date column dropdown to the current value
-        self.excel_date_column_dropdown.set(self.excel_editor.get_excel_date_column_index())
-        # bind the event to the excel date column dropdown
-        self.excel_date_column_dropdown.bind("<<ComboboxSelected>>", lambda event: self.excel_editor.set_excel_date_column_value(self.excel_date_column_dropdown.get()))
-        '''
-        self.dropdown_builder('date')
-
-        
-        # create the excel time column
-        self.excel_time_column_label = ttk.Label(self.tab2, text='Excel Time Column')
-        # create the excel time column dropdown
-        self.excel_time_column_dropdown = ttk.Combobox(self.tab2, state='readonly',values=dropdown_values)
-        # set the excel time column dropdown to the current value
-        self.excel_time_column_dropdown.set(self.excel_editor.get_excel_time_column_index())
-        # bind the event to the excel time column dropdown
-        self.excel_time_column_dropdown.bind("<<ComboboxSelected>>", lambda event: self.excel_editor.set_excel_time_column_value(self.excel_time_column_dropdown.get()))
-
-        # create the excel file name column
-        self.excel_file_name_column_label = ttk.Label(self.tab2, text='Excel File Name Column')
-        # create the excel file name column dropdown
-        self.excel_file_name_column_dropdown = ttk.Combobox(self.tab2, state='readonly',values=dropdown_values)
-        # set the excel file name column dropdown to the current value
-        self.excel_file_name_column_dropdown.set(self.excel_editor.get_excel_file_name_column_index())
-        # bind the event to the excel file name column dropdown
-        self.excel_file_name_column_dropdown.bind("<<ComboboxSelected>>", lambda event: self.excel_editor.set_excel_file_name_column_value(self.excel_file_name_column_dropdown.get()))
-
-        # create the excel total count column
-        self.excel_total_count_column_label = ttk.Label(self.tab2, text='Excel Total Count Column')
-        # create the excel total count column dropdown
-        self.excel_total_count_column_dropdown = ttk.Combobox(self.tab2, state='readonly',values=dropdown_values)
-        # set the excel total count column dropdown to the current value
-        self.excel_total_count_column_dropdown.set(self.excel_editor.get_excel_total_count_column_index())
-        # bind the event to the excel total count column dropdown
-        self.excel_total_count_column_dropdown.bind("<<ComboboxSelected>>", lambda event: self.excel_editor.set_excel_total_count_column_value(self.excel_total_count_column_dropdown.get()))
-
+        # creates the list to pass to the dropdown builder
+        dropdown_list = ['index', 'date', 'time', 'file_name', 'total_count']
+        # creates all the dropdowns using the dropdown builder method
+        for dropdown in dropdown_list:
+            self.dropdown_builder(dropdown)
         # create the save excel column button
         self.save_excel_column_button = ttk.Button(self.tab2, text='Save Excel Column Order', command=self.save_excel_columns)
 
@@ -263,7 +215,7 @@ class ExcelWindow(tk.Toplevel):
         # create the page
         self.create_page()
         # create tooltips
-        # utils.ToolTips(self.button_dict(),'excel_window',2)
+        utils.ToolTips(self.button_dict(),'excel_window',2)
         # load the page
         self.load_page()
         # sets the boolean to true to prevent duplicates of the window
@@ -370,11 +322,8 @@ class ExcelWindow(tk.Toplevel):
         self.excel_file_variable = excel_file
 
     def dropdown_builder(self,column_name='index'):
-        code_string = f'self.excel_{column_name}_column_label = ttk.Label(self.tab2, text="Excel {column_name.title()} Column")'
-        exec(code_string,locals(),globals())
-        code_string = f'self.excel_{column_name}_column_dropdown = ttk.Combobox(self.tab2, state="readonly",values=["None", "1", "2", "3", "4", "5"])'
-        exec(code_string,locals(),globals())
-        code_string = f'self.excel_{column_name}_column_dropdown.set(self.excel_editor.get_excel_{column_name}_column_index())'
-        exec(code_string,locals(),globals())
-        code_string = f'self.excel_{column_name}_column_dropdown.bind("<<ComboboxSelected>>", lambda event: self.excel_editor.set_excel_{column_name}_column_value(self.excel_{column_name}_column_dropdown.get()))'
+        code_string = f'self.excel_{column_name}_column_label = ttk.Label(self.tab2, text="Excel {column_name.title()} Column")\n'\
+        f'self.excel_{column_name}_column_dropdown = ttk.Combobox(self.tab2, state="readonly",values=["None", "1", "2", "3", "4", "5"])\n'\
+        f'self.excel_{column_name}_column_dropdown.set(self.excel_editor.get_excel_{column_name}_column_index())\n'\
+        f'self.excel_{column_name}_column_dropdown.bind("<<ComboboxSelected>>", lambda event: self.excel_editor.set_excel_{column_name}_column_value(self.excel_{column_name}_column_dropdown.get()))'
         exec(code_string,locals(),globals())
