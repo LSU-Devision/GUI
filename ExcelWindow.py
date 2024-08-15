@@ -263,7 +263,7 @@ class ExcelWindow(tk.Toplevel):
         # create the page
         self.create_page()
         # create tooltips
-        utils.ToolTips(self.button_dict(),'excel_window',2)
+        # utils.ToolTips(self.button_dict(),'excel_window',2)
         # load the page
         self.load_page()
         # sets the boolean to true to prevent duplicates of the window
@@ -369,12 +369,12 @@ class ExcelWindow(tk.Toplevel):
     def set_excel_file_variable(self, excel_file):
         self.excel_file_variable = excel_file
 
-    def dropdown_builder(object,column_name='index'):
+    def dropdown_builder(self,column_name='index'):
         code_string = f'self.excel_{column_name}_column_label = ttk.Label(self.tab2, text="Excel {column_name.title()} Column")'
         exec(code_string,locals(),globals())
-        code_string = f' self.excel_{column_name}_column_dropdown = ttk.Combobox(self.tab2, state="readonly",values=["None", "1", "2", "3", "4", "5"])'
+        code_string = f'self.excel_{column_name}_column_dropdown = ttk.Combobox(self.tab2, state="readonly",values=["None", "1", "2", "3", "4", "5"])'
         exec(code_string,locals(),globals())
-        code_string = f' self.excel_{column_name}_column_dropdown.set(self.excel_editor.get_excel_{column_name}_column_index())'
+        code_string = f'self.excel_{column_name}_column_dropdown.set(self.excel_editor.get_excel_{column_name}_column_index())'
         exec(code_string,locals(),globals())
         code_string = f'self.excel_{column_name}_column_dropdown.bind("<<ComboboxSelected>>", lambda event: self.excel_editor.set_excel_{column_name}_column_value(self.excel_{column_name}_column_dropdown.get()))'
         exec(code_string,locals(),globals())
