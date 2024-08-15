@@ -3,6 +3,7 @@ import webbrowser
 from tkinter import ttk,messagebox
 import Utilities as utils
 from Scrapers import Scraper
+import os
 '''
 Class SettingsWindow
 Contributors: Skylar Wilson, Alex Mensen-Johnson, Sunella Ramnath
@@ -98,11 +99,11 @@ class SettingsWindow(tk.Toplevel):
 
     def create_tab2(self):
         # create the save model selection button
-        self.save_model_selection_button = ttk.Button(self.tab2, text='Save Model Selection', command=None)
+        self.save_model_selection_button = ttk.Button(self.tab2, text='Save Model Selection', command=self.save_model_selection)
         # create the model selection label
-        self.model_selection_label = ttk.Label(self.tab2, text=self.master.settings.get_selected_model_name(), font=50)
+        self.model_label = ttk.Label(self.tab2, text=self.master.settings.get_model_name(), font=50)
         # create the clear model selection button
-        self.clear_model_selection_button = ttk.Button(self.tab2, text='Clear Model Selection', command=None)
+        self.clear_model_selection_button = ttk.Button(self.tab2, text='Clear Model Selection', command=self.clear_model_selection)
         # create the save excel output button
         self.save_excel_file_button = ttk.Button(self.tab2, text='Save Excel File', command=self.save_excel_file)
         # create the excel output label
@@ -183,7 +184,7 @@ class SettingsWindow(tk.Toplevel):
         # sets the save model selection button to the grid
         self.save_model_selection_button.grid(row=0, column=0, pady=15, padx=15)
         # sets the model selection label to the grid
-        self.model_selection_label.grid(row=0, column=1, pady=15, padx=15)
+        self.model_label.grid(row=0, column=1, pady=15, padx=15)
         # sets the clear model selection button to the grid
         self.clear_model_selection_button.grid(row=0, column=2, pady=15, padx=15)
         # sets the save excel output button to the grid
@@ -415,5 +416,28 @@ class SettingsWindow(tk.Toplevel):
         # update the settings
         if self.master.settings.get_load_save_settings_on_startup() is False:
             self.output_path_label.config(text='None')
-            self.model_selection_label.config(text='None')
+            self.model_label.config(text='None')
             self.excel_file_label.config(text='None')
+
+    def save_model_selection(self):
+        """
+        :method: save model selection
+        :description: saves the model selection
+        :return:
+        """
+        if self.master.model_path is not None:
+            self.master.settings.set_model_name(utils.model_path_to_name(self.master.model_path))
+            self.master.settings.set_model_path(self.master.model_path)
+            self.model_label.config(text=self.master.settings.get_model_name())
+        else:
+            messagebox.showerror("Error", "No Model Loaded in the Program, Please Load a Model via Model Dropdown")
+
+    def clear_model_selection(self):
+        """
+        :method: clear model selection
+        :description: clears the model selection
+        :return:
+        """
+        self.master.settings.set_model_name(None)
+        self.master.settings.set_model_path(None)
+        self.model_label.config(text='None')

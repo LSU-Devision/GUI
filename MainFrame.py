@@ -128,8 +128,16 @@ class MainFrame(ttk.Frame):
         """
         # change the labels if the start up setttings are on
         if self.settings.get_load_save_settings_on_startup() is True:
-            self.excel_label_title.config(text=self.settings.get_excel_file_name('string'))
-            self.excel_editor.set_excel_file(self.settings.get_excel_file_name())
+            if self.settings.get_excel_file_name() is not None:
+                self.excel_label_title.config(text=self.settings.get_excel_file_name('string'))
+                self.excel_editor.set_excel_file(self.settings.get_excel_file_name())
+            # load model on start up
+            if self.settings.get_model_path() is not None:
+                self.model_path = self.settings.get_model_path()
+                self.select_model_dropdown.set(self.settings.model_name)
+                self.load_model()
+
+
 
 
     def create_display(self):
@@ -313,7 +321,9 @@ class MainFrame(ttk.Frame):
         # If the model is selected from one of the options, load the option
         else:
             self.model_path = Predictions.get_model_path(self.predictions, model_option)
-        # print the model path
+        self.load_model()
+
+    def load_model(self):
         print(self.model_path)
         # print the full file name of the model path
         print(os.path.basename(self.model_path))
@@ -334,7 +344,6 @@ class MainFrame(ttk.Frame):
             self.predict_all_button.config(state=tk.NORMAL)
             # ste the model selected to true
             self.model_selected = True
-
     def clear_images(self):
         """
         method: clear_images

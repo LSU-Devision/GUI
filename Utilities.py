@@ -13,6 +13,10 @@ Methods:
     string_to_substring(string)
     boolean_text_conversion(boolean)
 '''
+
+FROG_EGG_COUNTER_BASE_PATH = os.path.basename('models/frog-egg-counter')
+OYSTER_SEED_COUNTER_BASE_PATH = os.path.basename('models/Oyster_model')
+XENOPUS_FROG_EMBRYO_BASE_PATH = os.path.basename('models/Xenopus Frog Embryos Classification Model')
 def string_to_substring(string):
     """
     Method: string_to_substring
@@ -252,3 +256,13 @@ class StringChecker():
         for each in self.files_cannot_end_with:
             string_builder = f'{string_builder} {each}'
         return string_builder
+
+def model_path_to_name(path):
+    if os.path.basename(path) == FROG_EGG_COUNTER_BASE_PATH:
+        return 'Frog Egg Counter'
+    if os.path.basename(path) == OYSTER_SEED_COUNTER_BASE_PATH:
+        return ' Oyster Seed Counter'
+    if os.path.basename(path) == XENOPUS_FROG_EMBRYO_BASE_PATH:
+        return 'Frog Egg Classification'
+    else:
+        return 'User Model'
