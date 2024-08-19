@@ -110,9 +110,10 @@ class MainFrame(ttk.Frame):
                 self.excel_editor.set_excel_file(self.settings.get_excel_file_name())
             # load model on start up
             if self.settings.get_model_path() is not None:
-                self.model_path = self.settings.get_model_path()
-                self.select_model_dropdown.set(self.settings.model_name)
-                self.load_model()
+                if os.path.exists(self.model_path):
+                    self.model_path = self.model_path
+                    self.select_model_dropdown.set(self.settings.model_name)
+                    self.load_model()
 
 
 

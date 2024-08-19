@@ -286,9 +286,11 @@ class StringChecker():
 def model_path_to_name(path):
     if os.path.basename(path) == FROG_EGG_COUNTER_BASE_PATH:
         return 'Frog Egg Counter'
-    if os.path.basename(path) == OYSTER_SEED_COUNTER_BASE_PATH:
+    elif os.path.basename(path) == OYSTER_SEED_COUNTER_BASE_PATH:
         return ' Oyster Seed Counter'
-    if os.path.basename(path) == XENOPUS_FROG_EMBRYO_BASE_PATH:
+    elif os.path.basename(path) == XENOPUS_FROG_EMBRYO_BASE_PATH:
         return 'Frog Egg Classification'
-    else:
+    elif os.path.exists(path):
         return 'User Model'
+    else:
+        return 'None'

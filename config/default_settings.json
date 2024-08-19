@@ -7,10 +7,10 @@
         "save images output": true
     },
     "saved files": {
-        "model name": null,
+        "model name": "None",
         "model path": "",
         "excel file name": null,
         "output folder name": null,
-        "load save settings on startup": false
+        "load save settings on startup": true
     }
 }
