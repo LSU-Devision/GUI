@@ -107,8 +107,15 @@ class SettingsJson():
     def get_save_images_output(self):
         return self.save_images_output
 
-    def get_model_name(self):
-        return self.model_name
+    def get_model_name(self,option=None):
+        if option is None:
+            return self.model_name
+        elif option == 'string':
+            if self.model_name is None:
+                return 'None'
+            else:
+                return self.model_name
+
 
     def get_model_path(self):
         return self.model_path
@@ -137,8 +144,15 @@ class SettingsJson():
                 return utils.string_to_substring(self.excel_file_name)
 
 
-    def get_output_folder_name(self):
-        return self.output_folder_name
+    def get_output_folder_name(self,option=None):
+        if option is None:
+            return self.output_folder_name
+        elif option == 'string':
+            if self.output_folder_name is None:
+                return 'None'
+            else:
+                return utils.string_to_substring(self.output_folder_name)
+
 
     def get_load_save_settings_on_startup(self):
         return self.load_save_settings_on_startup

@@ -3,30 +3,21 @@ import webbrowser
 from tkinter import ttk,messagebox
 import Utilities as utils
 from Scrapers import Scraper
-import os
-'''
-Class SettingsWindow
-Contributors: Skylar Wilson, Alex Mensen-Johnson, Sunella Ramnath
-Class: Settings Window
-Description: Settings Window for the main frame
-Methods:
-init
-create_page
-load_page
-toggle_automatic_excel
-toggle_automatic_prediction_data_clear
-toggle_clear_data_on_clear_images
-toggle_save_images
-reset_settings
-'''
+
 class SettingsWindow(tk.Toplevel):
     '''
-    initialization method
-    creates class variables for the settings window
-    parameters:
-    master: the mainframe window
-    container: the App window
-    settings: the settings object
+    :Class: SettingsWindow
+    :Contributors: Skylar Wilson, Alex Mensen-Johnson, Sunella Ramnath
+    :Description: Settings Window for the main frame
+    :Methods:
+    init
+    create_page
+    load_page
+    toggle_automatic_excel
+    toggle_automatic_prediction_data_clear
+    toggle_clear_data_on_clear_images
+    toggle_save_images
+    reset_settings
     '''
     def __init__(self, master=None,container=None,settings=None):
         # creates class variables for the settings window
@@ -101,7 +92,7 @@ class SettingsWindow(tk.Toplevel):
         # create the save model selection button
         self.save_model_selection_button = ttk.Button(self.tab2, text='Save Model Selection', command=self.save_model_selection)
         # create the model selection label
-        self.model_label = ttk.Label(self.tab2, text=self.master.settings.get_model_name(), font=50)
+        self.model_label = ttk.Label(self.tab2, text=self.master.settings.get_model_name('string'), font=50)
         # create the clear model selection button
         self.clear_model_selection_button = ttk.Button(self.tab2, text='Clear Model Selection', command=self.clear_model_selection)
         # create the save excel output button
@@ -113,7 +104,7 @@ class SettingsWindow(tk.Toplevel):
         # create the save output path button
         self.save_output_path_button = ttk.Button(self.tab2, text='Save Output Path', command=None)
         # create the output path label
-        self.output_path_label = ttk.Label(self.tab2, text=self.master.settings.get_output_folder_name(), font=50)
+        self.output_path_label = ttk.Label(self.tab2, text=self.master.settings.get_output_folder_name('string'), font=50)
         # create the clear output path button
         self.clear_output_path_button = ttk.Button(self.tab2, text='Clear Output Path', command=None)
         # create the load save settings button

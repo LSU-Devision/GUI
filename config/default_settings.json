@@ -7,8 +7,8 @@
         "save images output": false
     },
     "saved files": {
-        "model name": null,
-        "model path": null,
+        "model name": "Frog Egg Classification",
+        "model path": "models/Xenopus Frog Embryos Classification Model",
         "excel file name": null,
         "output folder name": null,
         "load save settings on startup": true
