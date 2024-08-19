@@ -42,7 +42,7 @@ class MainFrame(ttk.Frame):
         description: Initialization method
         :param container:
         """
-        # initialize the container's parent init methods
+        # initialize the container's master init methods
         super().__init__(container)
         # initialize the settings
         self.settings = Settings.SettingsJson()
@@ -76,8 +76,6 @@ class MainFrame(ttk.Frame):
         self.model_path = ''
         # settings for automatic excel export
         self.automatic_excel_setting = self.settings.get_automatic_excel_export()
-        # print(self.automatic_excel_setting)
-        self.predict_index = 1
         # settings for automatic prediction data clear
         self.automatic_prediction_data_clear_setting = self.settings.get_automatic_prediction_clear_data()
         # settings for clear data on clear images toggle
@@ -220,7 +218,7 @@ class MainFrame(ttk.Frame):
         Destroys current frame and reloads MainFrame for the purpose of dynamic display.
         :return:
         """
-        # make the parent container the same container
+        # make the master container the same container
         parent_container = self.container
         # destroy the mainframe window
         self.destroy()

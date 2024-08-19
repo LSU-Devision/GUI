@@ -74,12 +74,15 @@ class ExcelWindow(tk.Toplevel):
 
         self.notebook.bind("<<NotebookTabChanged>>", self.on_tab_change)
         self.excel_file_name = tk.StringVar()
+        self.output_folder_name = tk.StringVar()
         self.excel_file_variable = None
+        self.output_folder_variable = None
         # creates the page
         self.run()
-    def create_page(self):
+
+    def create_tab1(self):
         """
-        :method: create_page
+        :method: create tab 1
         :description: creates the page
         """
         # create the export excel button
@@ -90,24 +93,91 @@ class ExcelWindow(tk.Toplevel):
         self.clear_prediction_data_button = ttk.Button(self.tab1, text='Clear Predictions',command=self.master.clear_predicted_data)
         # create the clear excel file button
         self.clear_excel_file_button = ttk.Button(self.tab1, text='Clear Excel File', command=self.clear_excel_file)
-        # protocol for closing the window
-        self.protocol("WM_DELETE_WINDOW", lambda: self.close_window())
-        # creates the list to pass to the dropdown builder
+
+    def create_tab2(self):
+        """
+        :method: create tab 2
+        :description: creates the page
+        """
         dropdown_list = ['index', 'date', 'time', 'file_name', 'total_count']
+
         # creates all the dropdowns using the dropdown builder method
         for dropdown in dropdown_list:
             self.dropdown_builder(dropdown)
+
         # create the save excel column button
         self.save_excel_column_button = ttk.Button(self.tab2, text='Save Excel Column Order', command=self.save_excel_columns)
 
-        # tab 3
-
+    def create_tab3(self):
+        """
+        :method: create tab 3
+        :description: creates the page
+        """
         self.excel_name_label = ttk.Label(self.tab3, text='New Excel File Name : ')
         self.excel_name_field= ttk.Entry(self.tab3, textvariable=self.excel_file_name)
         self.excel_name_save_button = ttk.Button(self.tab3, text='Save Excel File Name', command=self.save_excel_file_name)
 
+        self.output_folder_label = ttk.Label(self.tab3,text = 'Output Folder Name : ')
+        self.output_folder_field = ttk.Entry(self.tab3, textvariable = self.output_folder_name)
+        self.output_folder_save_button = ttk.Button(self.tab3, text = 'Save Output Folder Name', command = self.save_output_folder_name)
+
+    def create_protocols(self):
+        # eliminates duplicate windows
+        self.protocol("WM_DELETE_WINDOW", self.close_window)
+
+    def load_tab1(self):
+        """
+        :method: load tab 1
+        :description: creates the buttons and labels for the Basic settings Tab and postions them on the grid
+        :return: Nothing
+        """
+        # creates the export excel button
+        self.export_excel_button.grid(row=0, column=0, pady=15, padx=15)
+        # creates the load excel by selection button
+        self.load_excel_by_selection_button.grid(row=0, column=1, pady=15, padx=15)
+        # creates the clear predictions button
+        self.clear_prediction_data_button.grid(row=1, column=0, pady=15, padx=15)
+        # creates the clear excel file button
+        self.clear_excel_file_button.grid(row=1, column=1, pady=15, padx=15)
 
 
+
+    def load_tab2(self):
+        """
+        :method: load tab 2
+        :description: creates the buttons and labels for the Advanced settings Tab and postions them on the grid
+        :return: Nothing
+        """
+        self.excel_index_column_label.grid(row=1, column=1, pady=15, padx=15)
+        self.excel_index_column_dropdown.grid(row=1, column=2, pady=15, padx=15)
+
+        self.excel_date_column_label.grid(row=2, column=1, pady=15, padx=15)
+        self.excel_date_column_dropdown.grid(row=2, column=2, pady=15, padx=15)
+
+        self.excel_time_column_label.grid(row=3, column=1, pady=15, padx=15)
+        self.excel_time_column_dropdown.grid(row=3, column=2, pady=15, padx=15)
+
+        self.excel_file_name_column_label.grid(row=4, column=1, pady=15, padx=15)
+        self.excel_file_name_column_dropdown.grid(row=4, column=2, pady=15, padx=15)
+
+        self.excel_total_count_column_label.grid(row=5, column=1, pady=15, padx=15)
+        self.excel_total_count_column_dropdown.grid(row=5, column=2, pady=15, padx=15)
+        # creates the save excel column button
+        self.save_excel_column_button.grid(row=6, column=1, pady=15, padx=15)
+
+    def load_tab3(self):
+        """
+        :method: load tab 3
+        :description: creates the buttons and labels for the Advanced settings Tab and postions them on the grid
+        :return: Nothing
+        """
+        self.excel_name_label.grid(row=0, column=0, pady=15, padx=15)
+        self.excel_name_field.grid(row=0, column=1, pady=15, padx=15)
+        self.excel_name_save_button.grid(row=0, column=2, pady=15, padx=15)
+
+        self.output_folder_label.grid(row=1, column=0, pady=15, padx=15)
+        self.output_folder_field.grid(row=1, column=1, pady=15, padx=15)
+        self.output_folder_save_button.grid(row=1, column=2, pady=15, padx=15)
 
     def button_dict(self):
         """
@@ -126,42 +196,6 @@ class ExcelWindow(tk.Toplevel):
             'excel_file_name_column': self.excel_file_name_column_dropdown,
             'excel_total_count_column': self.excel_total_count_column_dropdown
         }
-
-    def load_page(self):
-        """
-        method: load page
-        description: loads the page into the tkinter window
-        :return:
-        """
-        # add the export excel button to the pop up window
-        self.export_excel_button.grid(row=1, column=1, pady=15, padx=15)
-        # add the load excel by selection button to the pop up window
-        self.load_excel_by_selection_button.grid(row=1, column=2, pady=15, padx=15)
-        # add the clear predictions button to the pop up window
-        self.clear_prediction_data_button.grid(row=2, column=1, pady=15, padx=15)
-        # add the clear excel file button to the pop up window
-        self.clear_excel_file_button.grid(row=2, column=2, pady=15, padx=15)
-
-        self.excel_index_column_label.grid(row=1, column=1, pady=15, padx=15)
-        self.excel_index_column_dropdown.grid(row=1, column=2, pady=15, padx=15)
-
-        self.excel_date_column_label.grid(row=2, column=1, pady=15, padx=15)
-        self.excel_date_column_dropdown.grid(row=2, column=2, pady=15, padx=15)
-
-        self.excel_time_column_label.grid(row=3, column=1, pady=15, padx=15)
-        self.excel_time_column_dropdown.grid(row=3, column=2, pady=15, padx=15)
-
-        self.excel_file_name_column_label.grid(row=4, column=1, pady=15, padx=15)
-        self.excel_file_name_column_dropdown.grid(row=4, column=2, pady=15, padx=15)
-
-        self.excel_total_count_column_label.grid(row=5, column=1, pady=15, padx=15)
-        self.excel_total_count_column_dropdown.grid(row=5, column=2, pady=15, padx=15)
-
-        self.save_excel_column_button.grid(row=6, column=1, pady=15, padx=15)
-
-        self.excel_name_label.grid(row=0,column=0,pady=15,padx=15)
-        self.excel_name_field.grid(row=0,column=1,pady=15,padx=15)
-        self.excel_name_save_button.grid(row=0,column=2,pady=15,padx=15)
 
 
 
@@ -213,11 +247,21 @@ class ExcelWindow(tk.Toplevel):
         :return:
         """
         # create the page
-        self.create_page()
+        # self.create_page()
+        self.create_tab1()
+
+        self.create_tab2()
+
+        self.create_tab3()
+
+        self.create_protocols()
         # create tooltips
         utils.ToolTips(self.button_dict(),'excel_window',2)
         # load the page
-        self.load_page()
+        #self.load_page()
+        self.load_tab1()
+        self.load_tab2()
+        self.load_tab3()
         # sets the boolean to true to prevent duplicates of the window
         self.master.is_excel_save_page_open = True
 
@@ -308,11 +352,26 @@ class ExcelWindow(tk.Toplevel):
         # conditional statement to check the given string
         else:
             # show an error message, ask the user if they want to see what characters or names are invalid
-            flag = messagebox.askokcancel("Error", "Filename cannot be used.\nFilename contains invalid characters or names that cannot be used or is empty. \nDo you want to see what characters or names are invalid?")
+            flag = messagebox.askokcancel("Error", "Filename cannot be used.\nFilename contains invalid characters or "
+                                                   "names that cannot be used or is empty. \nDo you want to see what "
+                                                   "characters or names are invalid?")
             # if the flag is true, show the invalid characters or names
             if flag is True:
                 # show the invalid characters or names
                 messagebox.showinfo("Invalid naming conventions", 'Invalid characters: \n' + checker.get_invalid_characters_string() + '\nInvalid names: \n' + checker.get_reserved_filenames_string() + '\nAlso file names cannot end with periods or spaces')
+
+    def save_output_folder_name(self):
+        checker = utils.StringChecker()
+
+        if checker.folder_checker(self.output_folder_field.get()) is False:
+            self.master.excel_editor.set_output_folder(self.output_folder_field.get())
+            messagebox.showinfo("Success", "Output Folder Name Saved")
+        else:
+            flag = messagebox.askyesno("Error","Folder name cannout be used.\nFolder name contains invalid "
+                                               "characters, is empty, is too long, or begins/ends with a space.\nDo "
+                                               "you want to see the permissable naming conventions allowed?")
+            if flag is True:
+                messagebox.showinfo("Naming conventions",f'Acceptable characters \n Letters, Numbers, underscore, hyphen, and spaces are allowed\nFolder name cannot begin with or end with a space')
 
 
     def get_excel_file_variable(self):

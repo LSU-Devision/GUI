@@ -24,7 +24,7 @@ FROG_EGG_CLASSIFICATION = "models/Xenopus Frog Embryos Classification Model"
 class Predictions:
     def __init__(self, image_files, parent, model, main_frame):
         self.image_files = image_files
-        self.parent = parent
+        self.master = parent
         self.device = '/GPU:0' if tf.config.experimental.list_physical_devices('GPU') else '/CPU:0'
         # self.model = model
         self.lbl_cmap = random_label_cmap()
@@ -32,7 +32,7 @@ class Predictions:
         self.prediction_files = {}
         self.predict_index = 1
         self.settings = Settings.SettingsJson()
-        self.slideshow = Slideshow(self.parent)
+        self.slideshow = Slideshow(self.master)
         self.mainframe = main_frame
 
     def get_model_classes(self):
@@ -70,7 +70,7 @@ class Predictions:
         date = datetime.datetime.now().date().strftime("%Y/%m/%d")
         time = datetime.datetime.now().time().strftime("%H:%M:%S")
         self.predictions_data.append((self.predict_index, date, time, os.path.basename(image_path), len(details['points'])))
-        if self.parent.settings.save_images_output == True:
+        if self.master.settings.save_images_output == True:
             fig, ax = plt.subplots(figsize=(13, 10))
             ax.imshow(img, cmap="gray")
             ax.imshow(labels, cmap=self.lbl_cmap, alpha=0.5)
@@ -118,8 +118,8 @@ class Predictions:
         self.predict_index += 1
 
 
-        print(f'settings is : {self.parent.settings.save_images_output}')
-        if self.parent.settings.save_images_output == True:
+        print(f'settings is : {self.master.settings.save_images_output}')
+        if self.master.settings.save_images_output == True:
 
 
 
@@ -173,7 +173,7 @@ class Predictions:
             plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
             plt.tight_layout(pad=0)
 
-            save_path = os.path.join('output', f'prediction_{os.path.basename(image_path)}')
+            save_path = os.path.join(self.master.excel_editor.get_output_folder(), f'prediction_{os.path.basename(image_path)}')
             if not os.path.exists(os.path.dirname(save_path)):
                 os.makedirs(os.path.dirname(save_path))
             fig.savefig(save_path, dpi=500, bbox_inches='tight', pad_inches=0)
@@ -219,7 +219,7 @@ class Predictions:
         self.mainframe.enable_button(self.mainframe.predict_all_button)
 
     def create_progress_popup(self):
-        self.progress_popup = tk.Toplevel(self.parent)
+        self.progress_popup = tk.Toplevel(self.master)
         self.progress_popup.title("Prediction Progress")
 
         self.progress_bar = ttk.Progressbar(self.progress_popup, orient='horizontal', mode='determinate', length=300)

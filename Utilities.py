@@ -172,13 +172,16 @@ class StringChecker():
         self.invalid_characters = ['\\', '/', ':', ';', '?', '*', '<', '>', '|', '"', '.']
         self.invalid_filenames = ['CON', 'PRN', 'AUX', 'NUL', 'COM0', 'COM1', 'COM2', 'COM3', 'COM4', 'COM5', 'COM6', 'COM7', 'COM8', 'COM9', 'LPT0', 'LPT1', 'LPT2', 'LPT3', 'LPT4', 'LPT5', 'LPT6', 'LPT7', 'LPT8', 'LPT9','NONE']
         self.files_cannot_end_with = ['.', ' ']
+        self.alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
+        self.numbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+        self.acceptable_folder_characters = [' ', '-', '_']
 
     def filename_checker(self, filename):
         """
         method: filename checker
         description: checks if filename is valid
         :param filename: name to be checked for validity
-        :return: boolean value true or false based of the validity of the filename
+        :return: boolean value true or false based of the validity of the filename, False if valid, True if invalid
         """
         # create a boolean variable named flag
         flag = False
@@ -214,6 +217,29 @@ class StringChecker():
                 return flag
         # return flag
         return flag
+
+    def folder_checker(self,folder_name):
+        # create a boolean variable named flag
+        flag = False
+        # check if folder name is empty
+        if folder_name == '':
+            flag = True
+            return flag
+        # Create valid characters list
+        valid_characters = self.acceptable_folder_characters + self.alphabet + self.numbers
+        for character in folder_name:
+            if character.upper() not in valid_characters:
+                flag = True
+                return flag
+        if len(folder_name) > 30:
+            flag = True
+            return flag
+        if folder_name.startswith(' ') or folder_name.endswith(' '):
+            flag = True
+            return flag
+        return flag
+
+
 
     def get_invalid_characters(self):
         return self.invalid_characters

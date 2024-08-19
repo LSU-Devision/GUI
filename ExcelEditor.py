@@ -40,6 +40,8 @@ class ExcelEditor:
         self.excel_file_name_value = 'None'
         # set the Excel total count value to none
         self.excel_total_count_value = 'None'
+        # create output folder variable
+        self.output_folder = 'output'
         # set the master to the mainframe
         self.master = master
         # load the Excel settings
@@ -109,14 +111,14 @@ class ExcelEditor:
             # check to see if a name has been set to the excel_file_variable
             if self.master.excel_window.get_excel_file_variable() is None:
                 # if none has been set, set the Excel file to the default
-                self.set_excel_file(os.path.join('output', f'predictions_{current_time}.xlsx'))
+                self.set_excel_file(os.path.join(self.output_folder, f'predictions_{current_time}.xlsx'))
             else:
                 # if a name has been set, set the Excel file to the name
-                self.set_excel_file(os.path.join('output', f'{self.master.excel_window.get_excel_file_variable()}.xlsx'))
+                self.set_excel_file(os.path.join(self.output_folder, f'{self.master.excel_window.get_excel_file_variable()}.xlsx'))
         # check to see if the output folder exists
-        if not os.path.exists('output'):
+        if not os.path.exists(self.output_folder):
             # create the output folder
-            os.makedirs('output')
+            os.makedirs(self.output_folder)
         # create boolean variable to check if the file exists
         does_file_exist = True
         # create a list to store the headers
@@ -350,6 +352,9 @@ class ExcelEditor:
         return self.excel_file
     def get_excel_label(self):
         return self.excel_label
+    def get_output_folder(self):
+        return self.output_folder
+
     def set_excel_file(self, excel_file):
         self.excel_file = excel_file
     def set_excel_label(self, excel_label):
@@ -364,6 +369,9 @@ class ExcelEditor:
         self.excel_file_name_value = excel_file_name
     def set_excel_total_count_column_value(self, excel_total_count):
         self.excel_total_count_value = excel_total_count
+
+    def set_output_folder(self, output_folder):
+        self.output_folder = output_folder
 
     '''
     method: get_excel_headers
