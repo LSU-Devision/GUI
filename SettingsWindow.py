@@ -102,11 +102,11 @@ class SettingsWindow(tk.Toplevel):
         # create the clear excel file button
         self.clear_excel_file_button = ttk.Button(self.tab2, text='Clear Excel File', command=self.clear_excel_file)
         # create the save output path button
-        self.save_output_path_button = ttk.Button(self.tab2, text='Save Output Path', command=None)
+        self.save_output_path_button = ttk.Button(self.tab2, text='Save Output Path', command=self.save_output_folder)
         # create the output path label
         self.output_path_label = ttk.Label(self.tab2, text=self.master.settings.get_output_folder_name('string'), font=50)
         # create the clear output path button
-        self.clear_output_path_button = ttk.Button(self.tab2, text='Clear Output Path', command=None)
+        self.clear_output_path_button = ttk.Button(self.tab2, text='Clear Output Path', command=self.clear_output_folder)
         # create the load save settings button
         self.load_save_settings_button = ttk.Button(self.tab2, text='Load Save Settings On Startup', command=lambda : self.load_settings_toggle_wrapper('self.settings.load_save_settings_on_startup',self.load_save_settings_button_label))
         # create the load save settings label
@@ -409,6 +409,10 @@ class SettingsWindow(tk.Toplevel):
             self.output_path_label.config(text='None')
             self.model_label.config(text='None')
             self.excel_file_label.config(text='None')
+        else:
+            self.output_path_label.config(text=self.master.settings.get_output_folder_name())
+            self.model_label.config(text=self.master.settings.get_model_name())
+            self.excel_file_label.config(text=self.master.settings.get_excel_file_name())
 
     def save_model_selection(self):
         """
@@ -432,3 +436,25 @@ class SettingsWindow(tk.Toplevel):
         self.master.settings.set_model_name(None)
         self.master.settings.set_model_path(None)
         self.model_label.config(text='None')
+
+    def save_output_folder(self):
+        """
+        :method: save output folder
+        :description: saves the output folder
+        :return:
+        """
+        if self.master.excel_editor.get_output_folder() is not self.master.settings.get_output_folder_name():
+            self.master.settings.set_output_folder_name(self.master.excel_editor.get_output_folder())
+            self.output_path_label.config(text=self.master.excel_editor.get_output_folder())
+        else:
+            messagebox.showerror("Error", "Current output folder is already saved")
+
+    def clear_output_folder(self):
+        """
+        :method: clear output folder
+        :description: clears the output folder
+        :return:
+        """
+        self.master.excel_editor.set_output_folder('output')
+        self.master.settings.set_output_folder_name('output')
+        self.output_path_label.config(text='output')
