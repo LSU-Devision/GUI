@@ -106,14 +106,27 @@ class MainFrame(ttk.Frame):
         # change the labels if the start up setttings are on
         if self.settings.get_load_save_settings_on_startup() is True:
             if self.settings.get_excel_file_name() is not None:
-                self.excel_label_title.config(text=self.settings.get_excel_file_name('string'))
-                self.excel_editor.set_excel_file(self.settings.get_excel_file_name())
+                if os.path.exists(self.settings.get_excel_file_name()):
+                    self.excel_label_title.config(text=self.settings.get_excel_file_name('string'))
+                    self.excel_editor.set_excel_file(self.settings.get_excel_file_name())
+                else:
+                    self.excel_editor.set_excel_file(None)
+                    self.settings.set_excel_file_name(None)
+                    messagebox.showerror("Error", "Excel File Not Found, Setting reset to None")
             # load model on start up
             if self.settings.get_model_path() is not None:
                 if os.path.exists(self.model_path):
                     self.model_path = self.model_path
                     self.select_model_dropdown.set(self.settings.model_name)
                     self.load_model()
+                else:
+                    self.settings.set_model_path(None)
+                    self.settings.set_model_name(None)
+                    messagebox.showerror("Error", "Model File Not Found, Setting reset to None")
+            if self.settings.get_output_folder_name() is not None:
+                if os.path.exists(self.settings.get_output_folder_name()) is False:
+                    self.settings.set_output_folder_name(None)
+                    messagebox.showerror("Error", "Output Folder Not Found, Setting reset to None")
 
 
 
