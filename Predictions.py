@@ -77,8 +77,9 @@ class Predictions:
             ax.set_title(f"Predicted Objects: {len(np.unique(labels)) - 1}", fontsize=16)
             ax.axis("off")
             plt.tight_layout()
-
-            save_path = os.path.join('output', f'prediction_{os.path.basename(image_path)}')
+            if self.master.excel_editor.get_output_folder() is None:
+                self.master.excel_editor.set_output_folder('output')
+            save_path = os.path.join(self.master.excel_editor.get_output_folder(), f'prediction_{os.path.basename(image_path)}')
             if not os.path.exists(os.path.dirname(save_path)):
                 os.makedirs(os.path.dirname(save_path))
             fig.savefig(save_path, dpi=500)

@@ -125,8 +125,8 @@ class MainFrame(ttk.Frame):
                     messagebox.showerror("Error", "Model File Not Found, Setting reset to None")
             if self.settings.get_output_folder_name() is not None:
                 if os.path.exists(self.settings.get_output_folder_name()) is False:
-                    self.settings.set_output_folder_name(None)
-                    messagebox.showerror("Error", "Output Folder Not Found, Setting reset to None")
+                    self.settings.set_output_folder_name('output')
+                    messagebox.showerror("Error", "Output Folder Not Found, Setting reset to 'output'")
 
 
 
