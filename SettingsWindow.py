@@ -385,14 +385,10 @@ class SettingsWindow(tk.Toplevel):
         :description: clears the excel file
         :return:
         """
-        # clear the excel file from the excel editor
-        self.master.excel_editor.set_excel_file(None)
         # clear the excel file name from the settings
         self.master.settings.set_excel_file_name(None)
         # clear the excel file label
-        self.excel_file_label.config(text='')
-        # clear the excel label title
-        self.master.excel_label_title.config(text='None')
+        self.excel_file_label.config(text='None')
 
     def load_settings_toggle_wrapper(self,boolean_string,tk_label):
         """
