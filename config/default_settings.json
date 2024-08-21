@@ -1,7 +1,7 @@
 {
     "name": "default_settings.json",
     "runtime settings": {
-        "automatic excel export": false,
+        "automatic excel export": true,
         "automatic prediction clear data": false,
         "clear data on clear images": true,
         "save images output": true
@@ -10,7 +10,7 @@
         "model name": null,
         "model path": null,
         "excel file name": null,
-        "output folder name": null,
+        "output folder name": "output",
         "load save settings on startup": true
     }
 }

@@ -346,7 +346,11 @@ class ExcelWindow(tk.Toplevel):
         # conditional statement to check the given string
         if checker.filename_checker(self.excel_name_field.get()) is False:
             # save the Excel file name to the variable
-            self.excel_file_variable = self.excel_name_field.get()
+            if self.master.settings.get_output_folder_name() is not None:
+                self.master.excel_editor.set_excel_file(self.excel_name_field.get())
+            else:
+                self.master.settings.set_output_folder_name('output')
+                self.master.excel_editor.set_excel_file(self.excel_name_field.get())
             # show a success message
             messagebox.showinfo("Success", "Excel File Name Saved")
         # conditional statement to check the given string
@@ -365,6 +369,8 @@ class ExcelWindow(tk.Toplevel):
 
         if checker.folder_checker(self.output_folder_field.get()) is False:
             self.master.excel_editor.set_output_folder(self.output_folder_field.get())
+            if self.master.excel_editor.get_excel_file() is not None:
+                self.master.excel_editor.set_excel_file(self.master.excel_editor.get_excel_file())
             messagebox.showinfo("Success", "Output Folder Name Saved")
         else:
             flag = messagebox.askyesno("Error","Folder name cannout be used.\nFolder name contains invalid "

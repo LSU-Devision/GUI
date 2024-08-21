@@ -356,7 +356,18 @@ class ExcelEditor:
         return self.output_folder
 
     def set_excel_file(self, excel_file):
-        self.excel_file = excel_file
+        if self.output_folder is None:
+            self.set_output_folder('output')
+
+        if excel_file is None:
+            self.excel_file = None
+        else:
+            self.excel_file = os.path.join(self.output_folder, os.path.basename(excel_file).split('.')[0] + '.xlsx')
+            self.get_substring()
+
+            print(f'excel file is {self.excel_file} and the label is {self.excel_label}')
+            self.master.excel_label_title.config(text=self.excel_label)
+
     def set_excel_label(self, excel_label):
         self.excel_label = excel_label
     def set_excel_index_column_value(self, excel_index):
