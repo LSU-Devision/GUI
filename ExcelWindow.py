@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, messagebox,filedialog
 import Utilities as utils
+import os
 
 class ExcelWindow(tk.Toplevel):
     """
@@ -115,10 +116,14 @@ class ExcelWindow(tk.Toplevel):
         """
         self.excel_name_label = ttk.Label(self.tab3, text='New Excel File Name : ')
         self.excel_name_field= ttk.Entry(self.tab3, textvariable=self.excel_file_name)
+        if self.master.excel_editor.get_excel_file() is not None:
+            self.excel_name_field.insert(0, os.path.basename(self.master.excel_editor.get_excel_file()).split('.')[0])
         self.excel_name_save_button = ttk.Button(self.tab3, text='Save Excel File Name', command=self.save_excel_file_name)
 
         self.output_folder_label = ttk.Label(self.tab3,text = 'Output Folder Name : ')
         self.output_folder_field = ttk.Entry(self.tab3, textvariable = self.output_folder_name)
+        if self.master.excel_editor.get_output_folder() is not None:
+            self.output_folder_field.insert(0, self.master.excel_editor.get_output_folder().split('\\')[0])
         self.output_folder_save_button = ttk.Button(self.tab3, text = 'Save Output Folder Name', command = self.save_output_folder_name)
 
     def create_protocols(self):
