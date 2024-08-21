@@ -112,7 +112,7 @@ class SettingsWindow(tk.Toplevel):
         # create the load save settings label
         self.load_save_settings_button_label = ttk.Label(self.tab2, text=utils.boolean_text_conversion(self.master.settings.get_load_save_settings_on_startup()), font=50)
         # create the clear save settings button
-        self.clear_save_settings_button = ttk.Button(self.tab2, text='Clear Save Settings', command= self.master.settings.clear_saves)
+        self.clear_save_settings_button = ttk.Button(self.tab2, text='Clear Save Settings', command= self.clear_save_settings)
 
     def create_tab3(self):
         # create the check version button
@@ -454,3 +454,13 @@ class SettingsWindow(tk.Toplevel):
         self.master.excel_editor.set_output_folder('output')
         self.master.settings.set_output_folder_name('output')
         self.output_path_label.config(text='output')
+
+    def clear_save_settings(self):
+        """
+        :method: clear save settings
+        :description: clears the save settings
+        :return:
+        """
+        self.clear_excel_file()
+        self.clear_model_selection()
+        self.clear_output_folder()
