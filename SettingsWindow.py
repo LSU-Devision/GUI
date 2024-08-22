@@ -108,7 +108,7 @@ class SettingsWindow(tk.Toplevel):
         # create the clear output path button
         self.clear_output_path_button = ttk.Button(self.tab2, text='Clear Output Path', command=self.clear_output_folder)
         # create the load save settings button
-        self.load_save_settings_button = ttk.Button(self.tab2, text='Load Save Settings On Startup', command=lambda : self.load_settings_toggle_wrapper('self.settings.load_save_settings_on_startup',self.load_save_settings_button_label))
+        self.load_save_settings_button = ttk.Button(self.tab2, text='Load Save Settings On Startup', command=lambda : self.toggle_label('self.settings.load_save_settings_on_startup',self.load_save_settings_button_label))
         # create the load save settings label
         self.load_save_settings_button_label = ttk.Label(self.tab2, text=utils.boolean_text_conversion(self.master.settings.get_load_save_settings_on_startup()), font=50)
         # create the clear save settings button
@@ -389,26 +389,6 @@ class SettingsWindow(tk.Toplevel):
         self.master.settings.set_excel_file_name(None)
         # clear the excel file label
         self.excel_file_label.config(text='None')
-
-    def load_settings_toggle_wrapper(self,boolean_string,tk_label):
-        """
-        :method: load settings toggle wrapper
-        :description: wrapper for the load save settings toggle
-        :param boolean_string: string containing the load save settings boolean
-        :param tk_label: load save settings boolean
-        :return: Nothing
-        """
-        # toggle the load save settings
-        self.toggle_label(boolean_string,tk_label)
-        # update the settings
-        if self.master.settings.get_load_save_settings_on_startup() is False:
-            self.output_path_label.config(text='None')
-            self.model_label.config(text='None')
-            self.excel_file_label.config(text='None')
-        else:
-            self.output_path_label.config(text=self.master.settings.get_output_folder_name())
-            self.model_label.config(text=self.master.settings.get_model_name())
-            self.excel_file_label.config(text=self.master.settings.get_excel_file_name())
 
     def save_model_selection(self):
         """
