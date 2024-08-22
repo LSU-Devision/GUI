@@ -4,7 +4,7 @@ import webbrowser
 
 GITHUB_TAGS = "https://github.com/LSU-Devision/GUI/tags"
 GITHUB_USER_GUIDE = "https://github.com/LSU-Devision/GUI/blob/main/Devision%20GUI%20user%20guide.pdf"
-CURRENT_VERSION = 1.2
+CURRENT_VERSION = 1.3
 
 
 class Scraper:
