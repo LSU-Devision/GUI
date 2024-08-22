@@ -18,9 +18,9 @@ import Settings
 import Utilities as utils
 matplotlib.use('agg')
 
-FROG_EGG_COUNTER = "models/frog-egg-counter"
-OYSTER_SEED_COUNTER = "models/Oyster_model"
-FROG_EGG_CLASSIFICATION = "models/Xenopus Frog Embryos Classification Model"
+FROG_EGG_COUNTER = "models\\frog-egg-counter"
+OYSTER_SEED_COUNTER = "models\\Oyster_model"
+FROG_EGG_CLASSIFICATION = "models\\Xenopus Frog Embryos Classification Model"
 class Predictions:
     def __init__(self, image_files, parent, model, main_frame):
         self.image_files = image_files

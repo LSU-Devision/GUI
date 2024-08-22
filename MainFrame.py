@@ -115,9 +115,9 @@ class MainFrame(ttk.Frame):
                     messagebox.showerror("Error", "Excel File Not Found, Setting reset to None")
             # load model on start up
             if self.settings.get_model_path() is not None:
-                if os.path.exists(self.model_path):
-                    self.model_path = self.model_path
-                    self.select_model_dropdown.set(self.settings.model_name)
+                if os.path.exists(self.settings.get_model_path()):
+                    self.model_path = self.settings.get_model_path()
+                    self.select_model_dropdown.set(self.settings.get_model_name('string'))
                     self.load_model()
                 else:
                     self.settings.set_model_path(None)

@@ -109,7 +109,7 @@ class ExcelEditor:
         # check to see if the Excel file exists
         if self.get_excel_file() is None:
             # check to see if a name has been set to the excel_file_variable
-            if self.master.excel_window.get_excel_file_variable() is None:
+            if self.master.excel_editor.get_excel_file() is None:
                 # if none has been set, set the Excel file to the default
                 self.set_excel_file(os.path.join(self.output_folder, f'predictions_{current_time}.xlsx'))
             else:

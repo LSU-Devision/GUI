@@ -7,8 +7,8 @@
         "save images output": true
     },
     "saved files": {
-        "model name": null,
-        "model path": null,
+        "model name": "Frog Egg Counter",
+        "model path": "models\\frog-egg-counter",
         "excel file name": null,
         "output folder name": null,
         "load save settings on startup": true
