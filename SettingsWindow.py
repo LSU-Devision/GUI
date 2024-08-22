@@ -102,11 +102,11 @@ class SettingsWindow(tk.Toplevel):
         # create the clear excel file button
         self.clear_excel_file_button = ttk.Button(self.tab2, text='Clear Excel File', command=self.clear_excel_file)
         # create the save output path button
-        self.save_output_path_button = ttk.Button(self.tab2, text='Save Output Path', command=self.save_output_folder)
+        self.save_output_folder_button = ttk.Button(self.tab2, text='Save Output Folder', command=self.save_output_folder)
         # create the output path label
-        self.output_path_label = ttk.Label(self.tab2, text=self.master.settings.get_output_folder_name('string'), font=50)
+        self.output_folder_label = ttk.Label(self.tab2, text=self.master.settings.get_output_folder_name('string'), font=50)
         # create the clear output path button
-        self.clear_output_path_button = ttk.Button(self.tab2, text='Clear Output Path', command=self.clear_output_folder)
+        self.clear_output_folder_button = ttk.Button(self.tab2, text='Clear Output Path', command=self.clear_output_folder)
         # create the load save settings button
         self.load_save_settings_button = ttk.Button(self.tab2, text='Load Save Settings On Startup', command=lambda : self.toggle_label('self.settings.load_save_settings_on_startup',self.load_save_settings_button_label))
         # create the load save settings label
@@ -137,7 +137,20 @@ class SettingsWindow(tk.Toplevel):
             'automatic_clear_data_on_predict': self.automatic_prediction_data_clear,
             'clear_data_when_clearing_images': self.clear_data_on_clear_images_button,
             'save_images_to_output': self.save_images_output_button,
-            'reset_to_default_settings': self.default_settings_button
+            'reset_to_default_settings': self.default_settings_button,
+            'save_model_selection': self.save_model_selection_button,
+            'model_selection_label': self.model_label,
+            'clear_model_selection': self.clear_model_selection_button,
+            'save_excel_file': self.save_excel_file_button,
+            'excel_file_label': self.excel_file_label,
+            'clear_excel_file': self.clear_excel_file_button,
+            'save_output_folder': self.save_output_folder_button,
+            'output_folder_label': self.output_folder_label,
+            'clear_output_folder': self.clear_output_folder_button,
+            'load_save_settings_on_startup': self.load_save_settings_button,
+            'clear_save_settings': self.clear_save_settings_button,
+            'check_version': self.check_version_button,
+            'user_guide': self.user_guide_button
         }
 
     def load_tab1(self):
@@ -185,11 +198,11 @@ class SettingsWindow(tk.Toplevel):
         # sets the clear excel output button to the grid
         self.clear_excel_file_button.grid(row=1, column=2, pady=15, padx=15)
         # sets the save output path button to the grid
-        self.save_output_path_button.grid(row=2, column=0, pady=15, padx=15)
+        self.save_output_folder_button.grid(row=2, column=0, pady=15, padx=15)
         # sets the output path label to the grid
-        self.output_path_label.grid(row=2, column=1, pady=15, padx=15)
+        self.output_folder_label.grid(row=2, column=1, pady=15, padx=15)
 
-        self.clear_output_path_button.grid(row=2, column=2, pady=15, padx=15)
+        self.clear_output_folder_button.grid(row=2, column=2, pady=15, padx=15)
         # sets the load save settings button to the grid
         self.load_save_settings_button.grid(row=3, column=0, pady=15, padx=15)
         # sets the load save settings label to the grid
@@ -421,7 +434,7 @@ class SettingsWindow(tk.Toplevel):
         """
         if self.master.excel_editor.get_output_folder() is not self.master.settings.get_output_folder_name():
             self.master.settings.set_output_folder_name(self.master.excel_editor.get_output_folder())
-            self.output_path_label.config(text=self.master.excel_editor.get_output_folder())
+            self.output_folder_label.config(text=self.master.excel_editor.get_output_folder())
         else:
             messagebox.showerror("Error", "Current output folder is already saved")
 
@@ -433,7 +446,7 @@ class SettingsWindow(tk.Toplevel):
         """
         self.master.excel_editor.set_output_folder('output')
         self.master.settings.set_output_folder_name('output')
-        self.output_path_label.config(text='output')
+        self.output_folder_label.config(text='output')
 
     def clear_save_settings(self):
         """

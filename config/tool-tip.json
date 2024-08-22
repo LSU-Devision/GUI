@@ -28,6 +28,19 @@
     "automatic_clear_data_on_predict": "If turned on, data will automatically be cleared after the predict all button is pressed. All settings autosave on toggle",
     "clear_data_when_clearing_images": "If turned on, predictions will be cleared after the clear images button is clicked. All settings autosave on toggle",
     "save_images_to_output" : "If turned on, images will be saved to the output folder after the predict all button is clicked. Loading the program with this setting on will enable two screens instead of one. Predictions will be twice as fast with this button off. All settings autosave on toggle",
-    "reset_to_default_settings" : "Resets all settings to default."
+    "reset_to_default_settings" : "Resets all settings to default. the Default settings are as follows: automatic export ot excel off, automatic clear data on predict off, clear data on clear images on, save images to output off.",
+    "save_model_selection" : "Saves the current model selection into the program. If the model is a selected folder not recognized by the program, then user model will be displayed in the adjacent field. If the load settings are on, this model will be selected upon start up of the program. If the model folder is not detected by the program upon startup, the selection will be cleared from the save file.",
+    "model_selection_label" : "This label will display the model saved into the program. If the label is none then no model is currently loaded into the program.",
+    "clear_model_selection" : "Clears the current model selection from the save file. The label will reset to none.",
+    "save_excel_file" : "Saves the current excel file into the program. This can save the name of an excel file before export. If the current name saved is not found during startup, the file will reset to none. AKA if the file does not exist then it will not be loaded into the program.",
+    "excel_file_label" : "This label will display the excel file saved into the program. If the label is none then no excel file is currently loaded into the program.",
+    "clear_excel_file" : "Clears the current excel file from the save file. The label will reset to none.",
+    "save_output_folder" : "Saves the current output folder into the program. If the current name saved is not found during startup, the folder will reset to output. AKA if the folder does not exist then it will not be loaded into the program.",
+    "output_folder_label" : "This label will display the output folder saved into the program. If the label is none then no output folder is currently loaded into the program.",
+    "clear_output_folder" : "Clears the current output folder from the save file. The label will reset to output.",
+    "load_save_settings_on_startup": "Load settings on startup toggle. Select to toggle. If this is turned on then the settings above will load into the program on startup. If the setting is turned off then all settings will be visible but they will not be loaded into the program on startup.",
+    "clear_save_settings": "Clears all settings from the save file. Excel file and model selection will be set to none. Output folder will be set to output.",
+    "check_version": "This button will check to see if there is a new version available on github. If there is, a prompt will display asking if you want to update your version and will navigate you to the github page. It will display that you are up to date if you have the latest version. It will say you do not have internet if the button cannot load google.com, which is our test to see if your internet works.",
+    "user_guide": "This button will open the user guide page on the github. If you cannot load google then the button will let you know that you do not have internet."
   }
 }

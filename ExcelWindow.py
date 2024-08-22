@@ -325,11 +325,11 @@ class ExcelWindow(tk.Toplevel):
         # if the index is 1, resize the tab to 400x400
         elif index == 1:
             # resize the tab
-            self.geometry('400x400')
+            self.geometry('400x350')
         # if the index is 2, resize the tab to 500x400
         elif index == 2:
             # resize the tab
-            self.geometry('500x400')
+            self.geometry('500x200')
 
     '''
     
