@@ -10,7 +10,7 @@
         "model name": null,
         "model path": null,
         "excel file name": null,
-        "output folder name": null,
+        "output folder name": "test",
         "load save settings on startup": true
     }
 }

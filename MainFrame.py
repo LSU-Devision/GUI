@@ -127,6 +127,9 @@ class MainFrame(ttk.Frame):
                 if os.path.exists(self.settings.get_output_folder_name()) is False:
                     self.settings.set_output_folder_name('output')
                     messagebox.showerror("Error", "Output Folder Not Found, Setting reset to 'output'")
+                else:
+                    self.excel_editor.set_output_folder(self.settings.get_output_folder_name())
+
 
 
 
