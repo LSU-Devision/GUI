@@ -199,7 +199,11 @@ class ExcelWindow(tk.Toplevel):
             'excel_date_column': self.excel_date_column_dropdown,
             'excel_time_column': self.excel_time_column_dropdown,
             'excel_file_name_column': self.excel_file_name_column_dropdown,
-            'excel_total_count_column': self.excel_total_count_column_dropdown
+            'excel_total_count_column': self.excel_total_count_column_dropdown,
+            'excel_file_name_field': self.excel_name_field,
+            'save_excel_file_name': self.excel_name_save_button,
+            'output_folder_name_field': self.output_folder_field,
+            'save_output_folder_name': self.output_folder_save_button
         }
 
 

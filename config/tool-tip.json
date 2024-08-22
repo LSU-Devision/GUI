@@ -17,7 +17,11 @@
     "excel_date_column": "Sets the order of the date column in the excel file. If 'None' is selected, the column will not be included.",
     "excel_time_column": "Sets the order of the time column in the excel file. If 'None' is selected, the column will not be included.",
     "excel_file_name_column": "Sets the order of the file name column in the excel file. If 'None' is selected, the column will not be included.",
-    "excel_total_count_column": "Sets the order of the total count column in the excel file. If 'None' is selected, the column will not be included."
+    "excel_total_count_column": "Sets the order of the total count column in the excel file. If 'None' is selected, the column will not be included.",
+    "excel_file_name_field":"This is a field to enter the name of the file to save progress to, it will be populated with the current excel file name upon start up, if there is none then there is no file loaded into the program.",
+    "save_excel_file_name": "Saves the excel file name into the program. The name will be collected from the matching field. The file will be created after exporting the data.",
+    "output_folder_name_field": "This is a field to enter a new name for the output folder. It will be populated with the current output folder name upon start up pending on the save settings being on., If there is no saved output folder name then it will default to output.",
+    "save_output_folder_name": "Saves the output folder name into the program. The name will be collected from the matching field. The folder will be created after exporting the data."
   },
   "settings": {
     "automatic_export_to_excel": "If turned on, data will automatically export to a new or current excel file after the predict all button is clicked. All settings autosave on toggle",
