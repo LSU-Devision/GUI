@@ -254,10 +254,10 @@ class Predictions:
         :return: string of the path to the model
         """
         if option == 'Frog Egg Counter':
-            return FROG_EGG_COUNTER
+            return utils.resource_path(FROG_EGG_COUNTER)
         elif option == 'Oyster Seed Counter':
-            return OYSTER_SEED_COUNTER
+            return utils.resource_path(OYSTER_SEED_COUNTER)
         elif option == 'Frog Egg Classification':
-            return FROG_EGG_CLASSIFICATION
+            return utils.resource_path(FROG_EGG_CLASSIFICATION)
         else:
             messagebox.showerror("Error", "Invalid model selected")
