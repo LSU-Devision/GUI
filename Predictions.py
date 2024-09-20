@@ -22,7 +22,7 @@ FROG_EGG_COUNTER = "models\\frog-egg-counter"
 OYSTER_SEED_COUNTER = "models\\Oyster_model"
 FROG_EGG_CLASSIFICATION = "models\\Xenopus Frog Embryos Classification Model"
 class Predictions:
-    def __init__(self, image_files, parent, model, main_frame):
+    def __init__(self, image_files, parent):
         self.image_files = image_files
         self.master = parent
         self.device = '/GPU:0' if tf.config.experimental.list_physical_devices('GPU') else '/CPU:0'
@@ -31,19 +31,18 @@ class Predictions:
         self.predictions_data = []
         self.prediction_files = {}
         self.predict_index = 1
-        self.settings = Settings.SettingsJson()
-        self.slideshow = Slideshow(self.master)
-        self.mainframe = main_frame
+        self.settings = self.master.settings
+        self.slideshow = self.master.slideshow
 
     def get_model_classes(self):
-        config_file_path = f"{self.mainframe.model_path}/config.json"
+        config_file_path = f"{self.master.model_path}/config.json"
         with open(utils.resource_path(config_file_path), 'r') as file:
             config_data = json.load(file)
             n_classes = config_data.get('n_classes')
         return n_classes
     
     def get_model_channels(self):
-        config_file_path = f"{self.mainframe.model_path}/config.json"
+        config_file_path = f"{self.master.model_path}/config.json"
         with open(utils.resource_path(config_file_path), 'r') as file:
             config_data = json.load(file)
             n_channel = config_data.get('n_channel_in')
@@ -186,7 +185,7 @@ class Predictions:
 
     def predict_all(self):
         threading.Thread(target=self.thread_predict_all).start()
-        self.mainframe.disable_button(self.mainframe.predict_all_button)
+        self.master.disable_button(self.master.predict_all_button)
 
     def thread_predict_all(self):
         self.create_progress_popup()
@@ -211,13 +210,13 @@ class Predictions:
             self.progress_bar.after(0, self.update_progress, i + 1, total_images, remaining_time)
 
         self.predict_index = 1
-        if self.mainframe.settings.get_automatic_excel_export():
-            self.mainframe.excel_editor.export_predictions_to_excel()
-        self.mainframe.slideshow.update_image()
+        if self.master.settings.get_automatic_excel_export():
+            self.master.excel_editor.export_predictions_to_excel()
+        self.master.slideshow.update_image()
         total_elapsed_time = int(time.time() - start_time)
         print(f"Predicted {total_images} images in {total_elapsed_time} seconds")
         self.progress_bar.after(0, self.show_completion_message, total_images, total_elapsed_time)
-        self.mainframe.enable_button(self.mainframe.predict_all_button)
+        self.master.enable_button(self.master.predict_all_button)
 
     def create_progress_popup(self):
         self.progress_popup = tk.Toplevel(self.master)

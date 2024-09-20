@@ -10,7 +10,7 @@ default_settings = 'config/excel_settings.json'
 '''
 Class: ExcelEditor
 Contributors: Alex Mensen-Johnson, Skylar Wilson
-Description: Class for the Excel Editor to manage excel files for the mainframe
+Description: Class for the Excel Editor to manage excel files for the master
 Params:
     master = master class aka MainFrame
 methods:
@@ -42,7 +42,7 @@ class ExcelEditor:
         self.excel_total_count_value = 'None'
         # create output folder variable
         self.output_folder = 'output'
-        # set the master to the mainframe
+        # set the master to the master
         self.master = master
         # load the Excel settings
         self.load_excel_settings()

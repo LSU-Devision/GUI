@@ -31,6 +31,7 @@ class App(tk.Tk):
         self.grid_columnconfigure(0, weight=1)
 
         self.main = MainFrame(self)
+        #self.main.geometry(self.main.geometry)
         self.main.grid(row=0, column=0, sticky="nsew")
 
 if __name__ == "__main__":

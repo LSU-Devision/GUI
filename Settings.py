@@ -6,7 +6,7 @@ default_json_path = "config/default_settings.json"
 class SettingsJson():
     """
     :class:`SettingsJson`
-    :description: Class for the SettingsJson to manage settings for the mainframe
+    :description: Class for the SettingsJson to manage settings for the master
     authors: Alex Mensen-Johnson, Skylar Wilson
     :param: json_file_path = path to the json file
     :method: load_default

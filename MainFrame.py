@@ -82,16 +82,31 @@ class MainFrame(ttk.Frame):
         self.clear_data_on_clear_images_setting = self.settings.get_clear_data_on_clear_images()
         # settings for save images output toggle -skylar,
         self.save_images_output_setting = self.settings.get_save_images_output()
-        # Create an instance of the Predictions class
-        self.predictions = Predictions(self.image_files, self, self.model, self)
         # boolean checker to see if the data has been cleared
         self.is_data_cleared = True
+        self.notebook = ttk.Notebook(self)
+        # add the notebook using the grid method
+        self.notebook.grid(row=0, column=0)
+        # create the first tab
+        self.tab1 = ttk.Frame(self.notebook)
+        # create the second tab
+        self.tab2 = ttk.Frame(self.notebook)
+        # create the third tab
+        self.tab3 = ttk.Frame(self.notebook)
+        # add the Basic tab
+        self.notebook.add(self.tab1, text="Main Page", )
+        # add the Advanced tab
+        self.notebook.add(self.tab2, text="Oyster Page")
         # create all the buttons for the display
-        self.create_display()
+        self.slideshow = Slideshow(self, self.tab1)
+        self.predictions = Predictions(self.image_files, self)
+        self.create_tab1()
+
+        #self.predictions = Predictions(self.image_files, self)
         # add tooltips
         utils.ToolTips(self.button_dict(), 'main_frame', 2)
         # load the display
-        self.load_display()
+        self.load_tab1()
         # start up operations
         self.start_up_operations()
         # empty variable for excel window
@@ -138,24 +153,24 @@ class MainFrame(ttk.Frame):
 
 
 
-    def create_display(self):
+    def create_tab1(self):
         """
         Creates the display in the code and organizes all the creation into a method
         If you intend on creating a feature for display, add it here please
         :return:
         """
         # Creates the select files button
-        self.select_files_button = ttk.Button(self, text='Select Files', command=self.select_files)
+        self.select_files_button = ttk.Button(self.tab1, text='Select Files', command=self.select_files)
         # Creates the slide show
-        self.slideshow = Slideshow(self)
+        self.slideshow = Slideshow(self,self.tab1)
         # initialize buttons as disabled until a model is selected
         self.model_selected = False
         # Creates the predict all button
-        self.predict_all_button = ttk.Button(self, text='Predict All', command=self.predictions.predict_all,
+        self.predict_all_button = ttk.Button(self.tab1, text='Predict All', command=self.predictions.predict_all,
                                              state=tk.DISABLED)
         # make two buttons
         # self.select_model_button = ttk.Button(self, text='Select Model Folder', command=self.select_model)
-        self.select_model_dropdown = ttk.Combobox(self, state='readonly', values=
+        self.select_model_dropdown = ttk.Combobox(self.tab1, state='readonly', values=
         [
             'Frog Egg Counter',
             'Oyster Seed Counter',
@@ -167,17 +182,17 @@ class MainFrame(ttk.Frame):
 
         self.select_model_dropdown.bind('<<ComboboxSelected>>', lambda event: self.get_model_by_dropdown())
         # creates the model label
-        self.model_label = ttk.Label(self, text='No Model Selected', font=50)
+        self.model_label = ttk.Label(self.tab1, text='No Model Selected', font=50)
         # creates clear button
-        self.clear_button = ttk.Button(self, text='Clear Images', command=self.clear_images)
+        self.clear_button = ttk.Button(self.tab1, text='Clear Images', command=self.clear_images)
         # creates a help button that will display button usage
-        self.show_info = ttk.Button(self, text='Help', command=self.help_page)
+        self.show_info = ttk.Button(self.tab1, text='Help', command=self.help_page)
         # creates the excel label
-        self.excel_label_title = ttk.Label(self, text=str(self.excel_editor.get_excel_label()), font=50)
+        self.excel_label_title = ttk.Label(self.tab1, text=str(self.excel_editor.get_excel_label()), font=50)
         # creates the export to excel button
-        self.excel_window_button = ttk.Button(self, text='Excel Window', command=lambda: self.open_excel_window())
+        self.excel_window_button = ttk.Button(self.tab1, text='Excel Window', command=lambda: self.open_excel_window())
         # Create settings page
-        self.settings_page_button = ttk.Button(self, text='Settings', command=lambda: self.open_settings_window())
+        self.settings_page_button = ttk.Button(self.tab1, text='Settings', command=lambda: self.open_settings_window())
 
 
     def button_dict(self):
@@ -196,7 +211,7 @@ class MainFrame(ttk.Frame):
             'settings_window': self.settings_page_button
         }
 
-    def load_display(self):
+    def load_tab1(self):
         """
         method: load_display
         Author: Alex Mensen-Johnson
@@ -232,6 +247,7 @@ class MainFrame(ttk.Frame):
 
 
 
+
     def update_display(self):
         """
         method: update_display
@@ -241,7 +257,7 @@ class MainFrame(ttk.Frame):
         """
         # make the master container the same container
         parent_container = self.container
-        # destroy the mainframe window
+        # destroy the master window
         self.destroy()
         # Re-initialize the frame with the same container
         new_frame = MainFrame(parent_container)
@@ -426,3 +442,4 @@ class MainFrame(ttk.Frame):
         if self.is_settings_page_open == False:
             # open the settings window
             SettingsWindow(master=self, container=self.container, settings=self.settings)
+

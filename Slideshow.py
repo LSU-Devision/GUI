@@ -4,7 +4,7 @@ import os.path
 import Settings
 
 class Slideshow(ttk.Frame):
-    def __init__(self, container):
+    def __init__(self, container,container_tab):
         super().__init__(container)
         self.settings = Settings.SettingsJson()
         # Copies the image files from the Main frame into the sub frame
@@ -13,7 +13,7 @@ class Slideshow(ttk.Frame):
         self.prediction_files = container.prediction_files
         # Creates a counter variable called current index
         self.current_index = 0
-        self.container = container
+        self.container = container_tab
         self.create_frame()
         self.load_frame()
 
