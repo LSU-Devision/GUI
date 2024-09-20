@@ -105,10 +105,12 @@ class MainFrame(ttk.Frame):
         """
         # change the labels if the start up setttings are on
         if self.settings.get_load_save_settings_on_startup() is True:
+            # load excel file name on start up
             if self.settings.get_excel_file_name() is not None:
                 if os.path.exists(self.settings.get_excel_file_name()):
                     self.excel_label_title.config(text=self.settings.get_excel_file_name('string'))
                     self.excel_editor.set_excel_file(self.settings.get_excel_file_name())
+                # If the excel file path does not exist
                 else:
                     self.excel_editor.set_excel_file(None)
                     self.settings.set_excel_file_name(None)
@@ -119,6 +121,7 @@ class MainFrame(ttk.Frame):
                     self.model_path = self.settings.get_model_path()
                     self.select_model_dropdown.set(self.settings.get_model_name('string'))
                     self.load_model()
+                # if the model path does not exist
                 else:
                     self.settings.set_model_path(None)
                     self.settings.set_model_name(None)
@@ -127,6 +130,7 @@ class MainFrame(ttk.Frame):
                 if os.path.exists(self.settings.get_output_folder_name()) is False:
                     self.settings.set_output_folder_name('output')
                     messagebox.showerror("Error", "Output Folder Not Found, Setting reset to 'output'")
+                # if the output folder path does not exist
                 else:
                     self.excel_editor.set_output_folder(self.settings.get_output_folder_name())
 

@@ -95,6 +95,7 @@ class ExcelWindow(tk.Toplevel):
         # create the clear excel file button
         self.clear_excel_file_button = ttk.Button(self.tab1, text='Clear Excel File', command=self.clear_excel_file)
 
+
     def create_tab2(self):
         """
         :method: create tab 2
