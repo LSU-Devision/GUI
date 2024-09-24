@@ -13,46 +13,47 @@ class Slideshow(ttk.Frame):
         self.prediction_files = container.prediction_files
         # Creates a counter variable called current index
         self.current_index = 0
-        self.container = container_tab
+        self.container_tab = container_tab
+        self.container = container
         self.create_frame()
         self.load_frame()
 
 
     def load_frame(self):
-        self.filepath_label.grid(row=0, column=0, columnspan=2, pady=2)
-        self.base_image.grid(row=1, column=0)
-        self.predicted_image.grid(row=1, column=1)
+        self.filepath_label.grid(row=2, column=0, columnspan=2, pady=2)
+        self.base_image.grid(row=3, column=0)
+        self.predicted_image.grid(row=3, column=1)
 
         ####################################################
         # Display the predicted image only if the setting is True
         # used in save images output toggle for dynamic display -skylar
-        if self.settings.get_save_images_output() == False:
-            self.predicted_image.grid_forget()
+        #if self.settings.get_save_images_output() == False:
+            #self.predicted_image.grid_forget()
 
-        self.item_count_label.grid(row=2, column=0, columnspan=2)
+        self.item_count_label.grid(row=4, column=0, columnspan=2)
         
         ####################################################
         # made previous/next buttons into a frame
         # need to move into own file? -skylar
-        self.button_frame = ttk.Frame(self)
-        self.button_frame.grid(row = 3, column = 0, columnspan = 2)
+        self.button_frame = ttk.Frame(self.container_tab)
+        self.button_frame.grid(row = 5, column = 0, columnspan = 2)
         self.prev_image_button = ttk.Button(self.button_frame, text='Prev', command=self.prev_image)
         self.next_image_button = ttk.Button(self.button_frame, text='Next', command=self.next_image)
         # Pack the buttons with some padding
         self.prev_image_button.pack(side='left', padx=10)
         self.next_image_button.pack(side='left', padx=10)
         # Center the button frame
-        self.button_frame.grid(row=3, column=0, columnspan=2, pady=2)
+        self.button_frame.grid(row=6, column=0, columnspan=2, pady=2)
         # end previous/next button frame
 
     def create_frame(self):
-        self.filepath_label = ttk.Label(self, font=50)
+        self.filepath_label = ttk.Label(self.container_tab, font=50)
         # Creates an image frame for the base image
-        self.base_image = ImageFrame(self)
+        self.base_image = ImageFrame(self.container_tab)
         # Creates and Image frame for the predicted image
-        self.predicted_image = ImageFrame(self)
+        self.predicted_image = ImageFrame(self.container_tab)
         # Creates a label for the Item count
-        self.item_count_label = ttk.Label(self, font=50)
+        self.item_count_label = ttk.Label(self.container_tab, font=50)
     
     # no longer needed, functionality in main. leaving for now
     # def update_slideshow(self):

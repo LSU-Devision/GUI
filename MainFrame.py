@@ -224,26 +224,25 @@ class MainFrame(ttk.Frame):
         # using grid layout -skylar
         self.grid_columnconfigure(0, weight=1)
         # loads the model label into the frame
-        self.model_label.grid(row=1, column=0, pady=5)
-        # loads the select model button into the frame
-        #self.select_model_button.grid(row=2, column=0, pady=5)
-        self.select_model_dropdown.grid(row=2, column=0, pady=5)
+        self.model_label.grid(row=0, column=0, pady=5)
+
+        self.select_model_dropdown.grid(row=1, column=0, pady=5)
         # Loads the select files button into the page
-        self.select_files_button.grid(row=3, column=0, pady=5)
+        self.select_files_button.grid(row=0, column=1, pady=5)
         # loads the predict all button
-        self.predict_all_button.grid(row=4, column=0, pady=5)
+        self.predict_all_button.grid(row=1, column=1, pady=5)
         # loads the slide show frame into the display
-        self.slideshow.grid(row=5, column=0)
+        #self.slideshow.grid(row=5, column=0)
         # adds clear button using grid method
-        self.clear_button.grid(row=6, column=0, pady=5)
+        self.clear_button.grid(row=7, column=0, pady=5)
         # adds the button to the GUI
-        self.show_info.grid(row=7, column=0, pady=5)
+        self.show_info.grid(row=8, column=0, pady=5)
         # adds the excel label to the window
-        self.excel_label_title.grid(row=8, column=0, pady=0)
+        self.excel_label_title.grid(row=7, column=1, pady=0)
         # adds the excel save page to the window
-        self.excel_window_button.grid(row=9, column=0, pady=5)
+        self.excel_window_button.grid(row=8, column=1, pady=5)
         # adds the settings button to the window
-        self.settings_page_button.grid(row=10, column=0, pady=5)
+        self.settings_page_button.grid(row=9, column=1, pady=5)
 
 
 

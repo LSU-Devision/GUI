@@ -4,7 +4,7 @@
         "automatic excel export": false,
         "automatic prediction clear data": false,
         "clear data on clear images": true,
-        "save images output": false
+        "save images output": true
     },
     "saved files": {
         "model name": null,
