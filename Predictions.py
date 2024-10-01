@@ -213,6 +213,7 @@ class Predictions:
         if self.master.settings.get_automatic_excel_export():
             self.master.excel_editor.export_predictions_to_excel()
         self.master.slideshow.update_image()
+        self.master.oyster_slideshow.update_image()
         total_elapsed_time = int(time.time() - start_time)
         print(f"Predicted {total_images} images in {total_elapsed_time} seconds")
         self.progress_bar.after(0, self.show_completion_message, total_images, total_elapsed_time)
