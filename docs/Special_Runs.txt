@@ -1,0 +1,5 @@
+Special Runs:
+    The settings features are designed to create an optimal run from user to user. Certain configurations can be set up
+    to generate the fastest runtime. Currently, Saving the models, output folders, and Excel file, while having the
+    auto export to excel button turned on, make for the runtime with the least amount of user interaction. With all
+    these settings configured, You can run the program simply by loading pictures and pressing predict.

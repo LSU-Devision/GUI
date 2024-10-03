@@ -1,0 +1,140 @@
+import tkinter as tk
+from tkinter import ttk
+
+import Utilities as utils
+
+
+class HelpPage(tk.Toplevel):
+
+    def __init__(self,master,container):
+        super().__init__(master=master)
+        self.master = master
+        self.container = container
+        main_window_width = self.container.winfo_width()
+        # set the size of the pop up window
+        main_window_height = self.container.winfo_height()
+        # variables for the pop up window
+        pop_up_window_width = 400
+        # variables for the pop up window
+        pop_up_window_height = 400
+        # set the position of the pop up window
+        x = main_window_width + 75
+        # set the position of the pop up window
+        y = main_window_height // 2 - pop_up_window_height // 2  # center the pop-up window vertically
+        # set the title of the pop up window
+        self.title('Help page')
+
+        # set the geometry of the pop up window
+        self.geometry(f'{pop_up_window_width}x{pop_up_window_height}+{x}+{y}')
+
+        self.notebook = ttk.Notebook(self)
+        # add the notebook using the grid method
+        self.notebook.grid(row=0, column=0)
+        # create the first tab
+        self.tab1 = ttk.Frame(self.notebook)
+        # create the second tab
+        self.tab2 = ttk.Frame(self.notebook)
+        # create the third tab
+        self.tab3 = ttk.Frame(self.notebook)
+
+        # add the Basic tab
+        self.notebook.add(self.tab1, text="Simple Run In Steps", )
+        # add the Advanced tab
+        self.notebook.add(self.tab2, text="Columns")
+        # add the File Names tab
+        self.notebook.add(self.tab3, text='File Names')
+
+        self.text_widget = tk.Text(self.tab1)
+        self.text_widget.pack()
+        runInStepsText = open(utils.resource_path("docs/Simple_Run_In_Steps.txt"))
+        self.text_widget.insert(tk.END, runInStepsText.read())
+        self.text_widget = tk.Text(self.tab2)
+        self.text_widget.pack()
+        self.text_widget.insert(tk.END, "This is the text for the Columns tab.")
+
+        self.notebook.bind("<<NotebookTabChanged>>", self.on_tab_change)
+
+
+        self.run()
+
+    def create_tab1(self):
+        """
+        :method: create tab 1
+        :description: creates the page
+        """
+        self.demo_button = ttk.Button(self.tab1, text="Demo", command=self.demo)
+        pass
+
+    def create_tab2(self):
+        """
+        :method: create tab 2
+        :description: creates the page
+        """
+        pass
+
+    def create_tab3(self):
+        """
+        :method: create tab 3
+        :description: creates the page
+        """
+        pass
+
+    def load_tab1(self):
+        """
+        :method: load tab 1
+        :description: loads the page
+        """
+        self.demo_button.grid(row=0, column=0)
+        pass
+
+    def load_tab2(self):
+        """
+        :method: load tab 2
+        :description: loads the page
+        """
+        pass
+
+    def load_tab3(self):
+        """
+        :method: load tab 3
+        :description: loads the page
+        """
+        pass
+
+    def run(self):
+        self.create_tab1()
+        self.create_tab2()
+        self.create_tab3()
+        self.load_tab1()
+        self.load_tab2()
+        self.load_tab3()
+
+    def on_tab_change(self, event):
+        """
+        method: on tab change
+        description: method to resize the tab
+        """
+        # get the index of the tab
+        tab_index = self.notebook.index(self.notebook.select())
+        # resize the tab
+        self.resize_tab(tab_index)
+
+    def resize_tab(self,index):
+        """
+        method: resize tab
+        description: method to resize the tab
+        :param index: index of the current tab
+        """
+        # if the index is 0, resize the tab to 300x200
+        if index == 0:
+            # resize the tab
+            self.geometry('300x200')
+        # if the index is 1, resize the tab to 400x400
+        elif index == 1:
+            # resize the tab
+            self.geometry('400x350')
+        # if the index is 2, resize the tab to 500x400
+        elif index == 2:
+            # resize the tab
+            self.geometry('500x200')
+

@@ -4,6 +4,8 @@ import tensorflow as tf
 import os.path
 from stardist.models import StarDist2D
 import matplotlib
+
+from HelpPage import HelpPage
 from Slideshow import Slideshow
 import Settings
 import sys
@@ -45,6 +47,8 @@ class MainFrame(ttk.Frame):
         # initialize the container's master init methods
         super().__init__(container)
         # initialize the settings
+
+
         self.settings = Settings.SettingsJson()
         # initialize the container method
         self.container = container
@@ -64,10 +68,14 @@ class MainFrame(ttk.Frame):
         self.excel_editor.set_excel_label(None)
         # initialize the excel label index
         self.excel_label_index = 0
+
         # boolean checker to see if the excel window is open
         self.is_excel_save_page_open = False
         # boolean checker to see if the settings window is open
         self.is_settings_page_open = False
+        # boolean checker to see if the help window is open
+        self.is_help_page_open = False
+
         # set the device's GPU
         self.device = '/GPU:0' if tf.config.experimental.list_physical_devices('GPU') else '/CPU:0'
         # initialize the progress popup to None
@@ -111,6 +119,8 @@ class MainFrame(ttk.Frame):
         self.start_up_operations()
         # empty variable for excel window
         self.excel_window = None
+        #empty variable for help window, Paul
+        self.help_page = None
 
     def start_up_operations(self):
         """
@@ -397,17 +407,21 @@ class MainFrame(ttk.Frame):
 
     def help_page(self):
         """
-        Help Page: by Alex Mensen-Johnson
+        Help Page: by Alex Mensen-Johnson, Modified by Paul Yeon
         Description: Loads the Help_Information.txt into a file, reads the file, and displays the information in a pop up
         """
         # Load File
-        info_file = open(utils.resource_path("docs/Help_Information.txt"))
+        #info_file = open(utils.resource_path("docs/Help_Information.txt"))
         # Read the file
-        file_information = info_file.read()
+        #file_information = info_file.read()
         # Create the title string
-        title = 'Help'
+        #title = 'Help'
         # Create pop up with the information
-        messagebox.showinfo(title, file_information)
+        #messagebox.showinfo(title, file_information)
+
+        if not self.is_help_page_open:
+            # indent the help page starter
+            self.help_page = HelpPage(master=self, container=self.container)
 
     def clear_predicted_data(self):
         """
@@ -421,13 +435,15 @@ class MainFrame(ttk.Frame):
         # display a message box showing the data is cleared
         messagebox.showinfo("Devision", "Data Cleared")
 
+
+
     def open_excel_window(self):
         """
         method: opens the excel window if an instance is not already open
         :return:
         """
         # check if the excel window is already open
-        if self.is_excel_save_page_open == False:
+        if not self.is_excel_save_page_open:
             # open the excel window
             self.excel_window = ExcelWindow(master=self, container=self.container, excel_editor=self.excel_editor)
 
