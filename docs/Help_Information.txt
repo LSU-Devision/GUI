@@ -1,54 +1,36 @@
 Help Page V.1.3
 
-Simple Run in steps
+Simple Run in steps:
 Step 1:
-    Select a model from the dropdown, choose one of the three preloaded models, or load in your model manually
-    with the 4th option on the dropdown.
+    Select a model from the dropdown, choose one of the three preloaded models, or load in your model manually with the 4th option on the dropdown.
 
 Step 2:
-    Select all the pictures you wish to run the model by clicking the select images button. You can select
-    multiple images at the same time.
+    Select all the pictures you wish to run the model by clicking the select images button. You can select multiple images at the same time.
 
 Step 3:
-    Click the predict all button to run the model on the images. then wait, a pop up bar will display indicating
-    the programs progress on completing predictions.
+    Click the predict all button to run the model on the images. then wait, a pop up bar will display indicating the programs progress on completing predictions.
 
 Step 4:
-    Click the Excel Window button, and then click export to Excel. A folder named output will be auto generated in
-    the same folder as the executable. The output folder will contain Excel file of the new predictions.
-    If the save images to output setting is turned on, then the output folder will contain the images of the predictions
-    as well.
+    Click the Excel Window button, and then click export to Excel. A folder named output will be auto generated in the same folder as the executable. The output folder will contain Excel file of the new predictions. If the save images to output setting is turned on, then the output folder will contain the images of the predictions as well.
 
 General Navigation:
     Excel Window:
-    The Excel Window contains Excel operations and the ability to manually clear predictions. Advanced Excel settings
-    can be found here, including the ability to manage columns for the Excel file, name the excel file, and name the
-    output folder.
+    The Excel Window contains Excel operations and the ability to manually clear predictions. Advanced Excel settings can be found here, including the ability to manage columns for the Excel file, name the excel file, and name the output folder.
 
     Settings:
-    The settings window contains all program settings as well as the button to check for a new version and a button
-    to locate the user guide. The first set of settings manage the runtime of the program. The second set of settings
-    affect the files loaded into the program on start up. The third tab contains the check for updates and open User
-    guide buttons.
+    The settings window contains all program settings as well as the button to check for a new version and a button to locate the user guide. The first set of settings manage the runtime of the program. The second set of settings affect the files loaded into the program on start up. The third tab contains the check for updates and open User guide buttons.
 
 General Notes:
-    The program by default will run on CPU. For a much faster runtime, run the program on a computer containing a
-    Nvidia graphics card. The program will recognize the card and run on the gpu instead.
+    The program by default will run on CPU. For a much faster runtime, run the program on a computer containing a Nvidia graphics card. The program will recognize the card and run on the gpu instead.
 
-    Each button has a tool tip associated with it. Let the mouse hover over the button for a few seconds and then a
-    note will display on the cursor with details about the button.
+    Each button has a tool tip associated with it. Let the mouse hover over the button for a few seconds and then a note will display on the cursor with details about the button.
 
-    You can disable the save images to output settings to have a runtime that is twice as fast for the predictions.
-    The images won't save with the setting turned on. If the setting is off on start up then the program slideshow
-    will only display one slide. If it is on at start up then two slides will display.
+    You can disable the save images to output settings to have a runtime that is twice as fast for the predictions. The images won't save with the setting turned on. If the setting is off on start up then the program slideshow will only display one slide. If it is on at start up then two slides will display.
 
     All settings are saved upon toggle.
 
 Special Runs:
-    The settings features are designed to create an optimal run from user to user. Certain configurations can be set up
-    to generate the fastest runtime. Currently, Saving the models, output folders, and Excel file, while having the
-    auto export to excel button turned on, make for the runtime with the least amount of user interaction. With all
-    these settings configured, You can run the program simply by loading pictures and pressing predict.
+    The settings features are designed to create an optimal run from user to user. Certain configurations can be set up to generate the fastest runtime. Currently, Saving the models, output folders, and Excel file, while having the auto export to excel button turned on, make for the runtime with the least amount of user interaction. With all these settings configured, You can run the program simply by loading pictures and pressing predict.
 
 I hope you enjoy our program!
 email the following for questions or feature requests

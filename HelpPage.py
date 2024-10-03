@@ -14,9 +14,9 @@ class HelpPage(tk.Toplevel):
         # set the size of the pop up window
         main_window_height = self.container.winfo_height()
         # variables for the pop up window
-        pop_up_window_width = 400
+        pop_up_window_width = 800
         # variables for the pop up window
-        pop_up_window_height = 400
+        pop_up_window_height = 600
         # set the position of the pop up window
         x = main_window_width + 75
         # set the position of the pop up window
@@ -37,20 +37,43 @@ class HelpPage(tk.Toplevel):
         # create the third tab
         self.tab3 = ttk.Frame(self.notebook)
 
+        self.tab4 = ttk.Frame(self.notebook)
+        self.tab5 = ttk.Frame(self.notebook)
+
         # add the Basic tab
         self.notebook.add(self.tab1, text="Simple Run In Steps", )
         # add the Advanced tab
-        self.notebook.add(self.tab2, text="Columns")
+        self.notebook.add(self.tab2, text="General Navigation")
         # add the File Names tab
-        self.notebook.add(self.tab3, text='File Names')
+        self.notebook.add(self.tab3, text='General Notes')
 
-        self.text_widget = tk.Text(self.tab1)
-        self.text_widget.pack()
+        self.notebook.add(self.tab4, text = 'Special Runs')
+        self.notebook.add(self.tab5, text='Credits')
+
         runInStepsText = open(utils.resource_path("docs/Simple_Run_In_Steps.txt"))
-        self.text_widget.insert(tk.END, runInStepsText.read())
-        self.text_widget = tk.Text(self.tab2)
-        self.text_widget.pack()
-        self.text_widget.insert(tk.END, "This is the text for the Columns tab.")
+        generalNavigationText = open(utils.resource_path("docs/General_Navigation.txt"))
+        generalNotesText = open(utils.resource_path("docs/General_Notes.txt"))
+        specialRunsText = open(utils.resource_path("docs/Special_Runs.txt"))
+        creditsText = open(utils.resource_path("docs/Credits.txt"))
+
+
+        self.resize_tab(3)
+        self.label_widget = tk.Label(self.tab1, text=runInStepsText.read(), wraplength=800, justify=tk.LEFT)
+        #self.label_widget.grid(row=0, column=0, stricky="nsew")
+        self.label_widget.pack()
+
+        #self.label_widget.insert(tk.END, runInStepsText.read())
+        #self.label_widget = tk.Text(self.tab2)
+        self.label_widget = tk.Label(self.tab2, text=generalNavigationText.read(), wraplength=800, justify=tk.LEFT)
+        self.label_widget.pack()
+        #self.label_widget.insert(tk.END, "This is the text for the Columns tab.")
+
+        self.label_widget = tk.Label(self.tab3, text=generalNotesText.read(), wraplength=800, justify=tk.LEFT)
+        self.label_widget.pack()
+        self.label_widget = tk.Label(self.tab4, text=specialRunsText.read(), wraplength=800, justify=tk.LEFT)
+        self.label_widget.pack()
+        self.label_widget = tk.Label(self.tab5, text=creditsText.read(), wraplength=800, justify=tk.LEFT)
+        self.label_widget.pack()
 
         self.notebook.bind("<<NotebookTabChanged>>", self.on_tab_change)
 
@@ -137,4 +160,8 @@ class HelpPage(tk.Toplevel):
         elif index == 2:
             # resize the tab
             self.geometry('500x200')
+        elif index == 3:
+            self.geometry('1280x720')
+        elif index == 4:
+            self.geometry('1920x1080')
 

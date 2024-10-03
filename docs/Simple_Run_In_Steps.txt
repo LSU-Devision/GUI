@@ -1,18 +1,12 @@
 Simple Run in steps
 Step 1:
-    Select a model from the dropdown, choose one of the three preloaded models, or load in your model manually
-    with the 4th option on the dropdown.
+    Select a model from the dropdown, choose one of the three preloaded models, or load in your model manually with the 4th option on the dropdown.
 
 Step 2:
-    Select all the pictures you wish to run the model by clicking the select images button. You can select
-    multiple images at the same time.
+    Select all the pictures you wish to run the model by clicking the select images button. You can select multiple images at the same time.
 
 Step 3:
-    Click the predict all button to run the model on the images. then wait, a pop up bar will display indicating
-    the programs progress on completing predictions.
+    Click the predict all button to run the model on the images. then wait, a pop up bar will display indicating the programs progress on completing predictions.
 
 Step 4:
-    Click the Excel Window button, and then click export to Excel. A folder named output will be auto generated in
-    the same folder as the executable. The output folder will contain Excel file of the new predictions.
-    If the save images to output setting is turned on, then the output folder will contain the images of the predictions
-    as well.
+    Click the Excel Window button, and then click export to Excel. A folder named output will be auto generated in the same folder as the executable. The output folder will contain Excel file of the new predictions. If the save images to output setting is turned on, then the output folder will contain the images of the predictions as well.
