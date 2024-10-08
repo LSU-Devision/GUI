@@ -72,6 +72,7 @@ class SettingsWindow(tk.Toplevel):
 
         self.info = tk.Label(self.tab1, text="Click buttons to toggle settings", wraplength=800, justify=tk.LEFT)
 
+
         # create the automatic excel export label
         self.automatic_excel_export_label = ttk.Label(self.tab1, text=utils.boolean_text_conversion(self.settings.get_automatic_excel_export()), font=50)
         # create the automatic excel export button
