@@ -1,11 +1,6 @@
 General Navigation:
     Excel Window:
-    The Excel Window contains Excel operations and the ability to manually clear predictions. Advanced Excel settings
-    can be found here, including the ability to manage columns for the Excel file, name the excel file, and name the
-    output folder.
+    The Excel Window contains Excel operations and the ability to manually clear predictions. Advanced Excel settings can be found here, including the ability to manage columns for the Excel file, name the excel file, and name the output folder.
 
     Settings:
-    The settings window contains all program settings as well as the button to check for a new version and a button
-    to locate the user guide. The first set of settings manage the runtime of the program. The second set of settings
-    affect the files loaded into the program on start up. The third tab contains the check for updates and open User
-    guide buttons.
+    The settings window contains all program settings as well as the button to check for a new version and a button to locate the user guide. The first set of settings manage the runtime of the program. The second set of settings affect the files loaded into the program on start up. The third tab contains the check for updates and open User guide buttons.

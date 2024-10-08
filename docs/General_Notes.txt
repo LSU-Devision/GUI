@@ -1,12 +1,8 @@
 General Notes:
-    The program by default will run on CPU. For a much faster runtime, run the program on a computer containing a
-    Nvidia graphics card. The program will recognize the card and run on the gpu instead.
+    The program by default will run on CPU. For a much faster runtime, run the program on a computer containing a Nvidia graphics card. The program will recognize the card and run on the gpu instead.
 
-    Each button has a tool tip associated with it. Let the mouse hover over the button for a few seconds and then a
-    note will display on the cursor with details about the button.
+    Each button has a tool tip associated with it. Let the mouse hover over the button for a few seconds and then a note will display on the cursor with details about the button.
 
-    You can disable the save images to output settings to have a runtime that is twice as fast for the predictions.
-    The images won't save with the setting turned on. If the setting is off on start up then the program slideshow
-    will only display one slide. If it is on at start up then two slides will display.
+    You can disable the save images to output settings to have a runtime that is twice as fast for the predictions. The images won't save with the setting turned on. If the setting is off on start up then the program slideshow will only display one slide. If it is on at start up then two slides will display.
 
     All settings are saved upon toggle.

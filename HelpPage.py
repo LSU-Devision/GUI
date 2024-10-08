@@ -18,9 +18,12 @@ class HelpPage(tk.Toplevel):
         # variables for the pop up window
         pop_up_window_height = 600
         # set the position of the pop up window
-        x = main_window_width + 75
+        #x = main_window_width + 75
         # set the position of the pop up window
-        y = main_window_height // 2 - pop_up_window_height // 2  # center the pop-up window vertically
+        #y = main_window_height // 2 - pop_up_window_height // 2  # center the pop-up window vertically
+        x=0
+        y=0
+
         # set the title of the pop up window
         self.title('Help page')
 
@@ -40,11 +43,11 @@ class HelpPage(tk.Toplevel):
         self.tab4 = ttk.Frame(self.notebook)
         self.tab5 = ttk.Frame(self.notebook)
 
-        # add the Basic tab
+        # adding tabs
         self.notebook.add(self.tab1, text="Simple Run In Steps", )
-        # add the Advanced tab
+
         self.notebook.add(self.tab2, text="General Navigation")
-        # add the File Names tab
+
         self.notebook.add(self.tab3, text='General Notes')
 
         self.notebook.add(self.tab4, text = 'Special Runs')
@@ -57,7 +60,7 @@ class HelpPage(tk.Toplevel):
         creditsText = open(utils.resource_path("docs/Credits.txt"))
 
 
-        self.resize_tab(3)
+
         self.label_widget = tk.Label(self.tab1, text=runInStepsText.read(), wraplength=800, justify=tk.LEFT)
         #self.label_widget.grid(row=0, column=0, stricky="nsew")
         self.label_widget.pack()
@@ -77,7 +80,8 @@ class HelpPage(tk.Toplevel):
 
         self.notebook.bind("<<NotebookTabChanged>>", self.on_tab_change)
 
-
+        #self.resize_tab(3)
+        self.after(100, self.resize_tab, 5)
         self.run()
 
     def create_tab1(self):
@@ -85,7 +89,7 @@ class HelpPage(tk.Toplevel):
         :method: create tab 1
         :description: creates the page
         """
-        self.demo_button = ttk.Button(self.tab1, text="Demo", command=self.demo)
+        #self.demo_button = ttk.Button(self.tab1, text="Demo", command=self.demo)
         pass
 
     def create_tab2(self):
@@ -107,7 +111,7 @@ class HelpPage(tk.Toplevel):
         :method: load tab 1
         :description: loads the page
         """
-        self.demo_button.grid(row=0, column=0)
+        #self.demo_button.grid(row=0, column=0)
         pass
 
     def load_tab2(self):
@@ -140,7 +144,8 @@ class HelpPage(tk.Toplevel):
         # get the index of the tab
         tab_index = self.notebook.index(self.notebook.select())
         # resize the tab
-        self.resize_tab(tab_index)
+        #self.resize_tab(tab_index)
+        self.resize_tab(5)
 
     def resize_tab(self,index):
         """
@@ -164,4 +169,6 @@ class HelpPage(tk.Toplevel):
             self.geometry('1280x720')
         elif index == 4:
             self.geometry('1920x1080')
+        elif index == 5:
+            self.geometry('900x400')
 
