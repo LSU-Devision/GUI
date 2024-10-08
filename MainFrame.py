@@ -14,6 +14,7 @@ from SettingsWindow import SettingsWindow
 from Predictions import Predictions
 from ExcelWindow import ExcelWindow
 import Utilities as utils
+from OysterPage import OysterPage
 
 matplotlib.use('agg')
 
@@ -107,16 +108,11 @@ class MainFrame(ttk.Frame):
         self.notebook.add(self.tab2, text="Oyster Page")
         # create all the buttons for the display
         self.slideshow = Slideshow(self, self.tab1)
-        self.predictions = Predictions(self.image_files, self)
-        self.create_tab1()
 
-        #self.predictions = Predictions(self.image_files, self)
-        # add tooltips
-        utils.ToolTips(self.button_dict(), 'main_frame', 2)
-        # load the display
-        self.load_tab1()
-        # start up operations
-        self.start_up_operations()
+        self.predictions = Predictions(self.image_files, self)
+
+        self.oyster_page = OysterPage(self)
+        self.run()
         # empty variable for excel window
         self.excel_window = None
         #empty variable for help window, Paul
@@ -204,6 +200,25 @@ class MainFrame(ttk.Frame):
         # Create settings page
         self.settings_page_button = ttk.Button(self.tab1, text='Settings', command=lambda: self.open_settings_window())
 
+    def create_tab2(self):
+        """
+        Creates the display in the code and organizes all the creation into a method
+        If you intend on creating a feature for display, add it here please
+        :return:
+        """
+        self.subsample_frame = ttk.Frame(self.tab2)
+        self.oyster_slideshow = Slideshow(self, self.tab2)
+        self.subsample_label = ttk.Label(self.subsample_frame, text='Subsample Weight', font=50)
+        self.subsample_weight_field = ttk.Entry(self.subsample_frame, width=5)
+
+        self.sample_frame = ttk.Frame(self.tab2)
+        self.sample_label = ttk.Label(self.sample_frame, text='Sample Weight', font=50)
+        self.sample_weight_field = ttk.Entry(self.sample_frame, width=5)
+
+
+        self.calculate_button = ttk.Button(self.tab2, text='Calculate', command=self.calculate_brood)
+        self.calculated_number = ttk.Label(self.tab2, text='Predicted Sample Number: ', font=50)
+
 
     def button_dict(self):
         """
@@ -254,8 +269,39 @@ class MainFrame(ttk.Frame):
         # adds the settings button to the window
         self.settings_page_button.grid(row=9, column=1, pady=5)
 
+    def load_tab2(self):
+        """
+        method: load_tab2
+        Author: Alex Mensen-Johnson
+        :return:
+        """
+        '''
+        Sub sample frame
+        '''
+        self.subsample_frame.grid(row=0, column=0, pady=5, columnspan=1)
+        self.subsample_label.grid(row=0, column=0, pady=5)
+        self.subsample_weight_field.grid(row=1, column=0, pady=5)
+
+        self.sample_frame.grid(row=0, column=1, pady=5, columnspan=1)
+        self.sample_label.grid(row=0, column=1, pady=5)
+        self.sample_weight_field.grid(row=1, column=1, pady=5)
 
 
+        self.calculate_button.grid(row=7, column=0, pady=5)
+        self.calculated_number.grid(row=8, column=0, pady=5)
+
+    def run(self):
+        """
+        method: run
+        Author: Alex Mensen-Johnson
+        :return:
+        """
+        self.create_tab1()
+        self.create_tab2()
+        utils.ToolTips(self.button_dict(),'main_frame',2)
+        self.load_tab1()
+        self.load_tab2()
+        self.start_up_operations()
 
     def update_display(self):
         """
@@ -322,6 +368,7 @@ class MainFrame(ttk.Frame):
         if self.image_files:
             # update the slideshow
             self.slideshow.update_image()
+            self.oyster_slideshow.update_image()
 
     def get_model_by_dropdown(self):
         """
@@ -458,3 +505,18 @@ class MainFrame(ttk.Frame):
             # open the settings window
             SettingsWindow(master=self, container=self.container, settings=self.settings)
 
+
+    def calculate_brood(self):
+        """
+        method: calculate_brood
+        description:wrapper method to calculates the brood, uses Oyster page class for calculations
+        :return:
+        """
+        subsample_weight = self.subsample_weight_field.get()
+        sample_weight = self.sample_weight_field.get()
+        predicted_number = self.predictions.prediction_files[self.slideshow.image_files[self.slideshow.current_index]]
+        if subsample_weight != '':
+            if sample_weight != '':
+                if predicted_number != None:
+                        sample_number = self.oyster_page.calculate(int(sample_weight), int(subsample_weight), float(predicted_number[1]))
+                        self.calculated_number.config(text=f'predicted number: {sample_number}')

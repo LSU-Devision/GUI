@@ -1,7 +1,8 @@
 import json
 import Utilities as utils
+import os
 
-default_json_path = "config/default_settings.json"
+default_json_path = os.path.join("config","default_settings.json")
 
 class SettingsJson():
     """
