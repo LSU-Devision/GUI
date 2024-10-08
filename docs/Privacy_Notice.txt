@@ -1,0 +1,4 @@
+Attention:
+This project and application will not store your data externally, nor use any of your personal data without your consent.
+
+Any versions which do not include this notice will be considered non-privacy compliant.
