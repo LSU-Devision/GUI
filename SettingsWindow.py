@@ -7,7 +7,7 @@ from Scrapers import Scraper
 class SettingsWindow(tk.Toplevel):
     '''
     :Class: SettingsWindow
-    :Contributors: Skylar Wilson, Alex Mensen-Johnson, Sunella Ramnath
+    :Contributors: Skylar Wilson, Alex Mensen-Johnson, Sunella Ramnath, Paul Yeon
     :Description: Settings Window for the main frame
     :Methods:
     init
@@ -23,6 +23,8 @@ class SettingsWindow(tk.Toplevel):
         # creates class variables for the settings window
         super().__init__(master=master)
         # creates a class variable for the App window
+
+        #self.info2 = None
         self.container = container
         # creates a class variable for the settings object
         self.settings = settings
@@ -69,30 +71,39 @@ class SettingsWindow(tk.Toplevel):
         creates the buttons and labels for the settings page and assigns the relative function
         '''
     def create_tab1(self):
-
-        self.info = tk.Label(self.tab1, text="Click buttons to toggle settings", wraplength=800, justify=tk.LEFT)
-
+        self.info = tk.Label(self.tab1, text="Click buttons to toggle settings", font=50)
 
         # create the automatic excel export label
         self.automatic_excel_export_label = ttk.Label(self.tab1, text=utils.boolean_text_conversion(self.settings.get_automatic_excel_export()), font=50)
+
         # create the automatic excel export button
         self.automatic_excel_export = ttk.Button(self.tab1, text='Automatic Export To Excel', command= lambda : self.toggle_label('self.settings.automatic_excel_export',self.automatic_excel_export_label))
+
         # create the automatic prediction data clear label
         self.automatic_prediction_data_clear_label = ttk.Label(self.tab1,text=utils.boolean_text_conversion(self.settings.get_automatic_prediction_clear_data()),font=50)
+
         # create the automatic prediction data clear button
         self.automatic_prediction_data_clear = ttk.Button(self.tab1,text='Automatic Clear Data On Predict',command= lambda : self.toggle_label('self.settings.automatic_prediction_clear_data',self.automatic_prediction_data_clear_label))
+
         # create the clear data on clear images label
         self.clear_data_on_clear_images_label = ttk.Label(self.tab1, text=utils.boolean_text_conversion(self.settings.get_clear_data_on_clear_images()), font=50)
+
         # create the clear data on clear images button
         self.clear_data_on_clear_images_button = ttk.Button(self.tab1, text='Clear Data When Clearing Images',command=lambda  : self.toggle_label('self.settings.clear_data_on_clear_images',self.clear_data_on_clear_images_label))
+
         # create the save images output label
         self.save_images_output_label = ttk.Label(self.tab1, text=utils.boolean_text_conversion(self.settings.get_save_images_output()), font=50)
+
         # create the save images output button
         self.save_images_output_button = ttk.Button(self.tab1, text='Save Images To Output',command= lambda : self.toggle_label('self.settings.save_images_output',self.save_images_output_label))
+
         # create the reset settings button
         self.default_settings_button = ttk.Button(self.tab1, text='Reset To Default Settings',command=self.reset_settings)
 
+
     def create_tab2(self):
+        self.info2 = tk.Label(self.tab2, text="Click buttons to toggle settings", font=50)
+
         # create the save model selection button
         self.save_model_selection_button = ttk.Button(self.tab2, text='Save Model Selection', command=self.save_model_selection)
         # create the model selection label
@@ -163,24 +174,25 @@ class SettingsWindow(tk.Toplevel):
         :description: creates the buttons and labels for the basic settings Tab and positions them on the grid
         :return: Nothing
         """
+        self.info.grid(row=0, column=0, pady=15, padx=15)
         # sets the automatic excel export button to the grid
-        self.automatic_excel_export.grid(row=0, column=0, pady=15, padx=15)
+        self.automatic_excel_export.grid(row=1, column=0, pady=15, padx=15)
         # sets the automatic excel export label to the grid
-        self.automatic_excel_export_label.grid(row=0, column=1, pady=15, padx=15)
+        self.automatic_excel_export_label.grid(row=1, column=1, pady=15, padx=15)
         # sets the automatic prediction data clear button to the grid
-        self.automatic_prediction_data_clear.grid(row=1, column=0, pady=15, padx=15)
+        self.automatic_prediction_data_clear.grid(row=2, column=0, pady=15, padx=15)
         # sets the automatic prediction data clear label to the grid
-        self.automatic_prediction_data_clear_label.grid(row=1, column=1, pady=15, padx=15)
+        self.automatic_prediction_data_clear_label.grid(row=2, column=1, pady=15, padx=15)
         # sets the clear data on clear images button to the grid
-        self.clear_data_on_clear_images_button.grid(row=2, column=0, pady=15, padx=15)
+        self.clear_data_on_clear_images_button.grid(row=3, column=0, pady=15, padx=15)
         # sets the clear data on clear images label to the grid
-        self.clear_data_on_clear_images_label.grid(row=2, column=1, pady=15, padx=15)
+        self.clear_data_on_clear_images_label.grid(row=3, column=1, pady=15, padx=15)
         # sets the save images output button to the grid - skylar
-        self.save_images_output_button.grid(row=3, column=0, pady=15, padx=15)
+        self.save_images_output_button.grid(row=4, column=0, pady=15, padx=15)
         # sets the save images output label to the grid
-        self.save_images_output_label.grid(row=3, column=1, pady=15, padx=15)
+        self.save_images_output_label.grid(row=4, column=1, pady=15, padx=15)
         # sets the default settings button to the grid
-        self.default_settings_button.grid(row=4, column=0, pady=15, padx=15)
+        self.default_settings_button.grid(row=5, column=0, pady=15, padx=15)
 
 
     def load_tab2(self):
@@ -189,30 +201,32 @@ class SettingsWindow(tk.Toplevel):
         :description: creates the buttons and labels for the File Save settings Tab and postions them on the grid
         :return: Nothing
         """
-        # sets the save model selection button to the grid
-        self.save_model_selection_button.grid(row=0, column=0, pady=15, padx=15)
-        # sets the model selection label to the grid
-        self.model_label.grid(row=0, column=1, pady=15, padx=15)
-        # sets the clear model selection button to the grid
-        self.clear_model_selection_button.grid(row=0, column=2, pady=15, padx=15)
-        # sets the save excel output button to the grid
-        self.save_excel_file_button.grid(row=1, column=0, pady=15, padx=15)
-        # sets the excel output label to the grid
-        self.excel_file_label.grid(row=1, column=1, pady=15, padx=15)
-        # sets the clear excel output button to the grid
-        self.clear_excel_file_button.grid(row=1, column=2, pady=15, padx=15)
-        # sets the save output path button to the grid
-        self.save_output_folder_button.grid(row=2, column=0, pady=15, padx=15)
-        # sets the output path label to the grid
-        self.output_folder_label.grid(row=2, column=1, pady=15, padx=15)
+        self.info2.grid(row=0, column=0, pady=15, padx=15)
 
-        self.clear_output_folder_button.grid(row=2, column=2, pady=15, padx=15)
+        # sets the save model selection button to the grid
+        self.save_model_selection_button.grid(row=1, column=0, pady=15, padx=15)
+        # sets the model selection label to the grid
+        self.model_label.grid(row=1, column=1, pady=15, padx=15)
+        # sets the clear model selection button to the grid
+        self.clear_model_selection_button.grid(row=1, column=2, pady=15, padx=15)
+        # sets the save excel output button to the grid
+        self.save_excel_file_button.grid(row=2, column=0, pady=15, padx=15)
+        # sets the excel output label to the grid
+        self.excel_file_label.grid(row=2, column=1, pady=15, padx=15)
+        # sets the clear excel output button to the grid
+        self.clear_excel_file_button.grid(row=2, column=2, pady=15, padx=15)
+        # sets the save output path button to the grid
+        self.save_output_folder_button.grid(row=3, column=0, pady=15, padx=15)
+        # sets the output path label to the grid
+        self.output_folder_label.grid(row=3, column=1, pady=15, padx=15)
+
+        self.clear_output_folder_button.grid(row=3, column=2, pady=15, padx=15)
         # sets the load save settings button to the grid
-        self.load_save_settings_button.grid(row=3, column=0, pady=15, padx=15)
+        self.load_save_settings_button.grid(row=4, column=0, pady=15, padx=15)
         # sets the load save settings label to the grid
-        self.load_save_settings_button_label.grid(row=3, column=1, pady=15, padx=15)
+        self.load_save_settings_button_label.grid(row=4, column=1, pady=15, padx=15)
         # sets the clear save settings button to the grid
-        self.clear_save_settings_button.grid(row=3, column=2, pady=15, padx=15)
+        self.clear_save_settings_button.grid(row=4, column=2, pady=15, padx=15)
 
 
     def load_tab3(self):
@@ -352,15 +366,15 @@ class SettingsWindow(tk.Toplevel):
         # if the index is 0, resize the tab to 300x200
         if index == 0:
             # resize the tab
-            self.geometry('300x300')
+            self.geometry('300x400')
         # if the index is 1, resize the tab to 400x400
         elif index == 1:
             # resize the tab
-            self.geometry('600x400')
+            self.geometry('600x500')
         # if the index is 2, resize the tab to 500x400
         elif index == 2:
             # resize the tab
-            self.geometry('200x200')
+            self.geometry('200x300')
 
     def on_tab_change(self, event):
         """
