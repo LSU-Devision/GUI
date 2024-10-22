@@ -165,6 +165,8 @@ class MainFrame(ttk.Frame):
         If you intend on creating a feature for display, add it here please
         :return:
         """
+
+        self.info = tk.Label(self.tab1, text="Hover over buttons with your mouse to get tool tips!", font=50)
         # Creates the select files button
         self.select_files_button = ttk.Button(self.tab1, text='Select Files', command=self.select_files)
         # Creates the slide show
@@ -251,6 +253,8 @@ class MainFrame(ttk.Frame):
         # loads the model label into the frame
         self.model_label.grid(row=0, column=0, pady=5)
 
+
+
         self.select_model_dropdown.grid(row=1, column=0, pady=5)
         # Loads the select files button into the page
         self.select_files_button.grid(row=0, column=1, pady=5)
@@ -268,6 +272,10 @@ class MainFrame(ttk.Frame):
         self.excel_window_button.grid(row=8, column=1, pady=5)
         # adds the settings button to the window
         self.settings_page_button.grid(row=9, column=1, pady=5)
+
+        # information about button menus
+        self.info.grid(row=10, column=1, pady=5)
+
 
     def load_tab2(self):
         """

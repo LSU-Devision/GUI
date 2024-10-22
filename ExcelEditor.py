@@ -385,7 +385,7 @@ class ExcelEditor:
         self.output_folder = output_folder
 
     '''
-    method: get_excel_headers
+    method: get_excel_headers, very crucial
     description: get and order the excel headers according to the settings
     '''
     def get_excel_headers(self):
@@ -440,7 +440,7 @@ class ExcelEditor:
         # return the headers list
         return headers_list
     '''
-    method: get_headers_index
+    method: get_headers_index, also crucial
     description: get the index values of the headers
     '''
     def get_headers_index(self,header_list=None):
