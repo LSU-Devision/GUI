@@ -8,6 +8,7 @@ class OysterPage:
         self.index_row = None
         self.index_row_cells = None
         self.index_row_dict = {}
+        self.results_dict = {}
 
     def calculate(self,sample_weight,subsample_weight,predicted_number):
         subsamples_per_sample = sample_weight / subsample_weight
@@ -42,24 +43,27 @@ class OysterPage:
                 print(f' Prediction file : {prediction[3]} Predicted Number {prediction[4]}')
 
     def match_predicted_values(self):
-        results_dict = {}
+        self.results_dict = {}
         for array in self.index_row_dict['File Names']:
             for value in array:
-                print(f'File name is {value.value}')
+                # print(f'File name is {value.value}')
                 if value.value is None:
-                    pass
+                    continue
                 for prediction in self.master.predictions.predictions_data:
                     temp_file_name = value.value.split('\\')[-1].replace('"','')
-                    print(f'Temp file name is {temp_file_name}')
-                    print(f'cell location " {value.column_letter} {value.row}"')
-                    results_dict[value.row] = temp_file_name
+                    # print(f'Temp file name is {temp_file_name}')
+                    # print(f'cell location " {value.column_letter} {value.row}"')
                     if temp_file_name == prediction[3]:
-                        print(f'File name is {temp_file_name} and is matching {prediction[3]}')
-
-        return results_dict
+                        # print(f'File name is {temp_file_name} and is matching {prediction[3]},{prediction[4]}')
+                        self.results_dict[value.row] = prediction[4]
+        # for key in self.results_dict:
+        #     print(f'Key is {key} and value is {results_dict[key]}')
         # file_name_row = self.index_row_dict['File Names']
         # for file_name in file_name_row:
         #     print(f'File name is {file_name}')
+
+    def export_data_into_sheet(self):
+        pass
 
     def run_export_methods(self):
         self.oyster_excel_reader()
