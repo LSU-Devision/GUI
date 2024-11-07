@@ -104,8 +104,9 @@ class ExcelWindow(tk.Toplevel):
         dropdown_list = ['index', 'date', 'time', 'file_name', 'total_count']
 
         # creates all the dropdowns using the dropdown builder method
+        # now it creates a field as of Paul's update.
         for dropdown in dropdown_list:
-            self.dropdown_builder(dropdown)
+            self.field_builder(dropdown)
 
         # create the save excel column button
         self.save_excel_column_button = ttk.Button(self.tab2, text='Save Excel Column Order', command=self.save_excel_columns)
@@ -402,3 +403,17 @@ class ExcelWindow(tk.Toplevel):
         f'self.excel_{column_name}_column_dropdown.set(self.excel_editor.get_excel_{column_name}_column_index())\n'\
         f'self.excel_{column_name}_column_dropdown.bind("<<ComboboxSelected>>", lambda event: self.excel_editor.set_excel_{column_name}_column_value(self.excel_{column_name}_column_dropdown.get()))'
         exec(code_string,locals(),globals())
+
+    def field_builder(self, column_name='index'):
+        """
+        Builds a column label and Entry field with the given column name, default index. For exporting to excel.
+        Binds a KeyRelease event to the Entry field to set the column value.
+        Remember to press the save button to keep these settings when using the application.
+        :param column_name: The name of the column to build the field for. Default is 'index'.
+        """
+        code_string = f'self.excel_{column_name}_column_label = ttk.Label(self.tab2, text="Excel {column_name.title()} Column")\n' \
+        f'self.excel_{column_name}_column_dropdown = ttk.Entry(self.tab2)\n' \
+        f'self.excel_{column_name}_column_dropdown.insert(0, self.excel_editor.get_excel_{column_name}_column_index())\n' \
+        f'self.excel_{column_name}_column_dropdown.bind("<KeyRelease>", lambda event: self.excel_editor.set_excel_{column_name}_column_value(self.excel_{column_name}_column_entry.get()))'
+        exec(code_string, locals(), globals())
+
