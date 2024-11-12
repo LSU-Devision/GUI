@@ -50,6 +50,8 @@ class ExcelEditor:
     '''
     method: load_excel_settings
     description: load the excel settings in to the class
+    
+    Grabs settings, from excel_settings.json by default. 
     '''
     def load_excel_settings(self):
         # create the self.data variable
@@ -72,6 +74,8 @@ class ExcelEditor:
     '''
     method: save_excel_settings
     description: save the excel settings in to the class
+    
+    Puts the excel settings, such as the desired output columns, into excel_settings.json
     '''
     def save_excel_settings(self):
         # create the self.data_save variable
@@ -94,6 +98,11 @@ class ExcelEditor:
     '''
     method: export_predictions_to_excel
     description: export the predictions to excel
+    This is the main "workhorse" of this class, and does the job of taking predictions made by the program and exporting
+    them to an excel file. It will either create a new file or append to an existing file.
+    
+    In Fall 2024 one of Paul's objectives was to edit this so that instead of giving each column an order in the first
+    five columns of the spreadsheet, it would instead give each column the place provided it by the user's typed field. 
     '''
     def export_predictions_to_excel(self):
         # check to see if the data has been cleared
@@ -148,6 +157,24 @@ class ExcelEditor:
         # if the file does not exist
         if does_file_exist is False:
             # set the headers to the first row
+
+            #dialogue between paul and alex for reference, temporary note:
+            #worksheet.cell is a data type for the workbook. so the cell refers to the cell
+            #what's going on here/ we need to augment the index.there is a check somehwere in here.
+            #if you get an excel file and it doesn't have an index column, you can put your index in there.
+            #but if there is an existing file you have to pin your index set to be the same as the one which already
+            #exists. we start from one because it is the second entry.
+            #not sure why we're really starting with one.
+            #theenumerate allows us to create an index value. Using the i, header allows you to have an i index value
+            #that it indexes through.
+            #so here's my plan: instead of having a straight order, i'm going to make it a dictionary or a map
+            # and the value of each named column would be its output column, and I'll use ws.cell appropriately
+            #for each of those.
+            #ws.cell is the part which adds the data to the excell. So what does the "for prediction in self.master.predictions.predictions_data:" do?
+            #each prediction is like a tuple that contains the results from the results of the machine learning. Like the total count.
+            #edited prediction list modifies the order and adds the index, creatinga row to match every prediction.
+            #ws.append adds itothte worksheet. And it'll the follow that's given when we passed in our helper methods?
+            #yes.
             ws.cell(row=1, column=1, value=self.get_excel_headers()[0])
             # append the headers to the worksheet
             for i, header in enumerate(self.get_excel_headers()[1:], start=2):
@@ -190,6 +217,7 @@ class ExcelEditor:
                 # update the last index value to the current cell value, traversing down the Excel until out of values
                 last_index_value = cell.value
         # iterate over the predictions to append to the worksheet
+        # Paul: for some reason this is written as "if" and not an "else" or "elif"
         if does_file_exist is True:
             # get the possible headers
             possible_headers = ['Index', 'Date', 'Time', 'File Name', 'Total Count']
@@ -355,6 +383,10 @@ class ExcelEditor:
     def get_output_folder(self):
         return self.output_folder
 
+    """
+    A method for the final tab, to set the name of the output file. With the output folder set, this will create the whole
+    path of the file when exporting. 
+    """
     def set_excel_file(self, excel_file):
         if self.output_folder is None:
             self.set_output_folder('output')
@@ -387,6 +419,15 @@ class ExcelEditor:
     '''
     method: get_excel_headers, very crucial
     description: get and order the excel headers according to the settings
+    This is the method that will actually order the comments to their desired positions in the initial form that Alex made.
+    The resulting list of names, in Alex's initial version, would be used to determine the order of the columns in the Excel file.
+    Because Alex's version of the program just outputs one column at a time into the start of the spreadsheet, this form
+    cannot occupy anything other than the first five columns of the output file. 
+    Paul's objective was to fix this and allow the user to type and choose whatever column they want, so long as 
+    it does not conflict with any other columns or a preexisting one. 
+    
+    Plan: Maybe I should turn get_excel_headers into a thing which maps the names to a column, so that in the main method
+    we use the values of the second side in ws.cell to "print out" the stuff.
     '''
     def get_excel_headers(self):
         # create a list of the header values
@@ -442,6 +483,8 @@ class ExcelEditor:
     '''
     method: get_headers_index, also crucial
     description: get the index values of the headers
+    This is the method that will get numerical values for every header. This is a helper method for the convenience
+    of the program, designed to make it more compartmentalized.
     '''
     def get_headers_index(self,header_list=None):
         # create a list for the index values
