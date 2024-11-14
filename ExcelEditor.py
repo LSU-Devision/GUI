@@ -438,48 +438,59 @@ class ExcelEditor:
             self.excel_file_name_value,
             self.excel_total_count_value
         ]
-        # create a new list to store the values
-        new_list = []
-        # iterate over the values in the header list
-        for value in value_list:
-            # if the value is not None, append it to the new list
-            if value != 'None':
-                # append the value
-                new_list.append(str(value))
-        # sort the new list by numerical value
-        new_list.sort()
-        # create a new list to store the index values of the header list
-        index_list = []
-        # iterate over the new list and store the index values in the index list
-        for index in new_list:
-            # append the index value
-            index_list.append(value_list.index(index))
-        # create a list for the headers
-        headers_list = []
-        # iterate over the index list
-        for index in index_list:
-            # if the index is for the Index
-            if index == 0:
-                # append the index to the headers list
-                headers_list.append('Index')
-                # if the index is for the Date
-            elif index == 1:
-                # append the date to the headers list
-                headers_list.append('Date')
-            # if the index is for the Time
-            elif index == 2:
-                # append the time to the headers list
-                headers_list.append('Time')
-            # if the index is for the File Name
-            elif index == 3:
-                # append the file name to the headers list
-                headers_list.append('File Name')
-            # if the index is for the Total Count
-            elif index == 4:
-                # append the total count to the headers list
-                headers_list.append('Total Count')
+
+        value_dict = {
+            'Index': self.excel_index_value,
+            'Date': self.excel_date_value,
+            'Time': self.excel_time_value,
+            'File Name': self.excel_file_name_value,
+            'Total Count': self.excel_total_count_value
+        }
+        #
+        # # create a new list to store the values
+        # new_list = []
+        # # iterate over the values in the header list
+        # for value in value_list:
+        #     # if the value is not None, append it to the new list
+        #     if value != 'None':
+        #         # append the value
+        #         new_list.append(str(value))
+        # # sort the new list by numerical value
+        # new_list.sort()
+        # # create a new list to store the index values of the header list
+        # index_list = []
+        # # iterate over the new list and store the index values in the index list
+        # for index in new_list:
+        #     # append the index value
+        #     index_list.append(value_list.index(index))
+        # # create a list for the headers
+        # headers_list = []
+        # # iterate over the index list
+        # for index in index_list:
+        #     # if the index is for the Index
+        #     if index == 0:
+        #         # append the index to the headers list
+        #         headers_list.append('Index')
+        #         # if the index is for the Date
+        #     elif index == 1:
+        #         # append the date to the headers list
+        #         headers_list.append('Date')
+        #     # if the index is for the Time
+        #     elif index == 2:
+        #         # append the time to the headers list
+        #         headers_list.append('Time')
+        #     # if the index is for the File Name
+        #     elif index == 3:
+        #         # append the file name to the headers list
+        #         headers_list.append('File Name')
+        #     # if the index is for the Total Count
+        #     elif index == 4:
+        #         # append the total count to the headers list
+        #         headers_list.append('Total Count')
+
         # return the headers list
-        return headers_list
+        #return headers_list
+        return value_dict
     '''
     method: get_headers_index, also crucial
     description: get the index values of the headers
