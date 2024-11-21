@@ -175,11 +175,19 @@ class ExcelEditor:
             #edited prediction list modifies the order and adds the index, creatinga row to match every prediction.
             #ws.append adds itothte worksheet. And it'll the follow that's given when we passed in our helper methods?
             #yes.
-            ws.cell(row=1, column=1, value=self.get_excel_headers()[0])
-            # append the headers to the worksheet
-            for i, header in enumerate(self.get_excel_headers()[1:], start=2):
+
+            # ws.cell(row=1, column=1, value=self.get_excel_headers()[0])
+            # # append the headers to the worksheet
+            # for i, header in enumerate(self.get_excel_headers()[1:], start=2):
+
                 # add each header to the appropriate row
+            #spelled out for code comprehension:
+            #index, date, time, file name, total count
+            headers = self.get_excel_headers()
+            for i, header in enumerate(headers, start=1):
                 ws.cell(row=1, column=i, value=header)
+
+            #ws.cell(row=1, column=i, value=header)
                 # get the index of the headers
             index_list = self.get_headers_index()
             # create an empty list for indexing
@@ -438,6 +446,12 @@ class ExcelEditor:
             self.excel_file_name_value,
             self.excel_total_count_value
         ]
+
+        if len(value_list) != len(set(value_list)):
+            # show an error
+            messagebox.showerror("Error", "Please select unique values for each column")
+            # exit the method
+            return
 
         value_dict = {
             'Index': self.excel_index_value,
