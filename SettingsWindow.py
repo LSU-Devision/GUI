@@ -366,7 +366,7 @@ class SettingsWindow(tk.Toplevel):
         # if the index is 0, resize the tab to 300x200
         if index == 0:
             # resize the tab
-            self.geometry('300x400')
+            self.geometry('400x400')
         # if the index is 1, resize the tab to 400x400
         elif index == 1:
             # resize the tab
