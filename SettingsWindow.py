@@ -83,13 +83,13 @@ class SettingsWindow(tk.Toplevel):
         self.automatic_prediction_data_clear_label = ttk.Label(self.tab1,text=utils.boolean_text_conversion(self.settings.get_automatic_prediction_clear_data()),font=50)
 
         # create the automatic prediction data clear button
-        self.automatic_prediction_data_clear = ttk.Button(self.tab1,text='Automatic Clear Data On Predict',command= lambda : self.toggle_label('self.settings.automatic_prediction_clear_data',self.automatic_prediction_data_clear_label))
+        self.automatic_prediction_data_clear = ttk.Button(self.tab1,text='Automatic Clear Last Prediction On Predict',command= lambda : self.toggle_label('self.settings.automatic_prediction_clear_data',self.automatic_prediction_data_clear_label))
 
         # create the clear data on clear images label
         self.clear_data_on_clear_images_label = ttk.Label(self.tab1, text=utils.boolean_text_conversion(self.settings.get_clear_data_on_clear_images()), font=50)
 
         # create the clear data on clear images button
-        self.clear_data_on_clear_images_button = ttk.Button(self.tab1, text='Clear Data When Clearing Images',command=lambda  : self.toggle_label('self.settings.clear_data_on_clear_images',self.clear_data_on_clear_images_label))
+        self.clear_data_on_clear_images_button = ttk.Button(self.tab1, text='Clear Predictions When Clearing Images',command=lambda  : self.toggle_label('self.settings.clear_data_on_clear_images',self.clear_data_on_clear_images_label))
 
         # create the save images output label
         self.save_images_output_label = ttk.Label(self.tab1, text=utils.boolean_text_conversion(self.settings.get_save_images_output()), font=50)
