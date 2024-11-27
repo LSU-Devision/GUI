@@ -32,15 +32,17 @@ class OysterPage:
         predicted_total_count = subsamples_per_sample * predicted_number
         return predicted_total_count
 
+    def check_for_excel_file(self):
+        if self.excel_file is None:
+            return False
+        return True
     def oyster_excel_reader(self):
         '''
         method: oyster_excel_reader
         description: reads in the excel file, and extracts key values for the program export,\n
         stores the index row value, the index row cells, and the index row dictionary
         '''
-        if self.excel_file is None:
-            messagebox.showerror("Error", "Please select an excel file")
-            return
+
         workbook = openpyxl.load_workbook(self.excel_file)
         worksheet = workbook.active
         rows = worksheet.rows
@@ -59,7 +61,9 @@ class OysterPage:
                             column_values.append(col_val)
                         self.index_row_dict[cell.value] = column_values
         workbook.close()
-
+        if len(self.index_row_dict) == 0:
+            return False
+        return True
 
     def get_predicted_values(self):
         '''
@@ -69,6 +73,9 @@ class OysterPage:
         if self.master.predictions.predictions_data is not None:
             for prediction in self.master.predictions.predictions_data:
                 print(f' Prediction file : {prediction[3]} Predicted Number {prediction[4]}')
+        if len(self.master.predictions.predictions_data) == 0:
+            return False
+        return True
 
     def match_predicted_values(self):
         '''
@@ -80,12 +87,16 @@ class OysterPage:
         self.results_dict = {}
         # Loops through the filenames column to create a dictionary matching row index's to predicted values
         # time complecity is n^3 because of the nested for loops fix this possibly by index based accessing
+        excel_file_name_count = -1 # Initialized at -1 to account for the header
+        prediction_count = len(self.master.predictions.predictions_data)
         for array in self.index_row_dict['File Names']:
             # loops through the array
             for value in array:
                 # print(f'File name is {value.value}')
                 if value.value is None:
                     continue
+                else:
+                    excel_file_name_count += 1
                 for prediction in self.master.predictions.predictions_data:
                     temp_file_name = value.value.split('\\')[-1].replace('"','')
                     # print(f'Temp file name is {temp_file_name}')
@@ -93,6 +104,10 @@ class OysterPage:
                     if temp_file_name == prediction[3]:
                         # print(f'File name is {temp_file_name} and is matching {prediction[3]},{prediction[4]}')
                         self.results_dict[value.row] = prediction[4]
+        print(f'Excel file name count is {excel_file_name_count} and prediction count is {prediction_count}')
+        if excel_file_name_count != prediction_count:
+            return False
+        return True
         # for key in self.results_dict:
         #     print(f'Key is {key} and value is {self.results_dict[key]}')
         # file_name_row = self.index_row_dict['File Names']
@@ -136,10 +151,27 @@ class OysterPage:
         method: run_export_methods
         description:modular method, runs the methods to export the data
         '''
-        self.oyster_excel_reader()
-        self.get_predicted_values()
-        self.match_predicted_values()
-        self.export_data_into_sheet()
+        success = True
+        success = self.check_for_excel_file()
+        if success is False:
+            messagebox.showerror('File Error','Export Failed, no excel file loaded into program')
+            return
+
+        success = self.oyster_excel_reader()
+        if success is False:
+            messagebox.showerror("Column naming Error", "Export Failed, 'No Treatment or Group Name' column not found in the excel file. Please be mindful of spelling, capitalization, and spacing errors.")
+            return
+
+        success = self.get_predicted_values()
+        if success is False:
+            messagebox.showerror('Prediction Error','Export Failed, no predictions found, Export will not be successful')
+            return
+
+        success = self.match_predicted_values()
+        if success is False:
+            messagebox.showerror('Prediction Error','Export Failed, mismatch between predicted values and file names, currently not handling partial exports')
+            return
+        # self.export_data_into_sheet()
         print('Export complete')
 
     def load_excel_file(self):
