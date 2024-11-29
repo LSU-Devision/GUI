@@ -294,3 +294,7 @@ def model_path_to_name(path):
         return 'User Model'
     else:
         return 'None'
+
+def is_excel_file(file_path):
+    extensions = ['.xlsx', '.xls', '.xltx', '.xltm','.xml', '.csv','.xlsm']
+    return any(file_path.lower().endswith(ext) for ext in extensions)

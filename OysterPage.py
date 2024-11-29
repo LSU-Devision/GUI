@@ -1,5 +1,6 @@
 from tkinter import messagebox, filedialog
 import openpyxl
+import Utilities as utils
 class OysterPage:
     '''
     class: OysterPage
@@ -33,6 +34,10 @@ class OysterPage:
         return predicted_total_count
 
     def check_for_excel_file(self):
+        '''
+        method: check_for_excel_file
+        description: checks if an excel file has been loaded
+        '''
         if self.excel_file is None:
             return False
         return True
@@ -42,14 +47,17 @@ class OysterPage:
         description: reads in the excel file, and extracts key values for the program export,\n
         stores the index row value, the index row cells, and the index row dictionary
         '''
-
+        # open the the excel file using openpyxl. This does not load the worksheet, only the excel file
         workbook = openpyxl.load_workbook(self.excel_file)
+        # set the workbook to the 1st page worksheet
         worksheet = workbook.active
+        # gets the rows from the worksheet
         rows = worksheet.rows
         self.index_row = None
         self.index_row_cells = None
         self.index_row_dict = {}
-        # for loop has time complexity of n^2, fix this. try index based accessing to make it n
+        # for loop has time complexity of n^3, fix this. try index based accessing to make it smaller
+        # finds the Treatment or Group name and stores all the cells in that row creating a dictionary
         for row in rows:
             if row[0].value is not None:
                 if "Treatment or Group Name" in row[0].value:
@@ -104,7 +112,6 @@ class OysterPage:
                     if temp_file_name == prediction[3]:
                         # print(f'File name is {temp_file_name} and is matching {prediction[3]},{prediction[4]}')
                         self.results_dict[value.row] = prediction[4]
-        print(f'Excel file name count is {excel_file_name_count} and prediction count is {prediction_count}')
         if excel_file_name_count != prediction_count:
             return False
         return True
@@ -114,6 +121,10 @@ class OysterPage:
         # for file_name in file_name_row:
         #     print(f'File name is {file_name}')
 
+    def check_for_subsample_count(self):
+        if 'Subsample Count' in self.index_row_dict:
+            return True
+        return False
     def export_data_into_sheet(self):
         # open the workbook
         workbook = openpyxl.load_workbook(self.excel_file)
@@ -149,30 +160,34 @@ class OysterPage:
     def run_export_methods(self):
         '''
         method: run_export_methods
-        description:modular method, runs the methods to export the data
+        description: modular method, runs the methods to export the data
+        note: each method is run in an if statement, which returns either true or false. This triggers a warning message or proceeds to the next method.
         '''
-        success = True
-        success = self.check_for_excel_file()
-        if success is False:
+        if self.check_for_excel_file() is False:
             messagebox.showerror('File Error','Export Failed, no excel file loaded into program')
             return
 
-        success = self.oyster_excel_reader()
-        if success is False:
+        if self.oyster_excel_reader() is False:
             messagebox.showerror("Column naming Error", "Export Failed, 'No Treatment or Group Name' column not found in the excel file. Please be mindful of spelling, capitalization, and spacing errors.")
             return
 
-        success = self.get_predicted_values()
-        if success is False:
+        if self.get_predicted_values() is False:
             messagebox.showerror('Prediction Error','Export Failed, no predictions found, Export will not be successful')
             return
 
-        success = self.match_predicted_values()
-        if success is False:
+        if self.match_predicted_values() is False:
             messagebox.showerror('Prediction Error','Export Failed, mismatch between predicted values and file names, currently not handling partial exports')
             return
-        # self.export_data_into_sheet()
-        print('Export complete')
+
+        if self.check_for_subsample_count() is False:
+            messagebox.showerror('Subsample Count Error','Export Failed, no Subsample Count column found in the excel file. Please be mindful of spelling, capitalization, and spacing errors.')
+            return
+        try:
+            self.export_data_into_sheet()
+        except PermissionError:
+            messagebox.showerror('File Error', 'Export Failed, file is open in another program, or File is saved as read only')
+            return
+        messagebox.showinfo('Export Success', 'Oyster Excel Export was successful')
 
     def load_excel_file(self):
         '''
@@ -180,5 +195,8 @@ class OysterPage:
         description: loads the excel file from user input
         '''
         self.excel_file = filedialog.askopenfilename(initialdir='/home/max/development/stardist/data')
+        if utils.is_excel_file(self.excel_file) is False:
+            self.excel_file = None
+            messagebox.showerror('File Error', 'File is not an excel file, available file types are .xlsx, .xls, .xlsm, .xltm, .xltx, .xls,.csv')
 
 
