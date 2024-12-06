@@ -33,6 +33,16 @@ class OysterPage:
         predicted_total_count = subsamples_per_sample * predicted_number
         return predicted_total_count
 
+    def load_excel_file(self):
+        '''
+        method: load_excel_file
+        description: loads the excel file from user input
+        '''
+        self.excel_file = filedialog.askopenfilename(initialdir='/home/max/development/stardist/data')
+        if utils.is_excel_file(self.excel_file) is False:
+            self.excel_file = None
+            messagebox.showerror('File Error', 'File is not an excel file, available file types are .xlsx, .xls, .xlsm, .xltm, .xltx, .xls,.csv')
+
     def check_for_excel_file(self):
         '''
         method: check_for_excel_file
@@ -46,6 +56,8 @@ class OysterPage:
         method: oyster_excel_reader
         description: reads in the excel file, and extracts key values for the program export,\n
         stores the index row value, the index row cells, and the index row dictionary
+        Note: the index row dictionary is a dictionary with the column headers as the key and the cells as the value
+        Note: load Excel, and check for Excel file before using this method. both methods are run before this in the run method.
         '''
         # open the the excel file using openpyxl. This does not load the worksheet, only the excel file
         workbook = openpyxl.load_workbook(self.excel_file)
@@ -90,13 +102,15 @@ class OysterPage:
         method: match_predicted_values
         description: matches the predicted values given the existing filenames in the excel file\n
         needs to be tested to see how it handles mismatches between the predicted values and the file names
+        note: file names can be loaded with or without quotations, for example "filename" will match filename
         '''
         # empties the results dictionary
         self.results_dict = {}
         # Loops through the filenames column to create a dictionary matching row index's to predicted values
-        # time complecity is n^3 because of the nested for loops fix this possibly by index based accessing
+        # time complexity is n^3 because of the nested for loops fix this possibly by index based accessing
         excel_file_name_count = -1 # Initialized at -1 to account for the header
         prediction_count = len(self.master.predictions.predictions_data)
+        matched_file_name_count = 0
         for array in self.index_row_dict['File Names']:
             # loops through the array
             for value in array:
@@ -112,7 +126,8 @@ class OysterPage:
                     if temp_file_name == prediction[3]:
                         # print(f'File name is {temp_file_name} and is matching {prediction[3]},{prediction[4]}')
                         self.results_dict[value.row] = prediction[4]
-        if excel_file_name_count != prediction_count:
+                        matched_file_name_count += 1
+        if excel_file_name_count != prediction_count or matched_file_name_count != excel_file_name_count:
             return False
         return True
         # for key in self.results_dict:
@@ -121,8 +136,8 @@ class OysterPage:
         # for file_name in file_name_row:
         #     print(f'File name is {file_name}')
 
-    def check_for_subsample_count(self):
-        if 'Subsample Count' in self.index_row_dict:
+    def check_for_column(self,column_name):
+        if column_name in self.index_row_dict:
             return True
         return False
     def export_data_into_sheet(self):
@@ -130,10 +145,6 @@ class OysterPage:
         workbook = openpyxl.load_workbook(self.excel_file)
         # set the workbook to the 1st page worksheet
         worksheet = workbook.active
-        """
-        for key in self.index_row_dict:
-            print(key)
-        """
         # creates a target column store for accessing the cells by column, result should contain the column of the Subsample count
         target_column = None
         # access the Subsample count column
@@ -174,12 +185,14 @@ class OysterPage:
         if self.get_predicted_values() is False:
             messagebox.showerror('Prediction Error','Export Failed, no predictions found, Export will not be successful')
             return
-
+        if self.check_for_column('File Names') is False:
+            messagebox.showerror('File Names Error','Export Failed, no File Names column found in the excel file. Please be mindful of spelling, capitalization, and spacing errors.')
+            return
         if self.match_predicted_values() is False:
             messagebox.showerror('Prediction Error','Export Failed, mismatch between predicted values and file names, currently not handling partial exports')
             return
 
-        if self.check_for_subsample_count() is False:
+        if self.check_for_column('Subsample Count') is False:
             messagebox.showerror('Subsample Count Error','Export Failed, no Subsample Count column found in the excel file. Please be mindful of spelling, capitalization, and spacing errors.')
             return
         try:
@@ -188,15 +201,5 @@ class OysterPage:
             messagebox.showerror('File Error', 'Export Failed, file is open in another program, or File is saved as read only')
             return
         messagebox.showinfo('Export Success', 'Oyster Excel Export was successful')
-
-    def load_excel_file(self):
-        '''
-        method: load_excel_file
-        description: loads the excel file from user input
-        '''
-        self.excel_file = filedialog.askopenfilename(initialdir='/home/max/development/stardist/data')
-        if utils.is_excel_file(self.excel_file) is False:
-            self.excel_file = None
-            messagebox.showerror('File Error', 'File is not an excel file, available file types are .xlsx, .xls, .xlsm, .xltm, .xltx, .xls,.csv')
 
 
