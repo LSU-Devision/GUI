@@ -85,12 +85,13 @@ class OysterPage:
             return False
         return True
 
-    def get_predicted_values(self):
+    def get_predicted_values(self,test = False):
         '''
         method: get_predicted_values
-        description: prints out the predicted values, useful for examining possible errors in the code
+        description: prints out the predicted values, useful for examining possible errors in the code, also returns true or false if the predictions data is not empty
+        note: if you want to enable the predictions data to be printed, set test to true, by default it is false
         '''
-        if self.master.predictions.predictions_data is not None:
+        if self.master.predictions.predictions_data is not None and test is True:
             for prediction in self.master.predictions.predictions_data:
                 print(f' Prediction file : {prediction[3]} Predicted Number {prediction[4]}')
         if len(self.master.predictions.predictions_data) == 0:
@@ -100,7 +101,7 @@ class OysterPage:
     def match_predicted_values(self):
         '''
         method: match_predicted_values
-        description: matches the predicted values given the existing filenames in the excel file\n
+        description: matches the predicted values given the existing filenames in the Excel file\n
         needs to be tested to see how it handles mismatches between the predicted values and the file names
         note: file names can be loaded with or without quotations, for example "filename" will match filename
         '''
@@ -114,27 +115,18 @@ class OysterPage:
         for array in self.index_row_dict['File Names']:
             # loops through the array
             for value in array:
-                # print(f'File name is {value.value}')
                 if value.value is None:
                     continue
                 else:
                     excel_file_name_count += 1
                 for prediction in self.master.predictions.predictions_data:
                     temp_file_name = value.value.split('\\')[-1].replace('"','')
-                    # print(f'Temp file name is {temp_file_name}')
-                    # print(f'cell location " {value.column_letter} {value.row}"')
                     if temp_file_name == prediction[3]:
-                        # print(f'File name is {temp_file_name} and is matching {prediction[3]},{prediction[4]}')
                         self.results_dict[value.row] = prediction[4]
                         matched_file_name_count += 1
         if excel_file_name_count != prediction_count or matched_file_name_count != excel_file_name_count:
             return False
         return True
-        # for key in self.results_dict:
-        #     print(f'Key is {key} and value is {self.results_dict[key]}')
-        # file_name_row = self.index_row_dict['File Names']
-        # for file_name in file_name_row:
-        #     print(f'File name is {file_name}')
 
     def check_for_column(self,column_name):
         if column_name in self.index_row_dict:
