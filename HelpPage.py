@@ -43,6 +43,7 @@ class HelpPage(tk.Toplevel):
         self.tab4 = ttk.Frame(self.notebook)
         self.tab5 = ttk.Frame(self.notebook)
         self.tab6 = ttk.Frame(self.notebook)
+        self.tab7 = ttk.Frame(self.notebook)
 
         # adding tabs
         self.notebook.add(self.tab1, text="Simple Run In Steps", )
@@ -54,6 +55,7 @@ class HelpPage(tk.Toplevel):
         self.notebook.add(self.tab4, text = 'Special Runs')
         self.notebook.add(self.tab5, text='Credits')
         self.notebook.add(self.tab6, text='Privacy Notice')
+        self.notebook.add(self.tab7, text='Oyster Export')
 
         runInStepsText = open(utils.resource_path("docs/Simple_Run_In_Steps.txt"))
         generalNavigationText = open(utils.resource_path("docs/General_Navigation.txt"))
@@ -61,7 +63,7 @@ class HelpPage(tk.Toplevel):
         specialRunsText = open(utils.resource_path("docs/Special_Runs.txt"))
         creditsText = open(utils.resource_path("docs/Credits.txt"))
         privacyNoticeText = open(utils.resource_path("docs/Privacy_Notice.txt"))
-
+        oyster_export = open(utils.resource_path("docs/Oyster_Export.txt"))
 
 
         self.label_widget = tk.Label(self.tab1, text=runInStepsText.read(), wraplength=800, justify=tk.LEFT)
@@ -82,7 +84,8 @@ class HelpPage(tk.Toplevel):
         self.label_widget.pack()
         self.label_widget= tk.Label(self.tab6, text=privacyNoticeText.read(), wraplength=800, justify=tk.LEFT)
         self.label_widget.pack()
-
+        self.label_widget = tk.Label(self.tab7, text=oyster_export.read(), wraplength=800, justify=tk.LEFT)
+        self.label_widget.pack()
         self.notebook.bind("<<NotebookTabChanged>>", self.on_tab_change)
 
         #self.resize_tab(3)
