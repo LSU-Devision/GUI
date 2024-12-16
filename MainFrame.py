@@ -1,4 +1,5 @@
 import tkinter as tk
+import ttkbootstrap
 from tkinter import ttk, filedialog, messagebox
 import tensorflow as tf
 import os.path
@@ -45,11 +46,13 @@ class MainFrame(ttk.Frame):
         description: Initialization method
         :param container:
         """
+        
         # initialize the container's master init methods
         super().__init__(container)
+        
+        # TTK default style object using ttkbootstrap, attaches and subclasses from the current frame
+        self.style = ttkbootstrap.Style(theme='cerulean')
         # initialize the settings
-
-
         self.settings = Settings.SettingsJson()
         # initialize the container method
         self.container = container
