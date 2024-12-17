@@ -161,6 +161,9 @@ class SettingsJson():
     ####################################################
     # each set function uses boolean input and writes as boolean -skylar
     def set_automatic_excel_export(self, value):
+        if value == True:
+            self.automatic_prediction_clear_data(False)
+        
         self.automatic_excel_export = value
         self.update_json('automatic excel export', value, 'runtime settings')
 

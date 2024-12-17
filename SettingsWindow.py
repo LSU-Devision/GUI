@@ -49,7 +49,7 @@ class SettingsWindow(tk.Toplevel):
         # add the notebook using the grid method
         self.notebook.grid(row=0, column=0)
         # create the first tab
-        self.tab1 = ttk.Frame(self.notebook)
+        self.tab1 = self.BasicFrame(self.notebook)
         # create the second tab
         self.tab2 = ttk.Frame(self.notebook)
         # create the third tab
@@ -70,37 +70,52 @@ class SettingsWindow(tk.Toplevel):
         method: create page
         creates the buttons and labels for the settings page and assigns the relative function
         '''
-    def create_tab1(self):
-        self.info = tk.Label(self.tab1, text="Click buttons to toggle settings", font=50)
-
-        # create the automatic excel export label
-        self.automatic_excel_export_label = ttk.Label(self.tab1, text=utils.boolean_text_conversion(self.settings.get_automatic_excel_export()), font=50)
-
-        # create the automatic excel export button
-        self.automatic_excel_export = ttk.Button(self.tab1, text='Automatic Export To Excel', command= lambda : self.toggle_label('self.settings.automatic_excel_export',self.automatic_excel_export_label))
-
-        # create the automatic prediction data clear label
-        self.automatic_prediction_data_clear_label = ttk.Label(self.tab1,text=utils.boolean_text_conversion(self.settings.get_automatic_prediction_clear_data()),font=50)
-
-        # create the automatic prediction data clear button
-        self.automatic_prediction_data_clear = ttk.Button(self.tab1,text='Automatic Clear Last Prediction On Predict',command= lambda : self.toggle_label('self.settings.automatic_prediction_clear_data',self.automatic_prediction_data_clear_label))
-
-        # create the clear data on clear images label
-        self.clear_data_on_clear_images_label = ttk.Label(self.tab1, text=utils.boolean_text_conversion(self.settings.get_clear_data_on_clear_images()), font=50)
-
-        # create the clear data on clear images button
-        self.clear_data_on_clear_images_button = ttk.Button(self.tab1, text='Clear Predictions When Clearing Images',command=lambda  : self.toggle_label('self.settings.clear_data_on_clear_images',self.clear_data_on_clear_images_label))
-
-        # create the save images output label
-        self.save_images_output_label = ttk.Label(self.tab1, text=utils.boolean_text_conversion(self.settings.get_save_images_output()), font=50)
-
-        # create the save images output button
-        self.save_images_output_button = ttk.Button(self.tab1, text='Save Images To Output',command= lambda : self.toggle_label('self.settings.save_images_output',self.save_images_output_label))
-
-        # create the reset settings button
-        self.default_settings_button = ttk.Button(self.tab1, text='Reset To Default Settings',command=self.reset_settings)
-
-
+    class BasicFrame(ttk.Frame):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            
+            self.__w_kwargs = {"font":"TkDefaultFont"}
+            self.__g_kwargs = {"padx":15, "pady":15}
+            self.__args = [self]
+            
+            button_kwargs = [
+                {"text":"Reset to Default Settings", "command": None},
+                {"text":"Automatic Clear Last Prediction on Predict", "command":None},
+                {"text":"Automatic Export to Excel", "command":None},
+                {"text":"Clear Predictions when Clearing Images", "command":None},
+                {"text":"Save Images to Output", "command":None}
+            ]
+            
+            label_kwargs = [
+                {"text":"Click buttons to toggle settings"},
+                {"text":"On/Off placeholder"},
+                {"text":"On/Off placeholder"},
+                {"text":"On/Off placeholder"},
+                {"text":"On/Off placeholder"}
+            ]
+            
+            args = self.__args
+            kwargs = self.__w_kwargs
+            self._b_widgets = map(
+                lambda x: ttk.Button(*args, **(kwargs.copy().update(x))),
+                button_kwargs
+            )
+                
+            self._l_widgets = map(
+                lambda x: ttk.Label(*args, **(kwargs.copy().update(x))),
+                label_kwargs
+            )
+            
+            kwargs = self.__g_kwargs
+            map(
+                lambda i, x: x.grid(row=i, column=0, **kwargs),
+                enumerate(self._b_widgets) 
+            )
+            map(
+                lambda i, x: x.grid(row=i, column=1, **kwargs),
+                enumerate(self._l_widgets)
+            )
+                
     def create_tab2(self):
         self.info2 = tk.Label(self.tab2, text="Click buttons to toggle settings", font=50)
 
@@ -167,32 +182,6 @@ class SettingsWindow(tk.Toplevel):
             'check_version': self.check_version_button,
             'user_guide': self.user_guide_button
         }
-
-    def load_tab1(self):
-        """
-        :method: load tab 1
-        :description: creates the buttons and labels for the basic settings Tab and positions them on the grid
-        :return: Nothing
-        """
-        self.info.grid(row=0, column=0, pady=15, padx=15)
-        # sets the automatic excel export button to the grid
-        self.automatic_excel_export.grid(row=1, column=0, pady=15, padx=15)
-        # sets the automatic excel export label to the grid
-        self.automatic_excel_export_label.grid(row=1, column=1, pady=15, padx=15)
-        # sets the automatic prediction data clear button to the grid
-        self.automatic_prediction_data_clear.grid(row=2, column=0, pady=15, padx=15)
-        # sets the automatic prediction data clear label to the grid
-        self.automatic_prediction_data_clear_label.grid(row=2, column=1, pady=15, padx=15)
-        # sets the clear data on clear images button to the grid
-        self.clear_data_on_clear_images_button.grid(row=3, column=0, pady=15, padx=15)
-        # sets the clear data on clear images label to the grid
-        self.clear_data_on_clear_images_label.grid(row=3, column=1, pady=15, padx=15)
-        # sets the save images output button to the grid - skylar
-        self.save_images_output_button.grid(row=4, column=0, pady=15, padx=15)
-        # sets the save images output label to the grid
-        self.save_images_output_label.grid(row=4, column=1, pady=15, padx=15)
-        # sets the default settings button to the grid
-        self.default_settings_button.grid(row=5, column=0, pady=15, padx=15)
 
 
     def load_tab2(self):
