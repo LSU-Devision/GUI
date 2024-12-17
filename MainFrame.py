@@ -227,6 +227,8 @@ class MainFrame(ttk.Frame):
         self.load_oyster_excel_button = ttk.Button(self.tab2, text='Load Oyster Excel', command=self.oyster_page.load_excel_file)
         self.oyster_export = ttk.Button(self.tab2, text='Export', command=self.oyster_page.run_export_methods)
 
+        self.oyster_excel_label = ttk.Label(self.tab2, text='No Excel File Selected', font=50)
+
 
     def button_dict(self):
         """
@@ -305,7 +307,8 @@ class MainFrame(ttk.Frame):
         self.calculated_number.grid(row=8, column=0, pady=5)
 
         self.load_oyster_excel_button.grid(row=7, column=1, pady=5)
-        self.oyster_export.grid(row=8, column=1, pady=5)
+        self.oyster_excel_label.grid(row=8, column=1, pady=5)
+        self.oyster_export.grid(row=9, column=1, pady=5)
 
     def run(self):
         """
