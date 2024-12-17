@@ -532,7 +532,7 @@ class MainFrame(ttk.Frame):
         description:wrapper method to calculates the brood, uses Oyster page class for calculations
         :return:
         """
-        # test push
+        # test push 2
         if self.subsample_weight_field.get() != '':
             subsample_weight = self.subsample_weight_field.get()
         if self.sample_weight_field.get() != '':
