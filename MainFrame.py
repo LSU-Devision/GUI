@@ -532,11 +532,20 @@ class MainFrame(ttk.Frame):
         description:wrapper method to calculates the brood, uses Oyster page class for calculations
         :return:
         """
-        subsample_weight = self.subsample_weight_field.get()
-        sample_weight = self.sample_weight_field.get()
-        predicted_number = self.predictions.prediction_files[self.slideshow.image_files[self.slideshow.current_index]]
-        if subsample_weight != '':
-            if sample_weight != '':
-                if predicted_number != None:
-                        sample_number = self.oyster_page.calculate(int(sample_weight), int(subsample_weight), float(predicted_number[1]))
-                        self.calculated_number.config(text=f'predicted number: {sample_number}')
+        if self.subsample_weight_field.get() != '':
+            subsample_weight = self.subsample_weight_field.get()
+        if self.sample_weight_field.get() != '':
+            sample_weight = self.sample_weight_field.get()
+        if self.predictions.prediction_files != None:
+            predict_dict = {}
+            for value in self.predictions.prediction_files:
+                temp_tuple = self.predictions.prediction_files[value]
+                predict_dict[value] = temp_tuple[1]
+            for each in predict_dict:
+                print(f'{each}: {predict_dict[each]}')
+        sample_dict = {}
+        for file_name in predict_dict:
+            sample_dict[file_name] = self.oyster_page.calculate(int(sample_weight), int(subsample_weight), float(predict_dict[file_name]))
+            print(sample_dict[file_name])
+
+
