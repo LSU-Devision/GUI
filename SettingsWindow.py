@@ -1,3 +1,4 @@
+from src.GuiStyle import StyleFrame
 import tkinter as tk
 import webbrowser
 from tkinter import ttk,messagebox
@@ -42,6 +43,8 @@ class SettingsWindow(tk.Toplevel):
         y = main_window_height // 2 - pop_up_window_height // 2  # center the pop-up window vertically
         # set the title of the pop up window
         self.title('Settings')
+        # set the minimum size for resizing
+        self.minsize(pop_up_window_width, pop_up_window_height)
         # set the geometry of the pop up window
         self.geometry(f'{pop_up_window_width}x{pop_up_window_height}+{x}+{y}')
         # convert frame into notebook
@@ -54,12 +57,18 @@ class SettingsWindow(tk.Toplevel):
         self.tab2 = ttk.Frame(self.notebook)
         # create the third tab
         self.tab3 = ttk.Frame(self.notebook)
+        # create the fourth tab
+        self.tab4 = StyleFrame(self.notebook)
+        
         # add the Basic tab
         self.notebook.add(self.tab1, text="Basic", )
         # add the Advanced tab
         self.notebook.add(self.tab2, text="File Save")
         # add the Program tab
         self.notebook.add(self.tab3, text="Program")
+        # add the Style tab
+        self.notebook.add(self.tab4, text=self.tab4.title)
+                
         # bind the tab change
         self.notebook.bind("<<NotebookTabChanged>>", self.on_tab_change)
         # run the settings page
