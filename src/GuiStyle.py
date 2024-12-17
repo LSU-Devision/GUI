@@ -44,6 +44,8 @@ class StyleFrame(ttk.Frame):
     
     # Callback method for selecting style type
     def select(self, event):
+        if self.theme_tree.selection()[0] == "default":
+            Style(theme=None)
         Style(theme=self.theme_tree.selection()[0])
     
     # Python getter for title
@@ -56,6 +58,7 @@ class StyleSettings():
     def __init__(self):
         # Light theme names set
         self._lt_names = {
+            "default",
             "cosmo",
             "flatly",
             "journal",
