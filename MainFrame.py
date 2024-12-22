@@ -52,6 +52,8 @@ class MainFrame(ttk.Frame):
         
         # TTK default style object using ttkbootstrap, attaches and subclasses from the current frame
         self.style = ttkbootstrap.Style(theme='darkly')
+        self.style.load_user_themes(file='config/user_themes.json')
+        
         # initialize the settings
         self.settings = Settings.SettingsJson()
         # initialize the container method
