@@ -1,4 +1,6 @@
 from src.GuiStyle import StyleFrame
+from src.SaveOptionFrame import SaveOptionFrame
+
 import tkinter as tk
 import webbrowser
 from tkinter import ttk,messagebox
@@ -51,19 +53,20 @@ class SettingsWindow(tk.Toplevel):
         self.notebook = ttk.Notebook(self)
         # add the notebook using the grid method
         self.notebook.grid(row=0, column=0)
+        
         # create the first tab
         self.tab1 = self.BasicFrame(self.notebook)
         # create the second tab
-        self.tab2 = ttk.Frame(self.notebook)
+        self.tab2 = self.FileSaveFrame(self.notebook)
         # create the third tab
         self.tab3 = ttk.Frame(self.notebook)
         # create the fourth tab
         self.tab4 = StyleFrame(self.notebook)
         
         # add the Basic tab
-        self.notebook.add(self.tab1, text="Basic", )
+        self.notebook.add(self.tab1, text=self.tab1.title)
         # add the Advanced tab
-        self.notebook.add(self.tab2, text="File Save")
+        self.notebook.add(self.tab2, text=self.tab2.title)
         # add the Program tab
         self.notebook.add(self.tab3, text="Program")
         # add the Style tab
@@ -80,22 +83,26 @@ class SettingsWindow(tk.Toplevel):
         creates the buttons and labels for the settings page and assigns the relative function
         '''
     class BasicFrame(ttk.Frame):
-        def __init__(self, *args, **kwargs):
+        def __init__(self, *args, kwargs={}):
             super().__init__(*args, **kwargs)
+            # TODO: Frame must be resized
+            self._title = 'Basic'
             
-            self.__w_kwargs = {"font":"TkDefaultFont"}
+            # TODO: Button commands must be switched to toggle label
+            self.__button_kwargs = {'command' : None}
+            self.__label_kwargs = {"font":"TkDefaultFont"}
             self.__g_kwargs = {"padx":15, "pady":15}
             self.__args = [self]
             
-            button_kwargs = [
-                {"text":"Reset to Default Settings", "command": None},
-                {"text":"Automatic Clear Last Prediction on Predict", "command":None},
-                {"text":"Automatic Export to Excel", "command":None},
-                {"text":"Clear Predictions when Clearing Images", "command":None},
-                {"text":"Save Images to Output", "command":None}
+            button_individuals = [
+                {"text":"Reset to Default Settings"},
+                {"text":"Automatic Clear Last Prediction on Predict"},
+                {"text":"Automatic Export to Excel"},
+                {"text":"Clear Predictions when Clearing Images"},
+                {"text":"Save Images to Output"}
             ]
             
-            label_kwargs = [
+            label_individuals = [
                 {"text":"Click buttons to toggle settings"},
                 {"text":"On/Off placeholder"},
                 {"text":"On/Off placeholder"},
@@ -104,27 +111,67 @@ class SettingsWindow(tk.Toplevel):
             ]
             
             args = self.__args
-            kwargs = self.__w_kwargs
-            self._b_widgets = map(
-                lambda x: ttk.Button(*args, **(kwargs.copy().update(x))),
-                button_kwargs
-            )
+            kwargs = self.__button_kwargs
+            
+            self._b_widgets = []
+            for b_kwargs in button_individuals:
+                current_kwargs = kwargs.copy()
+                current_kwargs.update(b_kwargs)
                 
-            self._l_widgets = map(
-                lambda x: ttk.Label(*args, **(kwargs.copy().update(x))),
-                label_kwargs
-            )
+                self._b_widgets.append(
+                    ttk.Button(*args, **current_kwargs)
+                )
+           
+            kwargs = self.__label_kwargs
+            self._l_widgets = []
+            for l_kwargs in label_individuals:
+                current_kwargs = kwargs.copy()
+                current_kwargs.update(l_kwargs)
+                
+                self._l_widgets.append(
+                    ttk.Label(*args, **current_kwargs)
+                )
             
             kwargs = self.__g_kwargs
-            map(
-                lambda i, x: x.grid(row=i, column=0, **kwargs),
-                enumerate(self._b_widgets) 
-            )
-            map(
-                lambda i, x: x.grid(row=i, column=1, **kwargs),
-                enumerate(self._l_widgets)
-            )
-                
+            [x.grid(row=i, column=0, **kwargs) for i, x in enumerate(self._b_widgets)]
+            [x.grid(row=i, column=1, **kwargs) for i, x in enumerate(self._l_widgets)]
+        
+        @property
+        def title(self):
+            return self._title
+    
+    class FileSaveFrame(ttk.Frame):
+        def __init__(self, *args, kwargs={}):
+            super().__init__(*args, **kwargs)
+            self._title = 'File Save'
+            
+            # TODO: Button commands must be switched to toggle label
+            self.__g_kwargs = {"padx":15, "pady":15, 'sticky':'w'}
+            self.__label_kwargs = {"font":"TkDefaultFont"}
+            self.__args = [self]
+            
+            save_frames_text = [
+                {'object_name':'Model Name Placeholder', 'type_name':'Model Selection'},
+                {'object_name':'Excel Name Placeholder', 'type_name':'Excel File'},
+                {'object_name':'Output Folder Name Placeholder', 'type_name':'Output Folder'},
+            ]
+            
+            # TODO: Add load button
+            self._widgets = [ttk.Label(self, text='Click buttons to toggle settings', **self.__label_kwargs)]
+            for individual_kwargs in save_frames_text:
+                individual_kwargs.update(
+                    {'grid_kwargs':self.__g_kwargs, 
+                     'label_kwargs':self.__label_kwargs, 
+                     'width':250}
+                )
+                self._widgets.append(SaveOptionFrame(*self.__args, **individual_kwargs))
+            
+            [x.grid(column=0, row=i, sticky='w') for i, x in enumerate(self._widgets)]
+            
+        @property
+        def title(self):
+            return self._title
+            
     def create_tab2(self):
         self.info2 = tk.Label(self.tab2, text="Click buttons to toggle settings", font=50)
 
@@ -192,41 +239,6 @@ class SettingsWindow(tk.Toplevel):
             'user_guide': self.user_guide_button
         }
 
-
-    def load_tab2(self):
-        """
-        :method: load tab 2
-        :description: creates the buttons and labels for the File Save settings Tab and postions them on the grid
-        :return: Nothing
-        """
-        self.info2.grid(row=0, column=0, pady=15, padx=15)
-
-        # sets the save model selection button to the grid
-        self.save_model_selection_button.grid(row=1, column=0, pady=15, padx=15)
-        # sets the model selection label to the grid
-        self.model_label.grid(row=1, column=1, pady=15, padx=15)
-        # sets the clear model selection button to the grid
-        self.clear_model_selection_button.grid(row=1, column=2, pady=15, padx=15)
-        # sets the save excel output button to the grid
-        self.save_excel_file_button.grid(row=2, column=0, pady=15, padx=15)
-        # sets the excel output label to the grid
-        self.excel_file_label.grid(row=2, column=1, pady=15, padx=15)
-        # sets the clear excel output button to the grid
-        self.clear_excel_file_button.grid(row=2, column=2, pady=15, padx=15)
-        # sets the save output path button to the grid
-        self.save_output_folder_button.grid(row=3, column=0, pady=15, padx=15)
-        # sets the output path label to the grid
-        self.output_folder_label.grid(row=3, column=1, pady=15, padx=15)
-
-        self.clear_output_folder_button.grid(row=3, column=2, pady=15, padx=15)
-        # sets the load save settings button to the grid
-        self.load_save_settings_button.grid(row=4, column=0, pady=15, padx=15)
-        # sets the load save settings label to the grid
-        self.load_save_settings_button_label.grid(row=4, column=1, pady=15, padx=15)
-        # sets the clear save settings button to the grid
-        self.clear_save_settings_button.grid(row=4, column=2, pady=15, padx=15)
-
-
     def load_tab3(self):
         """
         :method: load tab 3
@@ -272,20 +284,13 @@ class SettingsWindow(tk.Toplevel):
         :description: runs the settings page
         :return:
         """
-        # create tab 1
-        self.create_tab1()
-        # create tab 2
-        self.create_tab2()
         # create tab 3
         self.create_tab3()
         # create protocols for the window
         self.create_protocols()
         # create tooltips
-        utils.ToolTips(self.button_dict(),'settings',2)
-        # load tab 1
-        self.load_tab1()
-        # load tab2
-        self.load_tab2()
+        # utils.ToolTips(self.button_dict(),'settings',2)
+        
         # load tab3
         self.load_tab3()
         # set boolean to True to disable a new window

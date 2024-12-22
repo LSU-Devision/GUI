@@ -2,7 +2,7 @@ from ttkbootstrap import Style
 import tkinter.ttk as ttk
 
 class StyleFrame(ttk.Frame):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, kwargs={}):
         # Pass up default frame arguments
         super().__init__(*args, **kwargs)
         

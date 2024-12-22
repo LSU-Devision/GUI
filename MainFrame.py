@@ -11,7 +11,8 @@ from Slideshow import Slideshow
 import Settings
 import sys
 import ExcelEditor as excel_editor
-from SettingsWindow import SettingsWindow
+from src.SettingsWindowProposal import SettingsWindow
+#from SettingsWindow import SettingsWindow
 from Predictions import Predictions
 from ExcelWindow import ExcelWindow
 import Utilities as utils
@@ -525,7 +526,8 @@ class MainFrame(ttk.Frame):
         # check if the settings window is already open
         if self.is_settings_page_open == False:
             # open the settings window
-            SettingsWindow(master=self, container=self.container, settings=self.settings)
+            SettingsWindow(self, container=self.container, settings=self.settings)
+
 
 
     def calculate_brood(self):
