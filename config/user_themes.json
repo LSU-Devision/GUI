@@ -1,0 +1,26 @@
+{
+    "themes": [{
+    "lsu": {
+        "type": "light",
+        "colors": {
+            "primary": "#fdd023",
+            "secondary": "#cdb7f6",
+            "success": "#02b875",
+            "info": "#17a2b8",
+            "warning": "#f0ad4e",
+            "danger": "#d9534f",
+            "light": "#F8F9FA",
+            "dark": "#343A40",
+            "bg": "#461d7c",
+            "fg": "#ffffff",
+            "selectbg": "#fdd023",
+            "selectfg": "#000905",
+            "border": "#f3c616",
+            "inputfg": "#ffffff",
+            "inputbg": "#000905",
+            "active": "#e5e5e5"
+            
+        }
+    }
+}]
+}
