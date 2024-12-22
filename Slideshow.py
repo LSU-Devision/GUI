@@ -4,17 +4,17 @@ import os.path
 import Settings
 
 class Slideshow(ttk.Frame):
-    def __init__(self, container,container_tab):
-        super().__init__(container)
+    def __init__(self, master, master_tab):
+        super().__init__(master)
         self.settings = Settings.SettingsJson()
         # Copies the image files from the Main frame into the sub frame
-        self.image_files = container.image_files
+        self.image_files = master.image_files
         # Copies the prediction files from the Main frame into the sub frame
-        self.prediction_files = container.prediction_files
+        self.prediction_files = master.prediction_files
         # Creates a counter variable called current index
         self.current_index = 0
-        self.container_tab = container_tab
-        self.container = container
+        self.master_tab = master_tab
+        self.master = master
         self.create_frame()
         self.load_frame()
 
@@ -35,7 +35,7 @@ class Slideshow(ttk.Frame):
         ####################################################
         # made previous/next buttons into a frame
         # need to move into own file? -skylar
-        self.button_frame = ttk.Frame(self.container_tab)
+        self.button_frame = ttk.Frame(self.master_tab)
         self.button_frame.grid(row = 5, column = 0, columnspan = 2)
         self.prev_image_button = ttk.Button(self.button_frame, text='Prev', command=self.prev_image)
         self.next_image_button = ttk.Button(self.button_frame, text='Next', command=self.next_image)
@@ -47,13 +47,13 @@ class Slideshow(ttk.Frame):
         # end previous/next button frame
 
     def create_frame(self):
-        self.filepath_label = ttk.Label(self.container_tab, font=50)
+        self.filepath_label = ttk.Label(self.master_tab, font=50)
         # Creates an image frame for the base image
-        self.base_image = ImageFrame(self.container_tab)
+        self.base_image = ImageFrame(self.master_tab)
         # Creates and Image frame for the predicted image
-        self.predicted_image = ImageFrame(self.container_tab)
+        self.predicted_image = ImageFrame(self.master_tab)
         # Creates a label for the Item count
-        self.item_count_label = ttk.Label(self.container_tab, font=50)
+        self.item_count_label = ttk.Label(self.master_tab, font=50)
     
     # no longer needed, functionality in main. leaving for now
     # def update_slideshow(self):
@@ -92,7 +92,7 @@ class Slideshow(ttk.Frame):
         # changes the label to the new title
         self.filepath_label.config(text=new_title)
 
-        prediction_path, num_labels = self.container.predictions.prediction_files.get(image_path, (None, ''))
+        prediction_path, num_labels = self.master.predictions.prediction_files.get(image_path, (None, ''))
 
         self.predicted_image.set_image(prediction_path)
         self.base_image.set_image(image_path)

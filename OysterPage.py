@@ -42,6 +42,7 @@ class OysterPage:
         if utils.is_excel_file(self.excel_file) is False:
             self.excel_file = None
             messagebox.showerror('File Error', 'File is not an excel file, available file types are .xlsx, .xls, .xlsm, .xltm, .xltx, .xls,.csv')
+        self.master.oyster_excel_label.config(text= str(utils.string_to_substring(self.excel_file)))
 
     def check_for_excel_file(self):
         '''

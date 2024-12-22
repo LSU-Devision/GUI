@@ -1,0 +1,18 @@
+Oyster Export:
+    The Oyster export button will export the predictions into a preloaded Excel File.
+
+    Before Exporting, you must load your Excel file into the program using the load Oyster Excel button
+
+    After loading the Excel file the name of the Excel file will be displayed in the Excel File label.
+
+    Export method will look for "Treatment or Group Name" in the first column and will use that row as the index row.
+
+    If Subsample Count or File Name columns are missing then the export will fail.
+
+    Program will look for File names in the File names colunm and export the matching predicted values in the
+    Subsample Count column and export them into the Excel file.
+
+    If the file names are not matching the imported files them the export will fail.
+
+    Please use the Given Excel Template for the export.
+

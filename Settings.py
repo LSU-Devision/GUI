@@ -198,3 +198,4 @@ class SettingsJson():
     def set_load_save_settings_on_startup(self, value):
         self.load_save_settings_on_startup = value
         self.update_json('load save settings on startup', value, 'saved files')
+

@@ -8,11 +8,11 @@ class App(tk.Tk):
         super().__init__()
         self.title('Devision')
         #self.geometry('1000x1000')
-        self.configure(bg="#12EFE4")
+        #self.configure()
 
         # set minimum window size
         self.minsize(750, 850)
-        
+
         # set the window icon
         #window_icon = PhotoImage(file = '.\Icons\devision-eye_64x64.png')
         #self.iconphoto(True, window_icon) # if set to 'True', then 'applied to all future created toplevels as well'
