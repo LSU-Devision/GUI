@@ -25,22 +25,22 @@ class SettingsWindow(tk.Toplevel):
         self._settings_tree = ttk.Treeview(self, columns=("status"), height=30, selectmode='browse')
         self._settings_tree.column("#0", width=400, minwidth=250)
         
-        self._settings_tree.heading("status", text="Status")
+        self._settings_tree.heading("status", text="Status", anchor="w")
         self.__styles = StyleSettings()
         
         header_id = [
-            'default',
+            'default',    
             'save',
-            'version',
             'style',
+            'version',
             'clear',            
         ]
         
         header = [
             'Defaults',
             'Save',
-            'Version',
             'Style',
+            'Version',
             'Reset/Clear'
         ]
         
@@ -71,7 +71,7 @@ class SettingsWindow(tk.Toplevel):
             'autosave-image-default'
         ]
         
-        for x, id in zip(settings_text, settings_id): self._settings_tree.insert('default', 'end', iid=id, text=x)
+        for x, id in zip(settings_text, settings_id): self._settings_tree.insert('default', 'end', iid=id, text=x, values='inactive')
         
     
     def _save_settings(self):
@@ -87,7 +87,7 @@ class SettingsWindow(tk.Toplevel):
             'output-save'
         ] 
 
-        for x, id in zip(settings_text, settings_id): self._settings_tree.insert('save', 'end', iid=id, text=x)
+        for x, id in zip(settings_text, settings_id): self._settings_tree.insert('save', 'end', iid=id, text=x, values='inactive')
 
     def _version_settings(self):
         settings_text = [
@@ -100,7 +100,7 @@ class SettingsWindow(tk.Toplevel):
             'guide-version'
         ]
         
-        for x, id in zip(settings_text, settings_id): self._settings_tree.insert('version', 'end', iid=id, text=x)
+        for x, id in zip(settings_text, settings_id): self._settings_tree.insert('version', 'end', iid=id, text=x, values='command')
         
     def _style_settings(self):
         
@@ -117,8 +117,8 @@ class SettingsWindow(tk.Toplevel):
         self._settings_tree.insert('style', 'end', iid='dt', text="Dark Themes", tags="Label")
         
         # Fill theme menus
-        for x in self.__styles.lt_names: self._settings_tree.insert('lt', 'end', iid= x + '-style', text=x, tags="Theme")
-        for x in self.__styles.dt_names: self._settings_tree.insert('dt', 'end', iid= x + '-style', text=x, tags="Theme")
+        for x in self.__styles.lt_names: self._settings_tree.insert('lt', 'end', iid= x + '-style', text=x, tags="Theme", values='inactive')
+        for x in self.__styles.dt_names: self._settings_tree.insert('dt', 'end', iid= x + '-style', text=x, tags="Theme", values='inactive')
         
         self._settings_tree.tag_configure("Theme", font="TkTextFont")
         
@@ -142,4 +142,4 @@ class SettingsWindow(tk.Toplevel):
             'settings-clear'
         ]
         
-        for x, id in zip(settings_text, settings_id): self._settings_tree.insert('clear', 'end', iid=id, text=x)
+        for x, id in zip(settings_text, settings_id): self._settings_tree.insert('clear', 'end', iid=id, text=x, values='command')
