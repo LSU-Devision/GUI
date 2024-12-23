@@ -1,11 +1,15 @@
 from tkinter import ttk
 import tkinter as tk
+import json
 from src.GuiStyle import StyleSettings
 from ttkbootstrap import Style
 
-class SettingsWindow(tk.Toplevel):
+class Settings(tk.Toplevel):
     def __init__(self, *args, **kwargs):
         super().__init__(*args)
+        
+        self.parent = args[0]
+        self.child = kwargs['child']
         
         self.title('Settings')
         self.parent = args[0]
@@ -18,11 +22,39 @@ class SettingsWindow(tk.Toplevel):
         
         x = main_window_width + 75
         y = main_window_height // 2 - pop_up_window_height // 2 
-        
+
         self.minsize(pop_up_window_width, pop_up_window_height)
         self.geometry(f'{pop_up_window_width}x{pop_up_window_height}+{x}+{y}')
         
+        self.child.create(self, parent=self.parent)
+        self.child.grid(row=0, column=0, sticky='nsew')
         
+        
+
+class SettingsWindow(ttk.Frame):
+    USER_SETTINGS = "src/settings_user_proposal.json"
+    DEFAULT_SETTINGS = "src/settings_default_proposal.json"
+    USER_THEMES = "config/user_themes.json"
+    
+    def __new__(cls, *args):
+        with open(cls.USER_SETTINGS, 'r') as file:
+            cls._settings = json.load(file)
+            
+        Style().load_user_themes(file=cls.USER_THEMES)
+        
+        try:
+            Style(theme=cls._settings['theme'][:-6])
+        except AttributeError:
+            pass
+        
+        return super().__new__(cls)
+      
+    def create(self, *args, **kwargs):
+        super().__init__(*args)
+        
+        
+        self.parent = kwargs['parent']
+       
         self._settings_tree = ttk.Treeview(self, columns=("status"), height=30, selectmode='browse')
         self._settings_tree.column("#0", width=400, minwidth=250)
         
@@ -56,7 +88,7 @@ class SettingsWindow(tk.Toplevel):
         self._version_settings()
         self._clear_settings()
         
-        self.load_user_settings()
+        self.load_user_settings(SettingsWindow.USER_SETTINGS)
         
         self._settings_tree.grid(column=0, row=0, sticky='nsew')
     
@@ -64,9 +96,10 @@ class SettingsWindow(tk.Toplevel):
         
         def toggle_setting(event):        
             id = self._settings_tree.focus()
-            value = 'inactive' if self._toggle_settings[id] else 'active'
+            value = 'inactive' if SettingsWindow._settings['toggles'][id] else 'active'
             self._settings_tree.set(id, column='status', value=value)
-            self._toggle_settings[id] = not self._toggle_settings[id]
+            self._settings['toggles'][id] = not SettingsWindow._settings['toggles'][id]
+            self.write_user_settings()
         
         settings_text = [
             "Export Excel file to output folder upon predicting",
@@ -127,10 +160,10 @@ class SettingsWindow(tk.Toplevel):
         # TODO: Update these two methods to not use old settings window
         # This will require a github deploy key
         def update_select(event):
-            SettingsWindow.check_version(self)
+            SettingsWindow.check_version(None)
             
         def guide_select(event):
-            SettingsWindow.open_user_guide(self)
+            SettingsWindow.open_user_guide(None)
         
         
         settings_text = [
@@ -161,14 +194,16 @@ class SettingsWindow(tk.Toplevel):
         def theme_select(event):
             theme = self._settings_tree.focus()
             
-            self._settings_tree.set(self._current_theme, column='status', value='inactive') 
-            self._current_theme = theme
-            self._settings_tree.set(self._current_theme, column='status', value='active')
+            self._settings_tree.set(SettingsWindow._settings['theme'], column='status', value='inactive') 
+            SettingsWindow._settings['theme'] = theme
+            self._settings_tree.set(SettingsWindow._settings['theme'], column='status', value='active')
             
             try:
                 Style(theme=theme[:-6])
             except AttributeError:
                 pass
+                
+            self.write_user_settings()
             
         # Create header for light themes
         self._settings_tree.insert('style', 'end', iid='lt', text="Light Themes", tags="Label")
@@ -204,7 +239,8 @@ class SettingsWindow(tk.Toplevel):
             self.parent.settings.set_output_folder_name('output')
             
         def reset_select(event):
-            self.parent.settings.revert_to_default()
+            self.load_user_settings(SettingsWindow.DEFAULT_SETTINGS)
+            self.write_user_settings()
 
         
         settings_text = [
@@ -237,19 +273,28 @@ class SettingsWindow(tk.Toplevel):
         
         
     
-    def load_user_settings(self):
-        # TODO: Load these setttings from file
-        self._current_theme = 'darkly-style'
-        self._settings_tree.set(self._current_theme, column='status', value='active')
+    def load_user_settings(self, file_name):
+        with open(file_name, 'r') as file:
+            SettingsWindow._settings = json.load(file)
         
-        self._toggle_settings = {
-            'excel-default': True,
-            'clear-excel-default' : False,
-            'clear-output-default': True,
-            'autosave-image-default': False
-        }
+        for style in self.__styles.lt_names:
+            self._settings_tree.set(f'{style}-style', column='status', value='inactive')
+        for style in self.__styles.dt_names:
+            self._settings_tree.set(f'{style}-style', column='status', value='inactive')
+            
+        self._settings_tree.set(SettingsWindow._settings['theme'], column='status', value='active')
         
-        for id in self._toggle_settings:
-            value = 'active' if self._toggle_settings[id] else 'inactive'
+        try:
+            Style(theme=SettingsWindow._settings['theme'][:-6])
+        except AttributeError:
+            pass
+        
+        for id in SettingsWindow._settings['toggles']:
+            value = 'active' if SettingsWindow._settings['toggles'][id] else 'inactive'
             self._settings_tree.set(id, column='status', value=value)
         
+            
+    def write_user_settings(self):
+        with open(SettingsWindow.USER_SETTINGS, 'w') as file:
+            json.dump(SettingsWindow._settings, file)
+    

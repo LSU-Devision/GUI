@@ -11,12 +11,14 @@ from Slideshow import Slideshow
 import Settings
 import sys
 import ExcelEditor as excel_editor
-from src.SettingsWindowProposal import SettingsWindow
+import src
+#from src.SettingsWindowProposal import SettingsWindow, Settings
 #from SettingsWindow import SettingsWindow
 from Predictions import Predictions
 from ExcelWindow import ExcelWindow
 import Utilities as utils
 from OysterPage import OysterPage
+import src.SettingsWindowProposal
 
 matplotlib.use('agg')
 
@@ -52,8 +54,7 @@ class MainFrame(ttk.Frame):
         super().__init__(container)
         
         # TTK default style object using ttkbootstrap, attaches and subclasses from the current frame
-        self.style = ttkbootstrap.Style(theme='darkly')
-        self.style.load_user_themes(file='config/user_themes.json')
+        self.settings_obj = src.SettingsWindowProposal.SettingsWindow()
         
         # initialize the settings
         self.settings = Settings.SettingsJson()
@@ -526,8 +527,7 @@ class MainFrame(ttk.Frame):
         # check if the settings window is already open
         if self.is_settings_page_open == False:
             # open the settings window
-            SettingsWindow(self, container=self.container, settings=self.settings)
-
+            self.settings_window = src.SettingsWindowProposal.Settings(self, child=self.settings_obj)
 
 
     def calculate_brood(self):
