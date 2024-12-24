@@ -1,7 +1,8 @@
-from tkinter import ttk
 import tkinter as tk
-import json
+from tkinter import ttk
 from ttkbootstrap import Style
+
+import json
 import pathlib
 from os import path
 
@@ -39,9 +40,9 @@ class Settings(tk.Toplevel):
 
 class SettingsWindow(ttk.Frame):
     # Class constants
-    USER_SETTINGS = "src/settings_user_proposal.json"
-    DEFAULT_SETTINGS = "src/settings_default_proposal.json"
-    USER_THEMES = "config/user_themes.json"
+    USER_SETTINGS = path.join('src', 'settings_user_proposal.json')
+    DEFAULT_SETTINGS = path.join('src', 'settings_default_proposal.json')
+    USER_THEMES = path.join('config', 'user_themes.json')
     USER_HOME = str(pathlib.Path.home())
     
     # Initializes before object creation to programmatically create class variables at runtime
@@ -384,6 +385,7 @@ class SettingsWindow(ttk.Frame):
         for id in self.cls._settings['paths']:
             value = self.cls._settings['paths'][id]
             self._settings_tree.set(id, column='status', value=value)
+        
         
     def write_user_settings(self):
         with open(SettingsWindow.USER_SETTINGS, 'w') as file:

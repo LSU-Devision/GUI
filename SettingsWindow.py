@@ -1,6 +1,3 @@
-from src.GuiStyle import StyleFrame
-from src.SaveOptionFrame import SaveOptionFrame
-
 import tkinter as tk
 import webbrowser
 from tkinter import ttk,messagebox
@@ -56,12 +53,9 @@ class SettingsWindow(tk.Toplevel):
         
         # create the first tab
         self.tab1 = self.BasicFrame(self.notebook)
-        # create the second tab
-        self.tab2 = self.FileSaveFrame(self.notebook)
         # create the third tab
         self.tab3 = ttk.Frame(self.notebook)
         # create the fourth tab
-        self.tab4 = StyleFrame(self.notebook)
         
         # add the Basic tab
         self.notebook.add(self.tab1, text=self.tab1.title)
@@ -136,38 +130,6 @@ class SettingsWindow(tk.Toplevel):
             [x.grid(row=i, column=0, **kwargs) for i, x in enumerate(self._b_widgets)]
             [x.grid(row=i, column=1, **kwargs) for i, x in enumerate(self._l_widgets)]
         
-        @property
-        def title(self):
-            return self._title
-    
-    class FileSaveFrame(ttk.Frame):
-        def __init__(self, *args, kwargs={}):
-            super().__init__(*args, **kwargs)
-            self._title = 'File Save'
-            
-            # TODO: Button commands must be switched to toggle label
-            self.__g_kwargs = {"padx":15, "pady":15, 'sticky':'w'}
-            self.__label_kwargs = {"font":"TkDefaultFont"}
-            self.__args = [self]
-            
-            save_frames_text = [
-                {'object_name':'Model Name Placeholder', 'type_name':'Model Selection'},
-                {'object_name':'Excel Name Placeholder', 'type_name':'Excel File'},
-                {'object_name':'Output Folder Name Placeholder', 'type_name':'Output Folder'},
-            ]
-            
-            # TODO: Add load button
-            self._widgets = [ttk.Label(self, text='Click buttons to toggle settings', **self.__label_kwargs)]
-            for individual_kwargs in save_frames_text:
-                individual_kwargs.update(
-                    {'grid_kwargs':self.__g_kwargs, 
-                     'label_kwargs':self.__label_kwargs, 
-                     'width':250}
-                )
-                self._widgets.append(SaveOptionFrame(*self.__args, **individual_kwargs))
-            
-            [x.grid(column=0, row=i, sticky='w') for i, x in enumerate(self._widgets)]
-            
         @property
         def title(self):
             return self._title

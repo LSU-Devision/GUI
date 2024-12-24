@@ -12,8 +12,6 @@ import Settings
 import sys
 import ExcelEditor as excel_editor
 import src
-#from src.SettingsWindowProposal import SettingsWindow, Settings
-#from SettingsWindow import SettingsWindow
 from Predictions import Predictions
 from ExcelWindow import ExcelWindow
 import Utilities as utils
