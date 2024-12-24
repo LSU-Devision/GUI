@@ -8,7 +8,6 @@ import json
 import pathlib
 from os import path
 import shutil
-import asyncio
 
 # Window wrapper for settings, ensures that the window is not open when setting are initialized
 class Settings(tk.Toplevel):
@@ -56,9 +55,7 @@ class SettingsWindow(ttk.Frame):
     def __new__(cls, *args):
         
         if not path.exists(cls.USER_SETTINGS):
-            asyncio.run(
-                shutil.copy(cls.DEFAULT_SETTINGS, cls.USER_SETTINGS)
-            )
+            shutil.copy(cls.DEFAULT_SETTINGS, cls.USER_SETTINGS)
              
         with open(cls.USER_SETTINGS, 'r') as file:
             cls._settings = json.load(file)
