@@ -42,6 +42,7 @@ class Settings(tk.Toplevel):
         self.child.grid(row=0, column=0, sticky='nsew')
         
         
+# TODO: Integrate tooltips
 
 class SettingsWindow(ttk.Frame):
     # Class constants
