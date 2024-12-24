@@ -371,13 +371,19 @@ class SettingsWindow(ttk.Frame):
             value = 'active' if SettingsWindow._settings['toggles'][id] else 'inactive'
             self._settings_tree.set(id, column='status', value=value)
         
+         # Create a default output path if not initialized
+        if not SettingsWindow._settings['paths']['output-save']:
+            SettingsWindow._settings['paths']['output-save'] = path.join(SettingsWindow.USER_HOME, 'output')
+            
+        # Create a default excel path if not initialized
+        if not SettingsWindow._settings['paths']['excel-save']:
+            SettingsWindow._settings['paths']['excel-save'] = path.join(SettingsWindow._settings['paths']['output-save'], 'data.xlsx')
+        
+        
         # Read paths and set to tree
         for id in SettingsWindow._settings['paths']:
             value = SettingsWindow._settings['paths'][id]
-            if not value:
-                self._settings_tree.set(id, column='status', value='undefined')
-            else:
-                self._settings_tree.set(id, column='status', value=value)
+            self._settings_tree.set(id, column='status', value=value)
         
     def write_user_settings(self):
         with open(SettingsWindow.USER_SETTINGS, 'w') as file:
