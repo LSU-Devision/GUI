@@ -8,7 +8,6 @@ import matplotlib
 
 from HelpPage import HelpPage
 from Slideshow import Slideshow
-import Settings
 import sys
 import ExcelEditor as excel_editor
 import src
@@ -53,9 +52,8 @@ class MainFrame(ttk.Frame):
         
         # TTK default style object using ttkbootstrap, attaches and subclasses from the current frame
         self.settings_obj = src.SettingsWindowProposal.SettingsWindow()
+        self.settings = self.settings_obj.settings
         
-        # initialize the settings
-        self.settings = Settings.SettingsJson()
         # initialize the container method
         self.container = container
         # create the image files list, set to empty
@@ -89,13 +87,13 @@ class MainFrame(ttk.Frame):
         # set the model path to nothing
         self.model_path = ''
         # settings for automatic excel export
-        self.automatic_excel_setting = self.settings_obj.settings['toggles']['excel-default']
+        self.automatic_excel_setting = self.settings['toggles']['excel-default']
         # settings for automatic prediction data clear
-        self.automatic_prediction_data_clear_setting = self.settings_obj.settings['toggles']['clear-excel-default']
+        self.automatic_prediction_data_clear_setting = self.settings['toggles']['clear-excel-default']
         # settings for clear data on clear images toggle
-        self.clear_data_on_clear_images_setting = self.settings_obj.settings['toggles']['clear-output-default']
+        self.clear_data_on_clear_images_setting = self.settings['toggles']['clear-output-default']
         # settings for save images output toggle -skylar,
-        self.save_images_output_setting = self.settings_obj.settings['toggles']['autosave-image-default']
+        self.save_images_output_setting = self.settings['toggles']['autosave-image-default']
         # boolean checker to see if the data has been cleared
         self.is_data_cleared = True
         self.notebook = ttk.Notebook(self)
@@ -131,9 +129,9 @@ class MainFrame(ttk.Frame):
         """
     
         # load excel file name on start up
-        excel_path = self.settings_obj.settings['paths']['excel-save']
-        model_path = self.settings_obj.settings['paths']['model-save']
-        output_dir = self.settings_obj.settings['paths']['output-save']
+        excel_path = self.settings['paths']['excel-save']
+        model_path = self.settings['paths']['model-save']
+        output_dir = self.settings['paths']['output-save']
         
         #TODO: Programatically create new directories to account for directories
         # that are non-extant

@@ -1,12 +1,11 @@
 from tkinter import ttk
 from ImageFrame import ImageFrame
 import os.path
-import Settings
 
 class Slideshow(ttk.Frame):
     def __init__(self, master, master_tab):
         super().__init__(master)
-        self.settings = master.settings_obj
+        self.settings = master.settings
         # Copies the image files from the Main frame into the sub frame
         self.image_files = master.image_files
         # Copies the prediction files from the Main frame into the sub frame

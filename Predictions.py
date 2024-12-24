@@ -14,7 +14,6 @@ import tensorflow as tf
 import threading
 import time
 import tkinter as tk
-import Settings
 import Utilities as utils
 matplotlib.use('agg')
 
@@ -69,7 +68,7 @@ class Predictions:
         date = datetime.datetime.now().date().strftime("%Y/%m/%d")
         time = datetime.datetime.now().time().strftime("%H:%M:%S")
         self.predictions_data.append((self.predict_index, date, time, os.path.basename(image_path), len(details['points'])))
-        autosave_images = self.master.settings_obj.settings['toggles']['autosave-image-default']
+        autosave_images = self.master.settings['toggles']['autosave-image-default']
         if autosave_images:
             fig, ax = plt.subplots(figsize=(13, 10))
             ax.imshow(img, cmap="gray")
@@ -118,7 +117,7 @@ class Predictions:
         self.predictions_data.append((self.predict_index, date, time, os.path.basename(image_path), len(results['points'])))
         self.predict_index += 1
 
-        autosave_images = self.master.settings_obj.settings['toggles']['autosave-image-default']
+        autosave_images = self.master.settings['toggles']['autosave-image-default']
         print(f'settings is : {autosave_images}')
         if autosave_images:
 

@@ -356,7 +356,7 @@ class ExcelWindow(tk.Toplevel):
         # conditional statement to check the given string
         if checker.filename_checker(self.excel_name_field.get()) is False:
             # save the Excel file name to the variable
-            output_dir = self.master.settings_obj.settings['paths']['output-save']
+            output_dir = self.master.settings['paths']['output-save']
             if output_dir:
                 self.master.excel_editor.set_excel_file(self.excel_name_field.get())
             else:
