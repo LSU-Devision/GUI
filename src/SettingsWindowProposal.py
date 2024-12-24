@@ -444,17 +444,19 @@ class SettingsWindow(ttk.Frame):
         # Read paths and set to tree
         for id in self.cls._settings['paths']:
             value = self.cls._settings['paths'][id]
-            self._settings_tree.set(id, column='status', value=value)
+            self._settings_tree.set(id, column='status', value=value)            
         
         
     def write_user_settings(self):
         with open(SettingsWindow.USER_SETTINGS, 'w') as file:
             json.dump(self.cls._settings, file, indent=2)
-    
-    # Attribut style getter (pythonic)
+            
+        
+    # Attribute style getter (pythonic)
+    # This is a read only pointer to the settings
     @property
     def settings(self):
-        return self.cls._settings.copy()
+        return read_only_dict(self.cls._settings)
     
 # Object for storing style names
 class StyleSettings():
@@ -500,5 +502,23 @@ class StyleSettings():
     def lt_names(self):
         return self._lt_names.copy()
     
+# Read only class for distributing settings
+# This ensures saftey for the required semi-singleton type of SettingsWindow
+
+class read_only_dict():
+    def __init__(self, dictionary):
+        self.internal_data = dictionary
     
+    def __getitem__(self, key):
+        return self.internal_data[key]
+    
+    def __len__(self):
+        return len(self.internal_data)
+    
+    def __delitem__(self, *args, **kwargs):
+        raise TypeError('Cannot delete read-only setting')
+    
+    def __setitem__(self, *args, **kwargs):
+        raise TypeError('Cannot set read-only setting')
+
     
