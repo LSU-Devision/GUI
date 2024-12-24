@@ -56,6 +56,7 @@ class MainFrame(ttk.Frame):
         self.settings_obj = src.SettingsWindowProposal.SettingsWindow()
         self.settings = self.settings_obj.settings
         
+        
         # initialize the container method
         self.container = container
         # create the image files list, set to empty
@@ -537,6 +538,9 @@ class MainFrame(ttk.Frame):
         if self.is_settings_page_open == False:
             # open the settings window
             self.settings_window = src.SettingsWindowProposal.Settings(self, child=self.settings_obj)
+            
+            print('mainframe: ',self.settings)
+            print('settingswindow: ', src.SettingsWindowProposal.SettingsWindow._settings)
 
 
     def calculate_brood(self):

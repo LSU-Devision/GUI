@@ -86,6 +86,7 @@ class SettingsWindow(ttk.Frame):
     
     def __init__(self, *args, **kwargs):
         self.cls = self.__class__
+        self.read_only_settings = read_only_settings()
     
     # Init analogue, runs only when called such that the frame is not created on app startup
     def create(self, *args, **kwargs):
@@ -149,7 +150,7 @@ class SettingsWindow(ttk.Frame):
             id = self._settings_tree.focus()
             value = 'inactive' if self.cls._settings['toggles'][id] else 'active'
             self._settings_tree.set(id, column='status', value=value)
-            self._settings['toggles'][id] = not self.cls._settings['toggles'][id]
+            self.cls._settings['toggles'][id] = not self.cls._settings['toggles'][id]
             self.write_user_settings()
         
         settings_text = [
@@ -445,18 +446,19 @@ class SettingsWindow(ttk.Frame):
         for id in self.cls._settings['paths']:
             value = self.cls._settings['paths'][id]
             self._settings_tree.set(id, column='status', value=value)            
-        
+    
         
     def write_user_settings(self):
         with open(SettingsWindow.USER_SETTINGS, 'w') as file:
             json.dump(self.cls._settings, file, indent=2)
             
-        
-    # Attribute style getter (pythonic)
-    # This is a read only pointer to the settings
+  
+    
+    # # Attribute style getter (pythonic)
+    # # This is a read only pointer to the settings
     @property
     def settings(self):
-        return read_only_dict(self.cls._settings)
+        return self.read_only_settings
     
 # Object for storing style names
 class StyleSettings():
@@ -502,18 +504,56 @@ class StyleSettings():
     def lt_names(self):
         return self._lt_names.copy()
     
-# Read only class for distributing settings
-# This ensures saftey for the required semi-singleton type of SettingsWindow
-
-class read_only_dict():
-    def __init__(self, dictionary):
-        self.internal_data = dictionary
     
+# Read only class for distributing settings, updates every time a key is required
+# Efficiency can be improved by implementing this as a tree, but irrelevant unless it bottlenecks
+# This ensures saftey for the required semi-singleton type of SettingsWindow
+# Otherwise works like a dictionary
+
+class read_only_settings():
+    def __init__(self, keylist=[]):
+        self.keylist = keylist
+        self.update()
+    
+    # Gets the most recent changes to settings
+    def update(self):
+        # New settings object
+        last_item = SettingsWindow._settings
+        
+        # Traverses down list until it reaches the current dictionary
+        for key in self.keylist:
+            last_item = last_item[key]
+        
+        self.__internal_data = last_item
+        
+        # Turns any dictionaries it finds into read only dictionaries
+        for key in self.__internal_data:
+            if type(self.__internal_data[key]) == "dict":
+                new_keylist = self.keylist.copy()
+                new_keylist.append(key)
+                self.__internal_data[key] = read_only_settings(new_keylist)
+        
     def __getitem__(self, key):
-        return self.internal_data[key]
+        self.update()
+        last_item = self.__internal_data
+        for current_key in self.keylist:
+            last_item = last_item[current_key]
+        return last_item[key]
+        
     
     def __len__(self):
-        return len(self.internal_data)
+        self.update()
+        last_item = self.__internal_data
+        for current_key in self.keylist:
+            last_item = last_item[current_key]
+        return len(last_item)
+    
+    def __repr__(self):
+        self.update()
+        last_item = self.__internal_data
+        for current_key in self.keylist:
+            last_item = last_item[current_key]
+        return last_item.__repr__()
     
     def __delitem__(self, *args, **kwargs):
         raise TypeError('Cannot delete read-only setting')
@@ -521,4 +561,5 @@ class read_only_dict():
     def __setitem__(self, *args, **kwargs):
         raise TypeError('Cannot set read-only setting')
 
+        
     
