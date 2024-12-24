@@ -1,7 +1,6 @@
 from tkinter import ttk
 import tkinter as tk
 import json
-from src.GuiStyle import StyleSettings
 from ttkbootstrap import Style
 import pathlib
 from os import path
@@ -389,4 +388,50 @@ class SettingsWindow(ttk.Frame):
     def write_user_settings(self):
         with open(SettingsWindow.USER_SETTINGS, 'w') as file:
             json.dump(self.cls._settings, file)
+    
+# Object for storing style names
+class StyleSettings():
+    def __init__(self):
+        # Light theme names set
+        self._lt_names = [
+            "default",
+            "cosmo",
+            "flatly",
+            "journal",
+            "litera",
+            "lumen",
+            "minty",
+            "pulse",
+            "sandstone",
+            "united",
+            "yeti",
+            "morph",
+            "simplex",
+            "cerculean"
+        ]
+        
+        # Dark theme names set
+        self._dt_names = [
+            "solar",
+            "superhero",
+            "darkly",
+            "cyborg",
+            "vapor",
+            "lsu"
+        ]
+        
+        self._dt_names.sort()
+        self._lt_names.sort()
+
+    # Python getters for internal properties
+    
+    @property
+    def dt_names(self):
+        return self._dt_names.copy()
+    
+    @property
+    def lt_names(self):
+        return self._lt_names.copy()
+    
+    
     
