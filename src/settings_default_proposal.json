@@ -9,8 +9,9 @@
     "theme":"darkly-style",
 
     "paths":{
-        "model-save": "undefined",
-        "output-save": "output"
+        "model-save": null,
+        "excel-save": null,
+        "output-save": null
     }
 
 }

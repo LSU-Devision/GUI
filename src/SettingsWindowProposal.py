@@ -3,6 +3,8 @@ import tkinter as tk
 import json
 from src.GuiStyle import StyleSettings
 from ttkbootstrap import Style
+import pathlib
+from os import path
 
 class Settings(tk.Toplevel):
     def __init__(self, *args, **kwargs):
@@ -35,6 +37,7 @@ class SettingsWindow(ttk.Frame):
     USER_SETTINGS = "src/settings_user_proposal.json"
     DEFAULT_SETTINGS = "src/settings_default_proposal.json"
     USER_THEMES = "config/user_themes.json"
+    USER_HOME = str(pathlib.Path.home())
     
     def __new__(cls, *args):
         with open(cls.USER_SETTINGS, 'r') as file:
@@ -47,11 +50,21 @@ class SettingsWindow(ttk.Frame):
         except AttributeError:
             pass
         
+        
+        if not cls._settings['paths']['output-save']:
+            cls._settings['paths']['output-save'] = path.join(cls.USER_HOME, 'output')
+            
+        if not cls._settings['paths']['excel-save']:
+            cls._settings['paths']['excel-save'] = path.join(cls._settings['paths']['output-save'], 'data.xlsx')
+        
+        with open(cls.USER_SETTINGS, 'w') as file:
+            cls._settings = json.dump(cls._settings, file)
+        
+        
         return super().__new__(cls)
       
     def create(self, *args, **kwargs):
         super().__init__(*args)
-        
         
         self.parent = kwargs['parent']
        
@@ -73,7 +86,7 @@ class SettingsWindow(ttk.Frame):
         header = [
             'Defaults',
             'Style',
-            'Save',
+            'File',
             'Version',
             'Reset/Clear'
         ]
@@ -127,22 +140,44 @@ class SettingsWindow(ttk.Frame):
         
         #TODO: Fill out these functions
         def model_select(event):
-            pass
+            filename = tk.filedialog.askopenfilename(initialdir = SettingsWindow.USER_HOME, 
+                                                     title = "Select a File",
+                                                     filetypes=[("Tensorflow Model files", '*.ckpt *.hdf5 *.pb')])
+            
+            
+            SettingsWindow._settings['paths']['model-save'] = filename
+            self.write_user_settings() 
+            
+        def excel_select(event):
+            filename = tk.filedialog.askopenfilename(initialdir = SettingsWindow.USER_HOME, 
+                                                     title = "Select a File",
+                                                     filetypes=[("Excel files", '*.xlsx')])
+            
+            SettingsWindow._settings['paths']['excel-save'] = filename
+            self.write_user_settings()
+            
         def output_select(event):
-            pass 
-        
+            filedirectory = tk.filedialog.askdirectory(initialdir=SettingsWindow.USER_HOME,
+                                                       title="Select a File Directory")
+            
+            SettingsWindow._settings['paths']['output-save'] = filedirectory
+            self.write_user_settings()      
+            
         settings_text = [
-            "Select default model",
-            "Select new output folder"
+            "Select default model file to import from on startup",
+            "Select default excel file to import from on startup",
+            "Select an output directory to automatically export data to"
         ]   
         
         settings_id = [
             'model-save',
+            'excel-save',
             'output-save'
         ] 
         
         settings_commands = [
             model_select,
+            excel_select,
             output_select
         ]
 
@@ -156,14 +191,14 @@ class SettingsWindow(ttk.Frame):
         
     def _version_settings(self):
         
-        from SettingsWindow import SettingsWindow
+        from SettingsWindow import SettingsWindow as OldSettingsWindow
         # TODO: Update these two methods to not use old settings window
-        # This will require a github deploy key
+        # This will require a github api key of some kind
         def update_select(event):
-            SettingsWindow.check_version(None)
+            OldSettingsWindow.check_version(None)
             
         def guide_select(event):
-            SettingsWindow.open_user_guide(None)
+            OldSettingsWindow.open_user_guide(None)
         
         
         settings_text = [
@@ -226,17 +261,22 @@ class SettingsWindow(ttk.Frame):
         
     def _clear_settings(self):
         
-        # TODO: Update these methods for internal clarity
         def model_select(event):
-            self.parent.settings.set_model_name(None)
-            self.parent.settings.set_model_path(None)
+            SettingsWindow._settings['paths']['model-save'] = None
+            self.write_user_settings()
             
         def excel_select(event):
-            self.master.settings.set_excel_file_name(None)
+            if not SettingsWindow._settings['paths']['output-save']:
+                excel_path = path.join(SettingsWindow.USER_HOME, 'output', 'data.xslx')
+            else:
+                excel_path = path.join(SettingsWindow._settings['paths']['output-save'], 'data.xlsx')
+        
+            SettingsWindow._settings['paths']['excel-save'] = excel_path
+            self.write_user_settings()
 
         def output_select(event):
-            self.parent.excel_editor.set_output_folder('output')
-            self.parent.settings.set_output_folder_name('output')
+            SettingsWindow._settings['paths']['output-save'] = path.join(SettingsWindow.USER_HOME, 'output')
+            self.write_user_settings()
             
         def reset_select(event):
             self.load_user_settings(SettingsWindow.DEFAULT_SETTINGS)
@@ -277,11 +317,13 @@ class SettingsWindow(ttk.Frame):
         with open(file_name, 'r') as file:
             SettingsWindow._settings = json.load(file)
         
+        # Disable all styles
         for style in self.__styles.lt_names:
             self._settings_tree.set(f'{style}-style', column='status', value='inactive')
         for style in self.__styles.dt_names:
             self._settings_tree.set(f'{style}-style', column='status', value='inactive')
-            
+        
+        # Enable the saved style in the json file
         self._settings_tree.set(SettingsWindow._settings['theme'], column='status', value='active')
         
         try:
@@ -289,9 +331,17 @@ class SettingsWindow(ttk.Frame):
         except AttributeError:
             pass
         
+        # Read toggleable option states from file and set
         for id in SettingsWindow._settings['toggles']:
             value = 'active' if SettingsWindow._settings['toggles'][id] else 'inactive'
             self._settings_tree.set(id, column='status', value=value)
+            
+        for id in SettingsWindow._settings['paths']:
+            value = SettingsWindow._settings['paths'][id]
+            if not value:
+                self._settings_tree.set(id, column='status', value='undefined')
+            else:
+                self._settings_tree.set(id, column='status', value=value)
         
             
     def write_user_settings(self):
