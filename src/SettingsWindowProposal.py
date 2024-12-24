@@ -2,6 +2,8 @@ import tkinter as tk
 from tkinter import ttk
 from ttkbootstrap import Style
 
+import webbrowser
+from Scrapers import Scraper
 import json
 import pathlib
 from os import path
@@ -220,16 +222,40 @@ class SettingsWindow(ttk.Frame):
             self._settings_tree.tag_bind(id, '<Double-1>', func)
         
     def _version_settings(self):
-        # Uses old version settings until we can get an api key
-        from SettingsWindow import SettingsWindow as OldSettingsWindow
-        # TODO: Update these two methods to not use old settings window
-        # This will require a github api key of some kind
-        def update_select(event):
-            OldSettingsWindow.check_version(None)
-            
-        def guide_select(event):
-            OldSettingsWindow.open_user_guide(None)
         
+        # TODO: Update to github api download methods for security
+        # This will require a github api key of some kind
+        
+        # These are the old SettingsWindow version updater functions
+        def update_select(event):
+        # create the scraper class
+            scraper_class = Scraper()
+            # check if there is an internet connection
+            if scraper_class.check_internet() is False:
+                # if there is no internet connection, show an error
+                tk.messagebox.showerror("Error", "No Internet Connection")
+                return
+            # check if there is a new version
+            if scraper_class.check_version() is True:
+                # if there is a new version, ask if the user wants to update
+                flag = tk.messagebox.askyesno("Update", "There is a new version available. Do you want to update?")
+                if flag is True:
+                    # open the update page
+                    webbrowser.open(scraper_class.get_update_page())
+            # if there is no new version show an info box
+            else:
+                tk.messagebox.showinfo("Update", "You are on the latest version") 
+                           
+        def guide_select(event):
+            scraper_user_guide_class = Scraper()
+            # check if there is an internet connection
+            if (scraper_user_guide_class.check_internet())  == False:
+                # if there is no internet connection, show an error
+                tk.messagebox.showerror("Internet Issue", "Fix your internet to the point where you can load google.com")
+                return
+            # open the user guide page
+            else: scraper_user_guide_class.get_user_guide()
+            
         
         settings_text = [
            'Check for updates',
