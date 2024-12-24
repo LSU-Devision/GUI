@@ -7,6 +7,8 @@ from Scrapers import Scraper
 import json
 import pathlib
 from os import path
+import shutil
+import asyncio
 
 # Window wrapper for settings, ensures that the window is not open when setting are initialized
 class Settings(tk.Toplevel):
@@ -25,17 +27,19 @@ class Settings(tk.Toplevel):
         main_window_width = self.parent.winfo_width()
         main_window_height = self.parent.winfo_height()
         
-        pop_up_window_width = 600
-        pop_up_window_height = 500
+        self.pop_up_window_width = 1250
+        self.pop_up_window_height = 450
         
         x = main_window_width + 75
-        y = main_window_height // 2 - pop_up_window_height // 2 
+        y = main_window_height // 2 - self.pop_up_window_height // 2 
 
-        self.minsize(pop_up_window_width, pop_up_window_height)
-        self.geometry(f'{pop_up_window_width}x{pop_up_window_height}+{x}+{y}')
+        self.minsize(self.pop_up_window_width, self.pop_up_window_height)
+        self.geometry(f'{self.pop_up_window_width}x{self.pop_up_window_height}+{x}+{y}')
         
         # Placing the child object within the new window
         self.child.create(self, parent=self.parent)
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
         self.child.grid(row=0, column=0, sticky='nsew')
         
         
@@ -50,6 +54,12 @@ class SettingsWindow(ttk.Frame):
     # Initializes before object creation to programmatically create class variables at runtime
     # but before the frame is created
     def __new__(cls, *args):
+        
+        if not path.exists(cls.USER_SETTINGS):
+            asyncio.run(
+                shutil.copy(cls.DEFAULT_SETTINGS, cls.USER_SETTINGS)
+            )
+             
         with open(cls.USER_SETTINGS, 'r') as file:
             cls._settings = json.load(file)
         
@@ -87,7 +97,9 @@ class SettingsWindow(ttk.Frame):
         
         # The dropdown menu object with various visual settings
         self._settings_tree = ttk.Treeview(self, columns=("status"), height=30, selectmode='browse')
-        self._settings_tree.column("#0", width=400, minwidth=250)
+        
+        self._settings_tree.column("#0", width=(args[0].pop_up_window_width // 3) * 2, minwidth=400)
+        self._settings_tree.column('status', width=args[0].pop_up_window_width // 3, minwidth=200)
         
         self._settings_tree.heading("status", text="Status", anchor="w")
         
@@ -127,6 +139,8 @@ class SettingsWindow(ttk.Frame):
         self.load_user_settings(SettingsWindow.USER_SETTINGS)
         
         # Place the tree
+        self._settings_tree.grid_rowconfigure(0, weight=1)
+        self._settings_tree.grid_columnconfigure(0, weight=1)
         self._settings_tree.grid(column=0, row=0, sticky='nsew')
     
     # Settings for the default tab
