@@ -184,7 +184,8 @@ class SettingsWindow(ttk.Frame):
             filename = tk.filedialog.askopenfilename(initialdir = SettingsWindow.USER_HOME, 
                                                      title = "Select a File",
                                                      filetypes=[("Tensorflow Model files", '*.ckpt *.hdf5 *.pb')])
-            
+            if not filename:
+                return
             
             self.cls._settings['paths']['model-save'] = filename
             self._settings_tree.set('excel-save', column='status', value=filename)
@@ -196,6 +197,8 @@ class SettingsWindow(ttk.Frame):
             filename = tk.filedialog.askopenfilename(initialdir = SettingsWindow.USER_HOME, 
                                                      title = "Select a File",
                                                      filetypes=[("Excel files", '*.xlsx')])
+            if not filename:
+                return
             
             self.cls._settings['paths']['excel-save'] = filename
             self._settings_tree.set('excel-save', column='status', value=filename)
@@ -206,6 +209,8 @@ class SettingsWindow(ttk.Frame):
         def output_select(event):
             filedirectory = tk.filedialog.askdirectory(initialdir=SettingsWindow.USER_HOME,
                                                        title="Select a File Directory")
+            if not filedirectory:
+                return
             
             excel_path = self.cls._settings['paths']['excel-save']
             
