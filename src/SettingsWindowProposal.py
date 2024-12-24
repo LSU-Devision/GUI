@@ -79,7 +79,8 @@ class SettingsWindow(ttk.Frame):
         super().__init__(*args)
         
         self.parent = kwargs['parent']
-       
+        self.cls = self.__class__
+        
         # The dropdown menu object with various visual settings
         self._settings_tree = ttk.Treeview(self, columns=("status"), height=30, selectmode='browse')
         self._settings_tree.column("#0", width=400, minwidth=250)
@@ -130,9 +131,9 @@ class SettingsWindow(ttk.Frame):
         # Callback function for turning a toggle from active to inactive and vice versa
         def toggle_setting(event):        
             id = self._settings_tree.focus()
-            value = 'inactive' if SettingsWindow._settings['toggles'][id] else 'active'
+            value = 'inactive' if self.cls._settings['toggles'][id] else 'active'
             self._settings_tree.set(id, column='status', value=value)
-            self._settings['toggles'][id] = not SettingsWindow._settings['toggles'][id]
+            self._settings['toggles'][id] = not self.cls._settings['toggles'][id]
             self.write_user_settings()
         
         settings_text = [
@@ -168,7 +169,7 @@ class SettingsWindow(ttk.Frame):
                                                      filetypes=[("Tensorflow Model files", '*.ckpt *.hdf5 *.pb')])
             
             
-            SettingsWindow._settings['paths']['model-save'] = filename
+            self.cls._settings['paths']['model-save'] = filename
             self.write_user_settings() 
         
         # Callback function changing default excel filepath and writing to settings
@@ -177,7 +178,7 @@ class SettingsWindow(ttk.Frame):
                                                      title = "Select a File",
                                                      filetypes=[("Excel files", '*.xlsx')])
             
-            SettingsWindow._settings['paths']['excel-save'] = filename
+            self.cls._settings['paths']['excel-save'] = filename
             self.write_user_settings()
         
         # Callback function changing default output file directory and writing to settings
@@ -185,7 +186,7 @@ class SettingsWindow(ttk.Frame):
             filedirectory = tk.filedialog.askdirectory(initialdir=SettingsWindow.USER_HOME,
                                                        title="Select a File Directory")
             
-            SettingsWindow._settings['paths']['output-save'] = filedirectory
+            self.cls._settings['paths']['output-save'] = filedirectory
             self.write_user_settings()      
             
         settings_text = [
@@ -258,9 +259,9 @@ class SettingsWindow(ttk.Frame):
         def theme_select(event):
             theme = self._settings_tree.focus()
             
-            self._settings_tree.set(SettingsWindow._settings['theme'], column='status', value='inactive') 
-            SettingsWindow._settings['theme'] = theme
-            self._settings_tree.set(SettingsWindow._settings['theme'], column='status', value='active')
+            self._settings_tree.set(self.cls._settings['theme'], column='status', value='inactive') 
+            self.cls._settings['theme'] = theme
+            self._settings_tree.set(self.cls._settings['theme'], column='status', value='active')
             
             try:
                 Style(theme=theme[:-6])
@@ -292,22 +293,22 @@ class SettingsWindow(ttk.Frame):
         
         # Callback rewrites default model path
         def model_select(event):
-            SettingsWindow._settings['paths']['model-save'] = None
+            self.cls._settings['paths']['model-save'] = None
             self.write_user_settings()
         
         # Callback rewrites default excel path
         def excel_select(event):
-            if not SettingsWindow._settings['paths']['output-save']:
+            if not self.cls._settings['paths']['output-save']:
                 excel_path = path.join(SettingsWindow.USER_HOME, 'output', 'data.xslx')
             else:
-                excel_path = path.join(SettingsWindow._settings['paths']['output-save'], 'data.xlsx')
+                excel_path = path.join(self.cls._settings['paths']['output-save'], 'data.xlsx')
         
-            SettingsWindow._settings['paths']['excel-save'] = excel_path
+            self.cls._settings['paths']['excel-save'] = excel_path
             self.write_user_settings()
         
         # Callback rewrites defaults output directory
         def output_select(event):
-            SettingsWindow._settings['paths']['output-save'] = path.join(SettingsWindow.USER_HOME, 'output')
+            self.cls._settings['paths']['output-save'] = path.join(SettingsWindow.USER_HOME, 'output')
             self.write_user_settings()
         
         # Resets all settings to default
@@ -350,7 +351,7 @@ class SettingsWindow(ttk.Frame):
     
     def load_user_settings(self, file_name):
         with open(file_name, 'r') as file:
-            SettingsWindow._settings = json.load(file)
+            self.cls._settings = json.load(file)
         
         # Disable all styles
         for style in self.__styles.lt_names:
@@ -359,33 +360,33 @@ class SettingsWindow(ttk.Frame):
             self._settings_tree.set(f'{style}-style', column='status', value='inactive')
         
         # Enable the saved style in the json file
-        self._settings_tree.set(SettingsWindow._settings['theme'], column='status', value='active')
+        self._settings_tree.set(self.cls._settings['theme'], column='status', value='active')
         
         try:
-            Style(theme=SettingsWindow._settings['theme'][:-6])
+            Style(theme=self.cls._settings['theme'][:-6])
         except AttributeError:
             pass
         
         # Read toggleable option states from file and set
-        for id in SettingsWindow._settings['toggles']:
-            value = 'active' if SettingsWindow._settings['toggles'][id] else 'inactive'
+        for id in self.cls._settings['toggles']:
+            value = 'active' if self.cls._settings['toggles'][id] else 'inactive'
             self._settings_tree.set(id, column='status', value=value)
         
          # Create a default output path if not initialized
-        if not SettingsWindow._settings['paths']['output-save']:
-            SettingsWindow._settings['paths']['output-save'] = path.join(SettingsWindow.USER_HOME, 'output')
+        if not self.cls._settings['paths']['output-save']:
+            self.cls._settings['paths']['output-save'] = path.join(SettingsWindow.USER_HOME, 'output')
             
         # Create a default excel path if not initialized
-        if not SettingsWindow._settings['paths']['excel-save']:
-            SettingsWindow._settings['paths']['excel-save'] = path.join(SettingsWindow._settings['paths']['output-save'], 'data.xlsx')
+        if not self.cls._settings['paths']['excel-save']:
+            self.cls._settings['paths']['excel-save'] = path.join(self.cls._settings['paths']['output-save'], 'data.xlsx')
         
         
         # Read paths and set to tree
-        for id in SettingsWindow._settings['paths']:
-            value = SettingsWindow._settings['paths'][id]
+        for id in self.cls._settings['paths']:
+            value = self.cls._settings['paths'][id]
             self._settings_tree.set(id, column='status', value=value)
         
     def write_user_settings(self):
         with open(SettingsWindow.USER_SETTINGS, 'w') as file:
-            json.dump(SettingsWindow._settings, file)
+            json.dump(self.cls._settings, file)
     
