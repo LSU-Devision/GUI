@@ -69,7 +69,8 @@ class Predictions:
         date = datetime.datetime.now().date().strftime("%Y/%m/%d")
         time = datetime.datetime.now().time().strftime("%H:%M:%S")
         self.predictions_data.append((self.predict_index, date, time, os.path.basename(image_path), len(details['points'])))
-        if self.master.settings.save_images_output == True:
+        autosave_images = self.master.settings_obj.settings['toggles']['autosave-image-default']
+        if autosave_images:
             fig, ax = plt.subplots(figsize=(13, 10))
             ax.imshow(img, cmap="gray")
             ax.imshow(labels, cmap=self.lbl_cmap, alpha=0.5)
@@ -117,9 +118,9 @@ class Predictions:
         self.predictions_data.append((self.predict_index, date, time, os.path.basename(image_path), len(results['points'])))
         self.predict_index += 1
 
-
-        print(f'settings is : {self.master.settings.save_images_output}')
-        if self.master.settings.save_images_output == True:
+        autosave_images = self.master.settings_obj.settings['toggles']['autosave-image-default']
+        print(f'settings is : {autosave_images}')
+        if autosave_images:
 
 
 
@@ -210,7 +211,7 @@ class Predictions:
             self.progress_bar.after(0, self.update_progress, i + 1, total_images, remaining_time)
 
         self.predict_index = 1
-        if self.master.settings.get_automatic_excel_export():
+        if self.master.automatic_excel_setting:
             self.master.excel_editor.export_predictions_to_excel()
         self.master.slideshow.update_image()
         self.master.oyster_slideshow.update_image()

@@ -89,13 +89,13 @@ class MainFrame(ttk.Frame):
         # set the model path to nothing
         self.model_path = ''
         # settings for automatic excel export
-        self.automatic_excel_setting = self.settings.get_automatic_excel_export()
+        self.automatic_excel_setting = self.settings_obj.settings['toggles']['excel-default']
         # settings for automatic prediction data clear
-        self.automatic_prediction_data_clear_setting = self.settings.get_automatic_prediction_clear_data()
+        self.automatic_prediction_data_clear_setting = self.settings_obj.settings['toggles']['clear-excel-default']
         # settings for clear data on clear images toggle
-        self.clear_data_on_clear_images_setting = self.settings.get_clear_data_on_clear_images()
+        self.clear_data_on_clear_images_setting = self.settings_obj.settings['toggles']['clear-output-default']
         # settings for save images output toggle -skylar,
-        self.save_images_output_setting = self.settings.get_save_images_output()
+        self.save_images_output_setting = self.settings_obj.settings['toggles']['autosave-image-default']
         # boolean checker to see if the data has been cleared
         self.is_data_cleared = True
         self.notebook = ttk.Notebook(self)
@@ -129,36 +129,39 @@ class MainFrame(ttk.Frame):
         description: operations required to be done after the create and load page are called
         :return:
         """
-        # change the labels if the start up setttings are on
-        if self.settings.get_load_save_settings_on_startup() is True:
-            # load excel file name on start up
-            if self.settings.get_excel_file_name() is not None:
-                if os.path.exists(self.settings.get_excel_file_name()):
-                    self.excel_label_title.config(text=self.settings.get_excel_file_name('string'))
-                    self.excel_editor.set_excel_file(self.settings.get_excel_file_name())
-                # If the excel file path does not exist
-                else:
-                    self.excel_editor.set_excel_file(None)
-                    self.settings.set_excel_file_name(None)
-                    messagebox.showerror("Error", "Excel File Not Found, Setting reset to None")
-            # load model on start up
-            if self.settings.get_model_path() is not None:
-                if os.path.exists(self.settings.get_model_path()):
-                    self.model_path = self.settings.get_model_path()
-                    self.select_model_dropdown.set(self.settings.get_model_name('string'))
-                    self.load_model()
-                # if the model path does not exist
-                else:
-                    self.settings.set_model_path(None)
-                    self.settings.set_model_name(None)
-                    messagebox.showerror("Error", "Model File Not Found, Setting reset to None")
-            if self.settings.get_output_folder_name() is not None:
-                if os.path.exists(self.settings.get_output_folder_name()) is False:
-                    self.settings.set_output_folder_name('output')
-                    messagebox.showerror("Error", "Output Folder Not Found, Setting reset to 'output'")
-                # if the output folder path does not exist
-                else:
-                    self.excel_editor.set_output_folder(self.settings.get_output_folder_name())
+    
+        # load excel file name on start up
+        excel_path = self.settings_obj.settings['paths']['excel-save']
+        model_path = self.settings_obj.settings['paths']['model-save']
+        output_dir = self.settings_obj.settings['paths']['output-save']
+        
+        #TODO: Programatically create new directories to account for directories
+        # that are non-extant
+        if excel_path:
+            if os.path.exists(excel_path):
+                self.excel_label_title.config(text=excel_path)
+                self.excel_editor.set_excel_file(excel_path)
+            # If the excel file path does not exist
+            else:
+                self.excel_editor.set_excel_file(None)
+                messagebox.showerror("Error", "Excel File Not Found, Setting reset to None")
+        
+        # load model on start up
+        if model_path:
+            if os.path.exists(model_path):
+                self.model_path = model_path
+                self.select_model_dropdown.set(os.path.basename(model_path))
+                self.load_model()
+            # if the model path does not exist
+            else:
+                messagebox.showerror("Error", "Model File Not Found")
+                
+        if output_dir:
+            if not os.path.exists(output_dir):
+                messagebox.showerror("Error", "Output Folder Not Found")
+            # if the output folder path does not exist
+            else:
+                self.excel_editor.set_output_folder(output_dir)
 
 
 
@@ -470,7 +473,8 @@ class MainFrame(ttk.Frame):
         # display a message box showing the Images are cleared
         messagebox.showinfo("Devision", "Images Cleared!")
         # check the settings variable
-        if self.settings.get_clear_data_on_clear_images():
+        
+        if self.clear_data_on_clear_images_setting:
             # clear the data
             self.clear_predicted_data()
 

@@ -329,7 +329,7 @@ class ExcelEditor:
         # boolean check for clearing variables
         self.master.is_data_cleared = False
         # boolean check for automatic prediction clearing
-        if self.master.settings.get_automatic_prediction_clear_data():
+        if self.master.automatic_prediction_data_clear_setting:
             # clear the predictions
             self.master.predictions.predictions_data.clear()
             # set the boolean check to True

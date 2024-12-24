@@ -69,17 +69,19 @@ class SettingsWindow(ttk.Frame):
             cls._settings['paths']['excel-save'] = path.join(cls._settings['paths']['output-save'], 'data.xlsx')
         
         with open(cls.USER_SETTINGS, 'w') as file:
-            cls._settings = json.dump(cls._settings, file)
+            json.dump(cls._settings, file)
         
         # Create a new class object from super method, this also instantiates an object put doesn't call supers init
         return super().__new__(cls)
+    
+    def __init__(self, *args, **kwargs):
+        self.cls = self.__class__
     
     # Init analogue, runs only when called such that the frame is not created on app startup
     def create(self, *args, **kwargs):
         super().__init__(*args)
         
         self.parent = kwargs['parent']
-        self.cls = self.__class__
         
         # The dropdown menu object with various visual settings
         self._settings_tree = ttk.Treeview(self, columns=("status"), height=30, selectmode='browse')
@@ -390,6 +392,11 @@ class SettingsWindow(ttk.Frame):
     def write_user_settings(self):
         with open(SettingsWindow.USER_SETTINGS, 'w') as file:
             json.dump(self.cls._settings, file)
+    
+    # Attribut style getter (pythonic)
+    @property
+    def settings(self):
+        return self.cls._settings.copy()
     
 # Object for storing style names
 class StyleSettings():
