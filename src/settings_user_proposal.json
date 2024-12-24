@@ -1,1 +1,15 @@
-{"toggles": {"excel-default": false, "clear-excel-default": false, "clear-output-default": true, "autosave-image-default": false}, "theme": "cosmo-style", "paths": {"model-save": null, "excel-save": "/home/dow/output/data.xlsx", "output-save": "/home/dow/output"}}
+{
+  "toggles": {
+    "excel-default": false,
+    "clear-excel-default": false,
+    "clear-output-default": true,
+    "autosave-image-default": false,
+    "create-dir-default": false
+  },
+  "theme": "darkly-style",
+  "paths": {
+    "model-save": null,
+    "excel-save": "/home/dow/personal/work/math_clinic/winter_2024_gui/GUI/src/data.xlsx",
+    "output-save": "/home/dow/personal/work/math_clinic/winter_2024_gui/GUI/src"
+  }
+}

@@ -71,7 +71,7 @@ class SettingsWindow(ttk.Frame):
             cls._settings['paths']['excel-save'] = path.join(cls._settings['paths']['output-save'], 'data.xlsx')
         
         with open(cls.USER_SETTINGS, 'w') as file:
-            json.dump(cls._settings, file)
+            json.dump(cls._settings, file, indent=2)
         
         # Create a new class object from super method, this also instantiates an object put doesn't call supers init
         return super().__new__(cls)
@@ -144,14 +144,16 @@ class SettingsWindow(ttk.Frame):
             "Export Excel file to output folder upon predicting",
             "Append new predictions to old Excel file after predicting",
             "Create new Excel file upon clearing images",
-            "Automatically save images to output after predicting"
+            "Automatically save images to output after predicting",
+            "Automatically create file directories to store outputs"
         ]
         
         settings_id = [
             "excel-default",
             "clear-excel-default",
             'clear-output-default',
-            'autosave-image-default'
+            'autosave-image-default',
+            'create-dir-default'
         ]
         
         # Place the default settings into the tree
@@ -174,6 +176,8 @@ class SettingsWindow(ttk.Frame):
             
             
             self.cls._settings['paths']['model-save'] = filename
+            self._settings_tree.set('excel-save', column='status', value=filename)
+
             self.write_user_settings() 
         
         # Callback function changing default excel filepath and writing to settings
@@ -183,6 +187,8 @@ class SettingsWindow(ttk.Frame):
                                                      filetypes=[("Excel files", '*.xlsx')])
             
             self.cls._settings['paths']['excel-save'] = filename
+            self._settings_tree.set('excel-save', column='status', value=filename)
+            
             self.write_user_settings()
         
         # Callback function changing default output file directory and writing to settings
@@ -190,14 +196,23 @@ class SettingsWindow(ttk.Frame):
             filedirectory = tk.filedialog.askdirectory(initialdir=SettingsWindow.USER_HOME,
                                                        title="Select a File Directory")
             
+            excel_path = self.cls._settings['paths']['excel-save']
+            
+            # If the excel file is contained in the output directory, move the default excel file location automatically when the output directory is moved
+            if self.cls._settings['paths']['output-save'] == path.dirname(excel_path):
+                self.cls._settings['paths']['excel-save'] = path.join(filedirectory, path.basename(excel_path))
+                self._settings_tree.set('excel-save', column='status', value=self.cls._settings['paths']['excel-save'])
+                
             self.cls._settings['paths']['output-save'] = filedirectory
+            self._settings_tree.set('output-save', column='status', value=filedirectory)
+            
             self.write_user_settings()      
             
         settings_text = [
             "Select default model file to import from on startup",
             "Select default excel file to import from on startup",
             "Select an output directory to automatically export data to"
-        ]   
+            ]   
         
         settings_id = [
             'model-save',
@@ -417,7 +432,7 @@ class SettingsWindow(ttk.Frame):
         
     def write_user_settings(self):
         with open(SettingsWindow.USER_SETTINGS, 'w') as file:
-            json.dump(self.cls._settings, file)
+            json.dump(self.cls._settings, file, indent=2)
     
     # Attribut style getter (pythonic)
     @property

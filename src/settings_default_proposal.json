@@ -3,7 +3,8 @@
         "excel-default": false,
         "clear-excel-default" : false,
         "clear-output-default" : true,
-        "autosave-image-default": false
+        "autosave-image-default": false,
+        "create-dir-default": false
     },
 
     "theme":"darkly-style",

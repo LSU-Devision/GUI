@@ -1,3 +1,5 @@
+import pandas as pd
+
 import tkinter as tk
 import ttkbootstrap
 from tkinter import ttk, filedialog, messagebox
@@ -133,8 +135,15 @@ class MainFrame(ttk.Frame):
         model_path = self.settings['paths']['model-save']
         output_dir = self.settings['paths']['output-save']
         
-        #TODO: Programatically create new directories to account for directories
-        # that are non-extant
+        if self.settings['toggles']['create-dir-default']:
+            if not os.path.exists(excel_path):
+                with pd.ExcelWriter(excel_path, engine='openpyxl', mode='w') as writer:
+                    empty_file = pd.DataFrame()
+                    empty_file.to_excel(writer, sheet_name='empty')
+                
+            if not os.path.exists(output_dir):
+                os.makedirs(output_dir)
+        
         if excel_path:
             if os.path.exists(excel_path):
                 self.excel_label_title.config(text=excel_path)
