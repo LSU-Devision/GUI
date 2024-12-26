@@ -146,8 +146,15 @@ class SettingsWindow(ttk.Frame):
     def _default_settings(self):
         
         # Callback function for turning a toggle from active to inactive and vice versa
-        def toggle_setting(event):        
+        def toggle_setting(event):
             id = self._settings_tree.focus()
+            
+            # Do not allow the user to automaticly clear if the excel file isn't being automatically created
+            if id=='clear-excel-default' and not self._settings_tree['toggles']['excel-default']:
+                return
+            
+            
+            
             value = 'inactive' if self.cls._settings['toggles'][id] else 'active'
             self._settings_tree.set(id, column='status', value=value)
             self.cls._settings['toggles'][id] = not self.cls._settings['toggles'][id]
@@ -155,7 +162,7 @@ class SettingsWindow(ttk.Frame):
         
         settings_text = [
             "Export Excel file to output folder upon predicting",
-            "Append new predictions to old Excel file after predicting",
+            "Append new predictions to a new Excel file upon predicting",
             "Create new Excel file upon clearing images",
             "Automatically save images to output after predicting",
             "Automatically create file directories to store outputs"
