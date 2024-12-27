@@ -65,7 +65,7 @@ class OysterExcel():
         
     # Takes in a dataframe (of insertable values) and concats it to the current dataframe
     def extend(self, insert_df):
-        """Insert all the values in a given dataframe into this objects
+        """Insert all the values in a given dataframe into this objects dataframe
 
         Args:
             insert_df (pandas.DataFrame): The dataframe being inserted, it must have columns of the same name as this objects dataframe
@@ -90,15 +90,15 @@ class OysterExcel():
         dof = groups.size() - 1 # degrees of freedom
         alpha = .05 # also known as p-value
         ppf = t.ppf(1-(alpha/2), dof) # Critical t-value for given degrees of freedom at alpha threshold
-
         # Aggregated statistics
         mean = groups.mean().rename(columns={'total-number':'mean'})
         std = groups.std().rename(columns={'total-number':'std'})
         sem = groups.sem().rename(columns={'total-number':'sem'})
+        dof = dof.rename('dof')
         confidence95 = sem.apply(lambda x: x*ppf).rename(columns={'sem':'confidence95'})
         
         # Write to dataframe
-        self.stats = pd.concat([mean, std, sem, confidence95], axis=1)
+        self.stats = pd.concat([mean, std, sem, dof, confidence95], axis=1)
     
     def _openpyxl_write(self, dataframe, workbook, worksheet, kwargs):
         """Internal method for formatting openpyxl
@@ -151,6 +151,7 @@ class OysterExcel():
             'mean':'Mean',
             'std':'Standard Deviation',
             'sem':'Standard Error',
+            'dof':'Degrees of Freedom (n-1)',
             'confidence95':'95% Confidence Interval'
         })
         print_stats.index.name = 'Group Number'
@@ -181,7 +182,6 @@ if __name__ == '__main__':
     excel_obj = OysterExcel(file_name='test/oyster-excel-out.xlsx')
     
     excel_obj.extend(import_df)
-    excel_obj.compute()
-    
     excel_obj.write_excel()
+    
     
