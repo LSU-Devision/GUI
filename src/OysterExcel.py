@@ -33,6 +33,18 @@ class OysterExcel():
     def insert(self, *, group_number, file_name, size_class,
                         seed_tray_weight, slide_weight,
                         slide_and_seed_weight, subsample_count):
+        """Inserts a new value into the OysterExcel dataframe
+
+        Args:
+            group_number (int): The group number of the group being inserted
+            file_name (str): The file name where the group count was taken from
+            size_class (str): The size class of the group being inserted
+            seed_tray_weight (float): The weight of the seed tray used on the group being inserted in grams
+            slide_weight (float): The weight of the slide of the group being inserted in grams
+            slide_and_seed_weight (float): The weight of the slide and the weight of the seed of the group being inserted in grams
+            subsample_count (int): The predicted number of oysters in this sample
+        """
+        
         
         total_count = (subsample_count / (slide_and_seed_weight - slide_weight)) * seed_tray_weight
         insert_row = pd.DataFrame([[
@@ -49,9 +61,15 @@ class OysterExcel():
         
         
         self.df = pd.concat([self.df, insert_row], ignore_index=True)
-    
-    # Takes in a dataframe (of insertable values) sand concats it to the current dataframe
+        self.compute()
+        
+    # Takes in a dataframe (of insertable values) and concats it to the current dataframe
     def extend(self, insert_df):
+        """Insert all the values in a given dataframe into this objects
+
+        Args:
+            insert_df (pandas.DataFrame): The dataframe being inserted, it must have columns of the same name as this objects dataframe
+        """
         total_count = insert_df['subsample-count'] / (insert_df['slide-and-seed-weight'] - insert_df['slide-weight']) * insert_df['seed-tray-weight']
         insert_df['total-number'] = total_count
         
@@ -60,7 +78,12 @@ class OysterExcel():
         else:
             self.df = pd.concat([self.df, insert_df], ignore_index=True)
        
+        self.compute()
+        
     def compute(self):
+        """Computes mean, standard deviation, standard error, and the deviation of the 95% confidence interval 
+           on all groups and saves them into this objects stats attribute as a dataframe
+        """
         groups = self.df[['group', 'total-number']].groupby('group')
         
         # Student's T parameters
@@ -77,13 +100,23 @@ class OysterExcel():
         # Write to dataframe
         self.stats = pd.concat([mean, std, sem, confidence95], axis=1)
     
-    def _openpyxl_write(self, dataframe, workbook, kwargs):
+    def _openpyxl_write(self, dataframe, workbook, worksheet, kwargs):
+        """Internal method for formatting openpyxl
+
+        Args:
+            dataframe (pandas.DataFrame): The dataframe object that is being written
+            workbook (openpyxl.workbook.workbook.Workbook): The excel workbook object
+            worksheet (openpyxl.worksheet.worksheet.Worksheet): The current working sheet
+            kwargs (dict): Additional keyword arguments to be passed into openpyxl's dataframe_to_rows
+        """
+        
+        workbook.active = worksheet
         # Add rows to the current sheet from the dataframe
         for row in dataframe_to_rows(dataframe, **kwargs):
-            workbook.active.append(row)
+            worksheet.append(row)
         
         # Resize columns based on the max width of the entries in that column for this sheet
-        for column in workbook.active.columns:
+        for column in worksheet.columns:
             column_letter = column[0].column_letter
             max_width = len(str(
                 max(column, 
@@ -91,9 +124,14 @@ class OysterExcel():
                     )
                 .value))
 
-            workbook.active.column_dimensions[column_letter].width = max_width + 1
+            worksheet.column_dimensions[column_letter].width = max_width + 1
     
     def write_excel(self):
+        """Writes this object into an excel file with three sheets:
+           info, which contains date and staff fields;
+           data, which contains data of all subsamples;
+           and statistics, which contains aggregate data performed on subsamples
+        """
         # Converting the internal dataframe names to human readable export
         print_df = self.df.copy()
         print_df = print_df.rename(columns={
@@ -120,20 +158,18 @@ class OysterExcel():
         # Writing to excel using openpyxl
         wb = Workbook()
         
+        # Sets the default sheet to the info sheet
         info = wb.active
         data = wb.create_sheet(title="Data")
         statistics = wb.create_sheet(title="Statistics")
         
         info.title = "Info"
         
-        wb.active = info
-        self._openpyxl_write(self.info_df, wb, {'index':False, 'header':True})
+        self._openpyxl_write(self.info_df, wb, info, {'index':False, 'header':True})
 
-        wb.active = data
-        self._openpyxl_write(print_df, wb, {'index':True, 'header':True})
+        self._openpyxl_write(print_df, wb, data, {'index':True, 'header':True})
 
-        wb.active = statistics
-        self._openpyxl_write(print_stats, wb, {'index':True, 'header':True})
+        self._openpyxl_write(print_stats, wb, statistics, {'index':True, 'header':True})
         
         wb.save(self.file_name)
             
