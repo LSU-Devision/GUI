@@ -16,6 +16,9 @@ class WarningWindow(tk.Toplevel):
         self.button_state = MutImmutable(None)
         self.cancel_flag = True
         self.destroy_flag = True
+        self.parent = parent
+        if self.parent:
+            self.parent_window = parent.winfo_toplevel()
         
         # Callback function to finish up states before destruction
         def on_destroy(event):
@@ -24,8 +27,8 @@ class WarningWindow(tk.Toplevel):
                 if self.cancel_flag:
                     self.button_state[''] = False
                 self._unlock()
-                if parent:
-                    parent.event_generate('<<WarningDone>>')
+                if self.parent:
+                    self.parent.event_generate('<<WarningDone>>')
                     
             
             
@@ -63,13 +66,18 @@ class WarningWindow(tk.Toplevel):
         """
         self.cancel_flag = True
         self.grab_set()
+        if self.parent:
+            self.parent_window.attributes('-alpha', .5)
+    
         
     def _unlock(self):
         """Internal method that unlocks other windows
         """
         self.cancel_flag = False
         self.grab_release()
-
+        if self.parent:
+            self.parent_window.attributes('-alpha', 1)
+        
     
 class WarningFrame(ttk.Frame):
     def __init__(self, dangerous_command_name):
