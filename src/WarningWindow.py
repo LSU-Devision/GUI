@@ -174,7 +174,7 @@ if __name__ == '__main__':
         print(callback_value)
     
     
-    callback_value = WarningWindow(parent=root, dangerous_command_name='DESTROY EVERYTHING').wait_for()
+    callback_value = WarningWindow(parent=root, dangerous_command_name='DESTROY EVERYTHING').wait_for() # A mutable object reference
         
     root.minsize(100, 100)
     root.resizable(False, False)
@@ -182,6 +182,6 @@ if __name__ == '__main__':
     lbl = ttk.Button(root, text='Luh Button')
     lbl.grid(row=0, column=0)
     
-    root.bind('<<WarningDone>>', on_complete)
+    root.bind('<<WarningDone>>', on_complete) # This virtual event must be bound by the parent
     root.mainloop()
     
