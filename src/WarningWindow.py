@@ -1,19 +1,27 @@
 import tkinter as tk
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
-import asyncio
 
 class WarningWindow(tk.Toplevel):
-    def __init__(self, frame):
+    def __init__(self, parent=None, dangerous_command_name=''):
+        self.button_state = MutImmutable(None)
+        self.cancel_flag = True
+        self.destroy_flag = True
         
-            
         def on_destroy(event):
-            self.destroy_flag = True
+            if self.destroy_flag:
+                self.destroy_flag = False
+                if self.cancel_flag:
+                    self.button_state[''] = False
+                self._unlock()
+                if parent:
+                    parent.event_generate('<<WarningDone>>')
+                    
+            
             
         super().__init__()
-        #super().__init__(title="Warning!", resizable=(False, False))
         self.title('Warning!')
-        self.frame = frame
+        self.frame = WarningFrame(dangerous_command_name=dangerous_command_name)
         
         self.width = self.winfo_screenwidth() // 8
         self.height = self.width
@@ -25,33 +33,39 @@ class WarningWindow(tk.Toplevel):
         self.grid_columnconfigure(0, weight=1)
         self.frame.grid(row=0, column=0, sticky='nsew')
         
-        self.destroy_flag = False
         self.bind('<Destroy>', on_destroy)
     
-    async def button_state(self):
-        button_state = False
-        while self.destroy_flag != True:
-            button_state = await self.frame.button_state()
+    # This method must be called by the calling window for the buttons to work        
+    def wait_for(self):
+        self._lock()
+        return self.button_state
+    
+    def _lock(self):
+        self.grab_set()
         
-        return button_state
-  
-        
+    def _unlock(self):
+        self.cancel_flag = False
+        self.grab_release()
+
+    
 class WarningFrame(ttk.Frame):
     def __init__(self, dangerous_command_name):
         self.command_name = dangerous_command_name
-        self.button_state_bool = None
-        self.button_press_flag = False
         self.grid_kwargs = {'padx':25, 'pady':25, 'sticky':'nsew'}
 
-    def create(self, parent):
-        def cancel_func(event):
-            self.button_state_bool = False
-        
-        def continue_func(event):
-            self.button_state_bool = True
-            
+    def create(self, parent): 
         super().__init__(parent)
         
+        def cancel_func():
+            parent.button_state[''] = False
+            parent._unlock()
+            parent.destroy()
+        
+        def continue_func():
+            parent.button_state[''] = True
+            parent._unlock()
+            parent.destroy()
+                
         warning = f"Warning! The command that you are executing ({self.command_name}) cannot be undone!\nDo you wish to proceed?"
         
         self.warning_label = ttk.Label(self, text=warning, font='TkHeadingFont', borderwidth=10, relief='solid', justify='center')
@@ -62,34 +76,79 @@ class WarningFrame(ttk.Frame):
         self.cancel_button.grid(row=1, column=0, **self.grid_kwargs)
         self.continue_button.grid(row=1, column=1, **self.grid_kwargs)
 
-    async def button_state(self):
-        while self.button_state_bool == None:
-            await asyncio.sleep(.1)
-            
-        return self.button_state_bool   
+class MutImmutable():
+    def __init__(self, value):
+        self._val = value
 
-   
+    def __add__(self, value):
+        self._val += value
+        return self._val
+    
+    def __radd__(self, value):
+        self._val = value + self._val
+        return self._val
+    
+    def __sub__(self, value):
+        self._val -= value
+        return self._val
+    
+    def __rsub__(self, value):
+        self._value = value - self._value
+        return self._val
+    
+    def __mult__(self, value):
+        self._value *= value
+        return self._val
+    
+    def __rmult__(self, value):
+        self._value = value * self._value
+        return self._val
+        
+    def __div__(self, value):
+        self._value /= value
+        return self._val
+    
+    def __rdiv__(self, value):
+        self._value = value / self._value
+        return self._val
 
-
-
+    def __pow__(self, value):
+        self._value **= value
+        return self._val
+    
+    def __floordiv__(self, value):
+        self._value //= value
+        return self._val
+    
+    def __repr__(self):
+        return repr(self._value)
+    
+    def __len__(self):
+        return len(self._value)
+    
+    def __setitem__(self, key, val):
+        self._val = val
+    
+    def __getitem__(self, key):
+        return self._val
+    
+    def __str__(self):
+        return str(self._val)
+    
 if __name__ == '__main__':
     root = tk.Tk()
     
-    async def main():
-        new_frame = WarningFrame('DESTROY EVERYTHING')
-        new_window = WarningWindow(new_frame)
-        
-        
-        await get_button_state(new_window)
+    def on_complete(event):
+        print(callback_value)
     
-    async def get_button_state(window_obj):
-        button_state = await window_obj.button_state()
-        print(button_state)
     
+    callback_value = WarningWindow(parent=root, dangerous_command_name='DESTROY EVERYTHING').wait_for()
+        
     root.minsize(100, 100)
     root.resizable(False, False)
+    lbl = ttk.Button(root, text='Luh Label')
+    lbl.grid(row=0, column=0)
     
-    asyncio.run(main())
-            
+    root.bind('<<WarningDone>>', on_complete)
     root.mainloop()
     
