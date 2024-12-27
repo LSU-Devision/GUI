@@ -83,9 +83,11 @@ class OysterExcel():
         self.stats = pd.concat([mean, std, sem, confidence95], axis=1)
     
     def _openpyxl_write(self, dataframe, workbook, kwargs):
+        # Add rows to the current sheet from the dataframe
         for row in dataframe_to_rows(dataframe, **kwargs):
             workbook.active.append(row)
-            
+        
+        # Resize columns based on the max width of the entries in that column for this sheet
         for column in workbook.active.columns:
             column_letter = column[0].column_letter
             max_width = len(str(
@@ -97,6 +99,7 @@ class OysterExcel():
             workbook.active.column_dimensions[column_letter].width = max_width + 1
     
     def write_excel(self):
+        # Converting the internal dataframe names to human readable export
         print_df = self.df.copy()
         print_df = print_df.rename(columns={
             'group':'Group Number',
@@ -119,6 +122,7 @@ class OysterExcel():
         })
         print_stats.index.name = 'Group Number'
         
+        # Writing to excel using openpyxl
         wb = Workbook()
         
         info = wb.active
