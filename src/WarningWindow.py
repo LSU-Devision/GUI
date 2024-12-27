@@ -4,10 +4,13 @@ from ttkbootstrap.constants import *
 
 class WarningWindow(tk.Toplevel):
     def __init__(self, parent=None, dangerous_command_name=''):
+        
+        # Asynchronous flags and states
         self.button_state = MutImmutable(None)
         self.cancel_flag = True
         self.destroy_flag = True
         
+        # Callback function to finish up states before destruction
         def on_destroy(event):
             if self.destroy_flag:
                 self.destroy_flag = False
@@ -21,6 +24,8 @@ class WarningWindow(tk.Toplevel):
             
         super().__init__()
         self.title('Warning!')
+        
+        # The window contents
         self.frame = WarningFrame(dangerous_command_name=dangerous_command_name)
         
         self.width = self.winfo_screenwidth() // 8
@@ -35,15 +40,26 @@ class WarningWindow(tk.Toplevel):
         
         self.bind('<Destroy>', on_destroy)
     
-    # This method must be called by the calling window for the buttons to work        
+    # This method must be called to recieve the mutable object and lock the window
     def wait_for(self):
+        """_summary_
+
+        Returns:
+            (WarningWindow.MutImmutable): Returns a mutable object reference for immutable datatypes. The immutable value can be queried with any key
+        """
+        
         self._lock()
         return self.button_state
     
     def _lock(self):
+        """Internal method that locks all other windows
+        """
+        self.cancel_flag = True
         self.grab_set()
         
     def _unlock(self):
+        """Internal method that unlocks other windows
+        """
         self.cancel_flag = False
         self.grab_release()
 
@@ -56,6 +72,7 @@ class WarningFrame(ttk.Frame):
     def create(self, parent): 
         super().__init__(parent)
         
+        # Callback functions that represent the cancel and continue state after button press
         def cancel_func():
             parent.button_state[''] = False
             parent._unlock()
@@ -76,6 +93,7 @@ class WarningFrame(ttk.Frame):
         self.cancel_button.grid(row=1, column=0, **self.grid_kwargs)
         self.continue_button.grid(row=1, column=1, **self.grid_kwargs)
 
+# This is an object reference to store immutable values, used for carrying variables between callbacks
 class MutImmutable():
     def __init__(self, value):
         self._val = value
@@ -134,7 +152,10 @@ class MutImmutable():
     
     def __str__(self):
         return str(self._val)
-    
+
+
+
+# Testing function
 if __name__ == '__main__':
     root = tk.Tk()
     
