@@ -369,9 +369,10 @@ class SettingsWindow(ttk.Frame):
             warn_user('Clear Model', model_select_yes)
             
         def model_select_yes(event, warn_state):
-            if warn_state:
+            if warn_state['']:
                 self.cls._settings['paths']['model-save'] = None
                 self.write_user_settings()
+            self.unbind_all('<<WarningDone>>')
         
         
         def excel_select(event):
@@ -379,7 +380,7 @@ class SettingsWindow(ttk.Frame):
             
         # Callback rewrites default excel path
         def excel_select_yes(event, warn_state):
-            if warn_state:
+            if warn_state['']:
                 if not self.cls._settings['paths']['output-save']:
                     excel_path = path.join(SettingsWindow.USER_HOME, 'output', 'data.xslx')
                 else:
@@ -387,6 +388,8 @@ class SettingsWindow(ttk.Frame):
             
                 self.cls._settings['paths']['excel-save'] = excel_path
                 self.write_user_settings()
+            self.unbind_all('<<WarningDone>>')
+
             
         
         # Callback rewrites defaults output directory
@@ -394,18 +397,21 @@ class SettingsWindow(ttk.Frame):
             warn_user('Clear Output', output_select_yes)
         
         def output_select_yes(event, warn_state):
-            if warn_state:
+            if warn_state['']:
                 self.cls._settings['paths']['output-save'] = path.join(SettingsWindow.USER_HOME, 'output')
                 self.write_user_settings()
-            
+            self.unbind_all('<<WarningDone>>')
+        
+        
         # Resets all settings to default
         def reset_select(event):
             warn_user('Reset All Settings', reset_select_yes)
         
         def reset_select_yes(event, warn_state):
-            if warn_state:
+            if warn_state['']:
                 self.load_user_settings(SettingsWindow.DEFAULT_SETTINGS)
                 self.write_user_settings()
+            self.unbind_all('<<WarningDone>>')
 
         
         settings_text = [

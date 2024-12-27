@@ -150,10 +150,10 @@ class MutImmutable():
         return self._val
     
     def __repr__(self):
-        return repr(self._value)
+        return repr(self._val)
     
     def __len__(self):
-        return len(self._value)
+        return len(self._val)
     
     def __setitem__(self, key, val):
         self._val = val
