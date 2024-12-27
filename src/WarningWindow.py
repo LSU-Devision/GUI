@@ -3,7 +3,14 @@ import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 
 class WarningWindow(tk.Toplevel):
-    def __init__(self, parent=None, dangerous_command_name=''):
+    def __init__(self, parent=None, dangerous_command_name=None):
+        """Create a new warning window, button press states can be recieved via .wait_for and binding the 
+        '<<WarningDone>>' virtual event to a callback function, see example in __main__ test function for further details
+
+        Args:
+            parent (tk.Widget, optional): A reference to the parent object, if given it throws a <<WarningDone>> event to the parent upon completion. Defaults to None.
+            dangerous_command_name (str, optional): The name of the command attempting to be run to display to the user. Defaults to None.
+        """
         
         # Asynchronous flags and states
         self.button_state = MutImmutable(None)
@@ -66,7 +73,11 @@ class WarningWindow(tk.Toplevel):
     
 class WarningFrame(ttk.Frame):
     def __init__(self, dangerous_command_name):
-        self.command_name = dangerous_command_name
+        if dangerous_command_name:
+            self.command_name = f"({dangerous_command_name}) "
+        else:
+            self.command_name = ''
+            
         self.grid_kwargs = {'padx':25, 'pady':25, 'sticky':'nsew'}
 
     def create(self, parent): 
@@ -83,7 +94,7 @@ class WarningFrame(ttk.Frame):
             parent._unlock()
             parent.destroy()
                 
-        warning = f"Warning! The command that you are executing ({self.command_name}) cannot be undone!\nDo you wish to proceed?"
+        warning = f"Warning! The command that you are executing {self.command_name}cannot be undone!\nDo you wish to proceed?"
         
         self.warning_label = ttk.Label(self, text=warning, font='TkHeadingFont', borderwidth=10, relief='solid', justify='center')
         self.cancel_button = ttk.Button(self, text='Cancel', bootstyle=DANGER, command=cancel_func)
@@ -167,7 +178,8 @@ if __name__ == '__main__':
         
     root.minsize(100, 100)
     root.resizable(False, False)
-    lbl = ttk.Button(root, text='Luh Label')
+    
+    lbl = ttk.Button(root, text='Luh Button')
     lbl.grid(row=0, column=0)
     
     root.bind('<<WarningDone>>', on_complete)
