@@ -36,7 +36,7 @@ class Settings(tk.Toplevel):
         self.geometry(f'{self.pop_up_window_width}x{self.pop_up_window_height}+{x}+{y}')
         
         # Placing the child object within the new window
-        self.child.create(self, parent=self.parent)
+        self.child.create(self)
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
         self.child.grid(row=0, column=0, sticky='nsew')
@@ -91,9 +91,7 @@ class SettingsWindow(ttk.Frame):
     # Init analogue, runs only when called such that the frame is not created on app startup
     def create(self, *args, **kwargs):
         super().__init__(*args)
-        
-        self.parent = kwargs['parent']
-        
+                
         # The dropdown menu object with various visual settings
         self._settings_tree = ttk.Treeview(self, columns=("status"), height=30, selectmode='browse')
         
