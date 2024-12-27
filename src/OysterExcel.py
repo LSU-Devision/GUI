@@ -6,12 +6,7 @@ from scipy.stats import t
 
 
 class OysterExcel():
-    def __init__(self, parent=None, *, 
-                 file_name='oyster-data.xlsx', staff_name=''):
-        # Inherit settings object from parent, this will fail if it is not passed a valid parent object (typically
-        # mainframe or one of mainframe's children)
-        if parent: self.settings = parent.settings
-        
+    def __init__(self, *, file_name='oyster-data.xlsx', staff_name=''):
         self.file_name = file_name
         
         formatted_datetime = datetime.now().strftime('%m/%d/%Y %I:%M:%S %p')
