@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from ttkbootstrap import Style
+from src.WarningWindow import WarningWindow
 
 import webbrowser
 from Scrapers import Scraper
@@ -8,6 +9,8 @@ import json
 import pathlib
 from os import path
 import shutil
+
+from functools import partial
 
 # Window wrapper for settings, ensures that the window is not open when setting are initialized
 class Settings(tk.Toplevel):
@@ -356,31 +359,53 @@ class SettingsWindow(ttk.Frame):
         self._settings_tree.tag_bind('Theme', '<Return>', theme_select)
         
     def _clear_settings(self):
+        def warn_user(command_name, master_func):
+            user_yes_no = WarningWindow(self, command_name).wait_for()
+            self.bind('<<WarningDone>>', partial(master_func, warn_state=user_yes_no))
+        
         
         # Callback rewrites default model path
         def model_select(event):
-            self.cls._settings['paths']['model-save'] = None
-            self.write_user_settings()
+            warn_user('Clear Model', model_select_yes)
+            
+        def model_select_yes(event, warn_state):
+            if warn_state:
+                self.cls._settings['paths']['model-save'] = None
+                self.write_user_settings()
         
-        # Callback rewrites default excel path
+        
         def excel_select(event):
-            if not self.cls._settings['paths']['output-save']:
-                excel_path = path.join(SettingsWindow.USER_HOME, 'output', 'data.xslx')
-            else:
-                excel_path = path.join(self.cls._settings['paths']['output-save'], 'data.xlsx')
-        
-            self.cls._settings['paths']['excel-save'] = excel_path
-            self.write_user_settings()
+            warn_user('Clear Excel', excel_select_yes)
+            
+        # Callback rewrites default excel path
+        def excel_select_yes(event, warn_state):
+            if warn_state:
+                if not self.cls._settings['paths']['output-save']:
+                    excel_path = path.join(SettingsWindow.USER_HOME, 'output', 'data.xslx')
+                else:
+                    excel_path = path.join(self.cls._settings['paths']['output-save'], 'data.xlsx')
+            
+                self.cls._settings['paths']['excel-save'] = excel_path
+                self.write_user_settings()
+            
         
         # Callback rewrites defaults output directory
         def output_select(event):
-            self.cls._settings['paths']['output-save'] = path.join(SettingsWindow.USER_HOME, 'output')
-            self.write_user_settings()
+            warn_user('Clear Output', output_select_yes)
         
+        def output_select_yes(event, warn_state):
+            if warn_state:
+                self.cls._settings['paths']['output-save'] = path.join(SettingsWindow.USER_HOME, 'output')
+                self.write_user_settings()
+            
         # Resets all settings to default
         def reset_select(event):
-            self.load_user_settings(SettingsWindow.DEFAULT_SETTINGS)
-            self.write_user_settings()
+            warn_user('Reset All Settings', reset_select_yes)
+        
+        def reset_select_yes(event, warn_state):
+            if warn_state:
+                self.load_user_settings(SettingsWindow.DEFAULT_SETTINGS)
+                self.write_user_settings()
 
         
         settings_text = [
