@@ -137,7 +137,7 @@ class SettingsWindow(ttk.Frame):
         
         # Initialize the tree from user settings
         self.load_user_settings(SettingsWindow.USER_SETTINGS)
-        
+
         # Place the tree
         self._settings_tree.grid_rowconfigure(0, weight=1)
         self._settings_tree.grid_columnconfigure(0, weight=1)
