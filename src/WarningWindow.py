@@ -102,7 +102,7 @@ class WarningFrame(ttk.Frame):
             parent._unlock()
             parent.destroy()
                 
-        warning = f"Warning! The command that you are executing {self.command_name}cannot be undone!\nDo you wish to proceed?"
+        warning = f"Warning! The command that you are executing {self.command_name} cannot be undone!\nDo you wish to proceed?"
         
         self.warning_label = ttk.Label(self, text=warning, font='TkHeadingFont', borderwidth=10, relief='solid', justify='center')
         self.cancel_button = ttk.Button(self, text='Cancel', bootstyle=DANGER, command=cancel_func)
@@ -114,7 +114,7 @@ class WarningFrame(ttk.Frame):
 
 # This is an object reference to store immutable values, used for carrying variables between callbacks
 class MutImmutable():
-    def __init__(self, value):
+    def __init__(self, value=None):
         self._val = value
 
     def __add__(self, value):
@@ -171,6 +171,9 @@ class MutImmutable():
     
     def __str__(self):
         return str(self._val)
+    
+    def __hash__(self):
+        return hash(self._val)
 
 
 
