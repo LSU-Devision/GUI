@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter.filedialog import askopenfilename
 
 from tkinter import ttk
-from WarningWindow import MutImmutable
+from Widgets import *
 
 from PIL.ImageTk import PhotoImage
 from PIL import Image
@@ -54,6 +54,7 @@ class Page(ttk.Frame):
         self.output_frame_iid = 0
         self.output_frame_widgets = {}
         self.output_frame_kwargs = output_frame_kwargs
+        self.output_frame_saves = {}
         
         self.settings_frame = ttk.Frame(self)
         self.settings_frame_iid = 0
@@ -128,12 +129,16 @@ class Page(ttk.Frame):
         widget = self.top_frame_widgets[iid]
         return widget.input
     
-    def save_inputs(self):
-        widgets = tuple(self.top_frame_widgets.keys())
-        widget_data = tuple(map(lambda x: self.top_frame_widgets[x].pop(), widgets))
-        self.top_frame_saves[self.image_pointer] = zip(widgets, widget_data)
+    def save_frame(self):
+        top_widgets = tuple(self.top_frame_widgets.keys())
+        top_widget_data = tuple(map(lambda x: self.top_frame_widgets[x].pop(), top_widgets))
+        self.top_frame_saves[self.image_pointer] = zip(top_widgets, top_widget_data)
         
-    def write_inputs(self):
+        out_widgets = tuple(self.output_frame_widgets.keys())
+        out_widget_data = tuple(map(lambda x: self.output_frame_widgets[x].pop(), out_widgets))
+        self.output_frame_saves[self.image_pointer] = zip(out_widgets, out_widget_data)
+        
+    def write_frame(self):
         if self.image_pointer not in self.top_frame_saves:
             return
         
@@ -141,6 +146,9 @@ class Page(ttk.Frame):
         for widget in widget_data:
             self.top_frame_widgets[widget[0]].push(widget[1])
         
+        widget_data = self.output_frame_saves[self.image_pointer]
+        for widget in widget_data:
+            self.output_frame_widgets[widget[0]].push(widget[1])
         
     def add_settings(self, widget, **kwargs):
         assert issubclass(widget, ttk.Widget)
@@ -172,9 +180,9 @@ class Page(ttk.Frame):
         if len(self.images) == self.image_pointer + 1:
             return None
         
-        self.save_inputs()
+        self.save_frame()
         self.image_pointer = min(len(self.images), self.image_pointer + 1)
-        self.write_inputs()
+        self.write_frame()
 
         self.set_image()
         
@@ -182,9 +190,9 @@ class Page(ttk.Frame):
         if len(self.images) == 0:
             return None
         
-        self.save_inputs()
+        self.save_frame()
         self.image_pointer = max(0, self.image_pointer - 1)
-        self.write_inputs()
+        self.write_frame()
         
         self.set_image()
     
@@ -204,9 +212,9 @@ class Page(ttk.Frame):
         self.images.append(save_img)
         self.prediction_images.append(None)
         
-        self.save_inputs()
+        self.save_frame()
         self.image_pointer = len(self.images) - 1
-        self.write_inputs()
+        self.write_frame()
         
         self.set_image()        
         
@@ -232,126 +240,13 @@ class Page(ttk.Frame):
         self.prediction_images[prediction_image_pointer] = img
         self.set_image()
     
-class TkIO(ttk.Frame):
-    def __init__(self, *args):
-        super().__init__(*args)
-        self._value = MutImmutable()
-    
-    #Abstract method
-    def pop(self):
-        current_input = self._value['']
-        self._value = None
-        return current_input
-    
-    #Abstract method
-    def push(self, inp):
-        self._value[''] = inp
-    
-class Inputable(TkIO):
-    def __init__(self, *args):
-        super().__init__(*args)
-        self.ready_flag = False
-        
-    @property
-    def value(self):
-        if self.ready_flag:
-            return self.value['']
-        else:
-            return None
-    
-    @value.setter
-    def value(self, inp):
-        self._value[''] = inp
-    
-    def ready(self):
-        self.ready_flag = True
-        
-    def unready(self):
-        self.ready_flag = False
-    
-    
-class Outputable(TkIO):
-    def __init__(self, *args):
-        super().__init__(*args)
-        self.outputs = []
-        
-    def bind(self, io_object, transform=id):
-        assert isinstance(io_object, Outputable)
-        self.outputs.append(io_object, transform)
-    
-    def bind_to(self, io_object, transform=id):
-        assert isinstance(io_object, Outputable)
-        io_object.outputs.append(self, transform)
-    
-    @property
-    def value(self):
-        return self._value
-    
-    @value.setter
-    def value(self, inp):
-        self._value[''] = inp
-        self.update()
-        
-        for (io_obj, transform) in self.outputs:
-            out = transform(inp)
-            io_obj.value = out
-        
-    #method to update text, not all widgets will need
-    def update(self):
-        pass
-    
-class LabelBox(Inputable):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args)
-        
-        def text_start(e):
-            self.unready()
-            
-        def text_finish(e):
-            self.value = self.box.get()
-            self.ready()
-                
-        text = kwargs.get('text', '')
-        self.text = ttk.Label(self, text=text, relief='solid') 
-        self.box = ttk.Entry(self, exportselection=0)
-        
-        self.text.pack(expand=True, fill=tk.BOTH)
-        self.box.pack(expand=True, fill=tk.BOTH)
-        
-        self.box.bind('<FocusIn>', text_start)
-        self.box.bind('<FocusOut>', text_finish)
 
-    def pop(self):
-        current_text = super().pop()
-        self.box.delete(0, tk.END)
-        return current_text
     
-    def push(self, text):
-        self.box.delete(0, tk.END)
-        self.box.insert(0, text)
-        self.value = text
-
-class IOButton(Outputable):
-    def __init__(self, command, *args, **kwargs):
-        super().__init__(*args)
-        
-        self.command = command
-        self.button = ttk.Button(self, command=self.run, **kwargs)
-        self.button.pack(expand=True, fill=tk.BOTH)
-
-    def run(self):
-        self.value = self.command()
-        
 class OysterPage(Page):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         
         self.brood_count_dict = {}
-        def predict_brood_count():
-            count, image = self.get_prediction()
-            self.brood_count_dict[self.image_pointer] = count
-            self.set_prediction_image(self.image_pointer, image)
-            return count
         
         self.add_input(LabelBox, text='Group Number')
         self.add_input(LabelBox, text='Size Class')
@@ -359,13 +254,28 @@ class OysterPage(Page):
         self.add_input(LabelBox, text='Slide Weight (g)')
         self.add_input(LabelBox, text='Slide + Seed Weight (g)')
         
-        predict_button = self.add_settings(IOButton, text='Predict Brood Count', command=self.get_prediction_count)
-        self.add_settings(ttk.Button, text='Load Data from Excel')
-        self.add_settings(ttk.Button, text='Export to Excel')
-    
+        def prediction_image():
+            img = self.get_prediction_image()
+            self.set_prediction_image(self.image_pointer, img)
+        
+        #The way this method works is unfortuante, it results both from Tkinter being a bad language (not being able to reassign master widgets) as well as
+        #Python not having static typing
+        predict_button = self.add_settings(IOButton, text='Predict Brood Count', command=self.get_prediction)
+        self.add_settings(IOButton, text='Load Data from Excel')
+        self.add_settings(IOButton, text='Export to Excel')
+        
+        predict_counter = self.add_output(Counter, text='Oyster Brood Count:')
+        predict_button.bind_out(predict_counter)
+        
     #TODO: Implement get_prediction
-    def get_prediction_count(self):
-        return 0
+    def get_prediction(self):
+        if len(self.images) == 0:
+            return 0
+        
+        count, image = (0, self.black_photoimage)
+        self.brood_count_dict[self.image_pointer] = count
+        self.set_prediction_image(self.image_pointer, image)
+        return count
     
     def get_prediction_image(self):
         return self.black_photoimage

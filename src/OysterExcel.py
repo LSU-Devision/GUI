@@ -90,11 +90,13 @@ class OysterExcel():
         dof = groups.size() - 1 # degrees of freedom
         alpha = .05 # also known as p-value
         ppf = t.ppf(1-(alpha/2), dof) # Critical t-value for given degrees of freedom at alpha threshold
+        
         # Aggregated statistics
         mean = groups.mean().rename(columns={'total-number':'mean'})
         std = groups.std().rename(columns={'total-number':'std'})
         sem = groups.sem().rename(columns={'total-number':'sem'})
         dof = dof.rename('dof')
+        
         confidence95 = sem.apply(lambda x: x*ppf).rename(columns={'sem':'confidence95'})
         
         # Write to dataframe

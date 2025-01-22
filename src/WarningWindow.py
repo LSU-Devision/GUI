@@ -1,6 +1,7 @@
 import tkinter as tk
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
+from src.Widgets import MutImmutable
 
 class WarningWindow(tk.Toplevel):
     def __init__(self, parent=None, dangerous_command_name=None):
@@ -111,69 +112,6 @@ class WarningFrame(ttk.Frame):
         self.warning_label.grid(row=0, column=0, columnspan=2, **self.grid_kwargs)
         self.cancel_button.grid(row=1, column=0, **self.grid_kwargs)
         self.continue_button.grid(row=1, column=1, **self.grid_kwargs)
-
-# This is an object reference to store immutable values, used for carrying variables between callbacks
-class MutImmutable():
-    def __init__(self, value=None):
-        self._val = value
-
-    def __add__(self, value):
-        self._val += value
-        return self._val
-    
-    def __radd__(self, value):
-        self._val = value + self._val
-        return self._val
-    
-    def __sub__(self, value):
-        self._val -= value
-        return self._val
-    
-    def __rsub__(self, value):
-        self._value = value - self._value
-        return self._val
-    
-    def __mult__(self, value):
-        self._value *= value
-        return self._val
-    
-    def __rmult__(self, value):
-        self._value = value * self._value
-        return self._val
-        
-    def __div__(self, value):
-        self._value /= value
-        return self._val
-    
-    def __rdiv__(self, value):
-        self._value = value / self._value
-        return self._val
-
-    def __pow__(self, value):
-        self._value **= value
-        return self._val
-    
-    def __floordiv__(self, value):
-        self._value //= value
-        return self._val
-    
-    def __repr__(self):
-        return repr(self._val)
-    
-    def __len__(self):
-        return len(self._val)
-    
-    def __setitem__(self, key, val):
-        self._val = val
-    
-    def __getitem__(self, key):
-        return self._val
-    
-    def __str__(self):
-        return str(self._val)
-    
-    def __hash__(self):
-        return hash(self._val)
 
 
 

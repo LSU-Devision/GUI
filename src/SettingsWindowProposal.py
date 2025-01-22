@@ -68,10 +68,9 @@ class SettingsWindow(ttk.Frame):
         Style().load_user_themes(file=cls.USER_THEMES)
         
         # Intialize the theme from file
-        try:
-            Style(theme=cls._settings['theme'][:-6])
-        except AttributeError:
-            pass
+        
+        Style.instance.theme_use(cls._settings['theme'][:-6])
+        
         
         # Create a default output path if not initialized
         if not cls._settings['paths']['output-save']:
@@ -332,10 +331,8 @@ class SettingsWindow(ttk.Frame):
             self.cls._settings['theme'] = theme
             self._settings_tree.set(self.cls._settings['theme'], column='status', value='active')
             
-            try:
-                Style(theme=theme[:-6])
-            except AttributeError:
-                pass
+            Style.instance.theme_use(theme[:-6])
+           
                 
             self.write_user_settings()
             
@@ -501,7 +498,6 @@ class StyleSettings():
     def __init__(self):
         # Light theme names set
         self._lt_names = [
-            "default",
             "cosmo",
             "flatly",
             "journal",
