@@ -5,6 +5,7 @@ from datetime import datetime
 from scipy.stats import t
 
 
+#TODO: Add read excel and delete function
 class OysterExcel():
     def __init__(self, *, file_name='oyster-data.xlsx', staff_name=''):
         self.file_name = file_name
@@ -70,6 +71,11 @@ class OysterExcel():
         Args:
             insert_df (pandas.DataFrame): The dataframe being inserted, it must have columns of the same name as this objects dataframe
         """
+        
+        pd.options.mode.chained_assignment = None
+
+        
+        insert_df = insert_df[['group', 'file-name', 'size-class', 'seed-tray-weight', 'slide-weight', 'slide-and-seed-weight', 'subsample-count']]
         total_count = insert_df['subsample-count'] / (insert_df['slide-and-seed-weight'] - insert_df['slide-weight']) * insert_df['seed-tray-weight']
         insert_df['total-number'] = total_count
         
@@ -79,6 +85,7 @@ class OysterExcel():
             self.df = pd.concat([self.df, insert_df], ignore_index=True)
        
         self.compute()
+        pd.options.mode.chained_assignment = 'warn'
         
     def compute(self):
         """Computes mean, standard deviation, standard error, and the deviation of the 95% confidence interval 

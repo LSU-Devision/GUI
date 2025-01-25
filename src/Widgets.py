@@ -65,8 +65,8 @@ class MutImmutable():
         return hash(self._val)
     
 class TkIO(ttk.Frame):
-    def __init__(self, *args):
-        super().__init__(*args)
+    def __init__(self, parent):
+        super().__init__(parent)
         self._value = MutImmutable()
     
     #Abstract method
@@ -80,8 +80,8 @@ class TkIO(ttk.Frame):
         self._value[''] = inp
     
 class Inputable(TkIO):
-    def __init__(self, *args):
-        super().__init__(*args)
+    def __init__(self, parent):
+        super().__init__(parent)
         self.ready_flag = False
         
     @property
@@ -103,8 +103,8 @@ class Inputable(TkIO):
     
     
 class Outputable(TkIO):
-    def __init__(self, *args):
-        super().__init__(*args)
+    def __init__(self, parent):
+        super().__init__(parent)
         self.outputs = []
         
     def bind_out(self, io_object, transform=lambda x: x):
@@ -133,8 +133,8 @@ class Outputable(TkIO):
         pass
     
 class LabelBox(Inputable):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args)
+    def __init__(self, parent, text=''):
+        super().__init__(parent)
         
         def text_start(e):
             self.unready()
@@ -143,7 +143,6 @@ class LabelBox(Inputable):
             self.value = self.box.get()
             self.ready()
                 
-        text = kwargs.get('text', '')
         self.text = ttk.Label(self, text=text, relief='solid') 
         self.box = ttk.Entry(self, exportselection=0)
         
@@ -164,30 +163,54 @@ class LabelBox(Inputable):
         self.box.delete(0, tk.END)
         self.box.insert(0, text)
         self.value = text
-
+        
+class DropdownBox(Inputable):
+    def __init__(self, parent, text='', dropdowns=[]):
+        super().__init__(parent)
+        dropdowns = ['None'] + dropdowns
+        
+        
+        def option_selected(e):
+            self.ready()
+            self.value = self.menu_var.get()
+        
+        self.text = ttk.Label(self, text=text, relief='solid')
+        
+        self.menu_var = tk.StringVar(parent, value='None')
+        self.menu = ttk.OptionMenu(self, self.menu_var, command=option_selected, *dropdowns)
+        
+        self.text.pack(expand=True, fill=tk.BOTH)
+        self.menu.pack(expand=True, fill=tk.BOTH)
+    
+    def pop(self):
+        current_option = super().pop()
+        self.menu_var.set('None')
+        return current_option
+    
+    def push(self, option):
+        self.menu_var.set(option)
+        self.value = option
+    
 class IOButton(Outputable):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args)
+    def __init__(self, parent, command=lambda: None, command_kwargs={}, **kwargs):
+        super().__init__(parent)
         
-        self.command = kwargs.get('command', None)
-        if self.command:
-            del kwargs['command']
-        
+        self.command = command
+        self.command_kwargs = command_kwargs
         self.button = ttk.Button(self, command=self.run, **kwargs)
         self.button.pack(expand=True, fill=tk.BOTH)
 
     def run(self):
-        if self.command:
-            self.value = self.command()
+        self.value = self.command(**self.command_kwargs)
         
 class Counter(Outputable):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args)
+    def __init__(self, parent, **kwargs):
+        super().__init__(parent)
         
-        self.text_label = ttk.Label(self, **kwargs)
-        self.counter = ttk.Label(self, text='-')
-        self.text_label.pack(expand=True, side=tk.LEFT, fill=tk.BOTH)
-        self.counter.pack(expand=False, side=tk.RIGHT, fill=tk.BOTH)
+        self.text_label = ttk.Label(self, relief='solid', **kwargs)
+        self.counter = ttk.Label(self, padding=5, relief='solid', text='-')
+        self.text_label.pack(expand=False, side=tk.LEFT, fill=tk.BOTH)
+        self.counter.pack(expand=False, side=tk.LEFT, fill=tk.BOTH)
         
     def update(self):
         self.counter.config(text=self.value)

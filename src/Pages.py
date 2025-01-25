@@ -3,12 +3,15 @@ from tkinter.filedialog import askopenfilename
 
 from tkinter import ttk
 from Widgets import *
+from OysterExcel import OysterExcel
 
 from PIL.ImageTk import PhotoImage
 from PIL import Image
 from ttkbootstrap import Style
 
 from pathlib import Path
+
+import pandas as pd
 
 INTIAL_DIR = Path.cwd()
 THUMBNAIL_SIZE = (400, 400)
@@ -42,6 +45,7 @@ class Page(ttk.Frame):
         Page.id += 1
         self.black_photoimage = PhotoImage(Page.black_image)
 
+        self.file_name_dict = {}
         
         self.top_frame = ttk.Frame(self)
         self.top_frame_iid = 0
@@ -127,16 +131,35 @@ class Page(ttk.Frame):
             raise IdNotFoundError(iid)
         
         widget = self.top_frame_widgets[iid]
-        return widget.input
+        return widget.value
+    
+    def get_frame_inputs(self):
+        return {self.image_pointer:{iid:self.top_frame_widgets[iid].value for iid in self.top_frame_widgets}}   
+    
+    def get_all_inputs(self):
+        if len(self.images) == 0:
+            return {}
+        
+        self.save_frame()
+
+        data = {}
+        for img_pointer in range(len(self.images)):
+            if img_pointer not in self.top_frame_saves:
+                data[img_pointer] = {iid:None for iid in self.top_frame_widgets}
+            else:
+                data[img_pointer] = {k:v for k, v in self.top_frame_saves[img_pointer]}
+                
+        self.write_frame()
+        return data
     
     def save_frame(self):
         top_widgets = tuple(self.top_frame_widgets.keys())
         top_widget_data = tuple(map(lambda x: self.top_frame_widgets[x].pop(), top_widgets))
-        self.top_frame_saves[self.image_pointer] = zip(top_widgets, top_widget_data)
+        self.top_frame_saves[self.image_pointer] = tuple(zip(top_widgets, top_widget_data))
         
         out_widgets = tuple(self.output_frame_widgets.keys())
         out_widget_data = tuple(map(lambda x: self.output_frame_widgets[x].pop(), out_widgets))
-        self.output_frame_saves[self.image_pointer] = zip(out_widgets, out_widget_data)
+        self.output_frame_saves[self.image_pointer] = tuple(zip(out_widgets, out_widget_data))
         
     def write_frame(self):
         if self.image_pointer not in self.top_frame_saves:
@@ -203,7 +226,9 @@ class Page(ttk.Frame):
                                 title='Please select an image',
                                 filetypes=[('Images', '*.jpg *.JPG *.jpeg *.JPEG *.png *.PNG *.tif *.tiff')]
                             )
-                                          
+        if Path(file_path).suffix not in ['.jpg', '.JPG', '.jpeg', '.png', '.PNG', '.tif', '.tiff']:
+            return
+                
         img = Image.open(file_path)
         save_img = img.resize(THUMBNAIL_SIZE)
         save_img = PhotoImage(save_img.convert('RGB'))
@@ -214,6 +239,7 @@ class Page(ttk.Frame):
         
         self.save_frame()
         self.image_pointer = len(self.images) - 1
+        self.file_name_dict[self.image_pointer] = Path(file_path).name
         self.write_frame()
         
         self.set_image()        
@@ -247,6 +273,7 @@ class OysterPage(Page):
         super().__init__(*args, **kwargs)
         
         self.brood_count_dict = {}
+        self.excel_obj = OysterExcel()
         
         self.add_input(LabelBox, text='Group Number')
         self.add_input(LabelBox, text='Size Class')
@@ -262,31 +289,89 @@ class OysterPage(Page):
         #Python not having static typing
         predict_button = self.add_settings(IOButton, text='Predict Brood Count', command=self.get_prediction)
         self.add_settings(IOButton, text='Load Data from Excel')
-        self.add_settings(IOButton, text='Export to Excel')
+        self.add_settings(IOButton, text='Export to Excel', command=self.to_excel)
         
-        predict_counter = self.add_output(Counter, text='Oyster Brood Count:')
+        predict_counter = self.add_output(Counter, text='Oyster Brood Count')
         predict_button.bind_out(predict_counter)
         
     #TODO: Implement get_prediction
+    def get_prediction(self, img_pointer=None):
+        if not img_pointer:
+            img_pointer = self.image_pointer
+        
+        if len(self.images) == 0  or img_pointer >= len(self.images) or img_pointer < 0:
+            return 0
+                
+        count, image = (0, self.black_photoimage)
+        self.brood_count_dict[img_pointer] = count
+        self.set_prediction_image(img_pointer, image)
+        return count
+    
+    #TODO: Load append excel from settings
+    def to_excel(self, drop_na=True, predict_all=True):
+        if predict_all:
+            for img_pointer in range(len(self.images)):
+                if img_pointer not in self.brood_count_dict:
+                    self.get_prediction(img_pointer)
+        
+        data = self.get_all_inputs()
+        
+        df = pd.DataFrame.from_dict(data, orient='index')
+        df_file = pd.DataFrame.from_dict(self.file_name_dict, orient='index')
+        df_count = pd.DataFrame.from_dict(self.brood_count_dict, orient='index')
+     
+        df = pd.concat(objs=[df, df_file, df_count], axis=1, ignore_index = True)
+        
+        if drop_na:
+            df = df.dropna(how='any')
+        
+        df = df.rename(columns={0:'group', 1:'size-class', 2:'seed-tray-weight', 3:'slide-weight', 4:'slide-and-seed-weight', 5:'file-name', 6:'subsample-count'})
+
+        numeric_columns = ['seed-tray-weight', 'slide-weight', 'slide-and-seed-weight', 'subsample-count']
+        for col in numeric_columns:
+            df[col] = pd.to_numeric(df[col])
+        
+        self.excel_obj.extend(df)
+        self.excel_obj.write_excel()
+        
+        
+class DevisionPage(Page):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        self.egg_count_dict = {}
+        
+        self.add_input(DropdownBox, text='Select a Model Below', dropdowns = ['StarDist', 'CNN'])
+        
+        predict_button = self.add_settings(IOButton, text='Predict Egg Count', command=self.get_prediction)
+        self.add_settings(IOButton, text='Export to Excel')
+        self.add_settings(IOButton, text='Settings')
+        
+        predict_counter = self.add_output(Counter, text='Frog Egg Count')
+        predict_button.bind_out(predict_counter)
+    
     def get_prediction(self):
         if len(self.images) == 0:
             return 0
         
         count, image = (0, self.black_photoimage)
-        self.brood_count_dict[self.image_pointer] = count
+        self.egg_count_dict[self.image_pointer] = count
         self.set_prediction_image(self.image_pointer, image)
         return count
-    
-    def get_prediction_image(self):
-        return self.black_photoimage
-    
+                
 if __name__ == '__main__':
     root = tk.Tk()
-    oyster = OysterPage(root)
-    style_obj = Style(theme='darkly')
+    notebook = ttk.Notebook(root)
     
-    oyster.grid(row=0, column=0, sticky='NSEW')
+    frog = DevisionPage()
+    oyster = OysterPage()
+    
+    notebook.add(frog, text='Devision Page')
+    notebook.add(oyster, text='Oyster Page')
+    
+    style_obj = Style(theme='darkly')
+    notebook.grid(row=0, column=0, sticky='NSEW')
+    
     root.rowconfigure(0, weight=1)
     root.columnconfigure(0, weight=1)
-    #root.maxsize(1400, 800)
     root.mainloop()
