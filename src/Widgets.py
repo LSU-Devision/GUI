@@ -168,6 +168,9 @@ class LabelBox(Inputable):
         return current_text
     
     def push(self, text):
+        if text is None:
+            text = ''
+        
         self.box.delete(0, tk.END)
         self.box.insert(0, text)
         self.value = text
@@ -196,6 +199,9 @@ class DropdownBox(Inputable):
         return current_option
     
     def push(self, option):
+        if option is None:
+            option = 'None'
+        
         self.menu_var.set(option)
         self.value = option
     
@@ -230,3 +236,5 @@ class Counter(Outputable):
         
     def push(self, inp):
         self.value = inp
+        if inp is None:
+            self.counter.config(text='-')

@@ -92,12 +92,13 @@ class Page(ttk.Frame):
             'padx':5,
             'pady':10
         }
-        self.images_frame.left_window = ttk.Label(self.images_frame, relief='groove')
-        self.images_frame.right_window = ttk.Label(self.images_frame, relief='groove')
+        self.images_frame.left_window = ttk.Label(self.images_frame, relief='groove', image=self.black_photoimage)
+        self.images_frame.right_window = ttk.Label(self.images_frame, relief='groove', image=self.black_photoimage)
         self.images_frame.next_button = ttk.Button(self.images_frame, text='Next', command=self.next)
         self.images_frame.prev_button = ttk.Button(self.images_frame, text='Prev', command=self.prev)
         self.images_frame.counter = ttk.Label(self.images_frame, text='-/0', relief='groove', anchor='center')
         self.images_frame.file_select = ttk.Button(self.images_frame, text='Select an image', command=self.add_image)
+        self.images_frame.clear_images = ttk.Button(self.images_frame, text='Clear all images', command=self.clear_all_images)
         
         self.images_frame.left_window.grid(row=1, column=0, rowspan=2, sticky='NSEW', **self.images_frame_kwargs)
         self.images_frame.right_window.grid(row=1, column=2, rowspan=2, sticky='NSEW', **self.images_frame_kwargs)
@@ -105,6 +106,7 @@ class Page(ttk.Frame):
         self.images_frame.next_button.grid(row=3, column=2, sticky='', **self.images_frame_kwargs)
         self.images_frame.counter.grid(row=3, column=1, sticky='EW', **self.images_frame_kwargs)
         self.images_frame.file_select.grid(row=0, column=1, sticky='EW', **self.images_frame_kwargs)
+        self.images_frame.clear_images.grid(row=2, column=1, stick='EW', **self.images_frame_kwargs)
         
         for row in [0,3]:
             self.images_frame.rowconfigure(row, weight=1)
@@ -275,6 +277,24 @@ class Page(ttk.Frame):
         self.prediction_images[prediction_image_pointer] = img
         self.set_image()
     
+    def clear_all_images(self):
+        self.image_pointer = 0
+        self.images_frame.right_window.config(image=self.black_photoimage)
+        self.images_frame.left_window.config(image=self.black_photoimage)
+        self.images = []
+        self.top_frame_saves = {}
+        self.output_frame_saves = {}
+        self.prediction_images = []
+        
+        widgets = self.top_frame_widgets
+        for key in self.top_frame_widgets:
+            widgets[key].push(None)
+        
+        widgets = self.output_frame_widgets
+        for key in self.output_frame_widgets:
+            widgets[key].push(None)
+        
+        self.images_frame.counter.config(text='-/0')
 
     
 class OysterPage(Page):
@@ -291,10 +311,6 @@ class OysterPage(Page):
         self.add_input(LabelBox, text='Seed Tray Weight (g)')
         self.add_input(LabelBox, text='Slide Weight (g)')
         self.add_input(LabelBox, text='Slide + Seed Weight (g)')
-        
-        def prediction_image():
-            img = self.get_prediction_image()
-            self.set_prediction_image(self.image_pointer, img)
         
         #The way this method works is unfortuante, it results both from Tkinter being a bad language (not being able to reassign master widgets) as well as
         #Python not having static typing
@@ -317,9 +333,15 @@ class OysterPage(Page):
         count, image = (0, self.black_photoimage)
         self.brood_count_dict[img_pointer] = count
         self.set_prediction_image(img_pointer, image)
+        
+        if self.settings['toggles']['excel-default']:
+            self.to_excel(predict_all=False)
+        
+        if self.settings['toggles']['clear-excel-default']:
+            self.excel_obj = OysterExcel()
+            
         return count
     
-    #TODO: Load append excel from settings
     def to_excel(self, drop_na=True, predict_all=True):
         if predict_all:
             for img_pointer in range(len(self.images)):
@@ -345,9 +367,23 @@ class OysterPage(Page):
         numeric_columns = ['seed-tray-weight', 'slide-weight', 'slide-and-seed-weight', 'subsample-count']
         for col in numeric_columns:
             df[col] = pd.to_numeric(df[col])
-        
+
         self.excel_obj.extend(df)
-        self.excel_obj.write_excel()
+        
+        file_path = self.settings['paths']['output-save']
+        if file_path:
+            if not os.path.exists(Path(file_path).parent) and self.settings['toggles']['create-dir-default']:
+                os.makedirs(Path(file_path).parent)
+                self.excel_obj.write_excel(file_path + '/data.xlsx')
+                
+            elif os.path.exists(Path(file_path).parent):
+                self.excel_obj.write_excel(file_path=file_path + '/data.xlsx')
+                
+            else:
+                raise FileNotFoundError('The given output directory does not exist, try creating the directories or enabling create directory by default in settings')
+        else:
+            raise FileNotFoundError('No output directory selected, consider changing the location in settings')
+    
     
     def load_excel(self):
         default_file_path = self.settings['paths']['excel-save']
@@ -365,10 +401,14 @@ class OysterPage(Page):
             return
 
         self.excel_obj.read_excel(file_path)
-        
+    
+    def clear_all_images(self):
+        super().clear_all_images()
+        if self.settings['toggles']['clear-output-default']:
+            self.excel_obj = OysterExcel()
         
     def open_settings(self):
-        Settings(self, child=self.settings_obj)
+        Settings(self)
         
         
 class DevisionPage(Page):

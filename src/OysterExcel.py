@@ -5,7 +5,6 @@ from datetime import datetime
 from scipy.stats import t
 
 
-#TODO: Add read excel and delete function
 class OysterExcel():
     def __init__(self, *, file_name='oyster-data.xlsx', staff_name=''):
         self.file_name = file_name
@@ -146,12 +145,15 @@ class OysterExcel():
 
             worksheet.column_dimensions[column_letter].width = max_width + 1
     
-    def write_excel(self):
+    def write_excel(self, file_path=None):
         """Writes this object into an excel file with three sheets:
            info, which contains date and staff fields;
            data, which contains data of all subsamples;
            and statistics, which contains aggregate data performed on subsamples
         """
+        if not file_path:
+            file_path = self.file_name
+        
         # Converting the internal dataframe names to human readable export
         print_df = self.df.copy()
         print_df = print_df.rename(columns=self.data_to_readable)
@@ -183,7 +185,7 @@ class OysterExcel():
 
         self._openpyxl_write(print_stats, wb, statistics, {'index':True, 'header':True})
         
-        wb.save(self.file_name)
+        wb.save(file_path)
     
     #This assumes that the file was written by this excel writer or is in the same format
     def read_excel(self, file_path=None):

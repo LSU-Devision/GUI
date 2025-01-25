@@ -30,7 +30,7 @@ class Settings(tk.Toplevel):
         self.parent = args[0]
         
         if Settings.instance is None:
-            Settings.instance = SettingsWindow()
+            raise AttributeError('No settings instance has been initialized')
             
         self.child = Settings.instance
         self.title('Settings')
@@ -56,7 +56,7 @@ class Settings(tk.Toplevel):
         
         self.bind('<Destroy>', self.on_destroy)        
     
-    def on_destroy(self):
+    def on_destroy(self, event):
         Settings.is_open = False
         
 # TODO: Integrate tooltips
