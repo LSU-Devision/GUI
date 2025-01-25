@@ -1,14 +1,22 @@
+# Motivation for this file:
+# Being able to create new image-based pages as easy as building blocks as opposed to hand-coding every single widget
+# Pages is specifically for image prediction pages like MainFrame and OysterPage, but the concept is
+# able to be generalized
+
 import tkinter as tk
 from tkinter.filedialog import askopenfilename
 
 from tkinter import ttk
+
 from Widgets import *
+from SettingsWindowProposal import SettingsWindow, Settings
 from OysterExcel import OysterExcel
 
 from PIL.ImageTk import PhotoImage
 from PIL import Image
 from ttkbootstrap import Style
 
+import os
 from pathlib import Path
 
 import pandas as pd
@@ -25,6 +33,7 @@ class IdNotFoundError(Exception):
     def __repr__(self):
         return f'Could not find id {self.value}'
 
+#TODO: Add clear images button to image frame in page
 class Page(ttk.Frame):
     id = 0
     black_image = Image.new(mode='RGB', color=(0, 0, 0), size=THUMBNAIL_SIZE)    
@@ -274,6 +283,8 @@ class OysterPage(Page):
         
         self.brood_count_dict = {}
         self.excel_obj = OysterExcel()
+        self.settings_obj = SettingsWindow()
+        self.settings = self.settings_obj.settings
         
         self.add_input(LabelBox, text='Group Number')
         self.add_input(LabelBox, text='Size Class')
@@ -288,8 +299,9 @@ class OysterPage(Page):
         #The way this method works is unfortuante, it results both from Tkinter being a bad language (not being able to reassign master widgets) as well as
         #Python not having static typing
         predict_button = self.add_settings(IOButton, text='Predict Brood Count', command=self.get_prediction)
-        self.add_settings(IOButton, text='Load Data from Excel')
+        self.add_settings(IOButton, text='Load Data from Excel', command=self.load_excel)
         self.add_settings(IOButton, text='Export to Excel', command=self.to_excel)
+        self.add_settings(IOButton, text='Settings', command=self.open_settings)
         
         predict_counter = self.add_output(Counter, text='Oyster Brood Count')
         predict_button.bind_out(predict_counter)
@@ -315,7 +327,7 @@ class OysterPage(Page):
                     self.get_prediction(img_pointer)
         
         data = self.get_all_inputs()
-        
+
         df = pd.DataFrame.from_dict(data, orient='index')
         df_file = pd.DataFrame.from_dict(self.file_name_dict, orient='index')
         df_count = pd.DataFrame.from_dict(self.brood_count_dict, orient='index')
@@ -325,14 +337,38 @@ class OysterPage(Page):
         if drop_na:
             df = df.dropna(how='any')
         
+        if df.empty:
+            return
+        
         df = df.rename(columns={0:'group', 1:'size-class', 2:'seed-tray-weight', 3:'slide-weight', 4:'slide-and-seed-weight', 5:'file-name', 6:'subsample-count'})
-
+        
         numeric_columns = ['seed-tray-weight', 'slide-weight', 'slide-and-seed-weight', 'subsample-count']
         for col in numeric_columns:
             df[col] = pd.to_numeric(df[col])
         
         self.excel_obj.extend(df)
         self.excel_obj.write_excel()
+    
+    def load_excel(self):
+        default_file_path = self.settings['paths']['excel-save']
+        if default_file_path and os.path.exists(default_file_path):
+            file_path = default_file_path
+            
+        else:
+            file_path = askopenfilename(
+                initialdir=INTIAL_DIR,
+                title='Please select an excel file to open',
+                filetypes=[('Excel Files', '*.xlsx *.xlsb *.xltx *.xltm *.xls *.xlt *.ods')]
+            )
+            
+        if Path(file_path).suffix not in '.xlsx .xlsb .xltx .xltm .xls .xlt .ods'.split(' '):
+            return
+
+        self.excel_obj.read_excel(file_path)
+        
+        
+    def open_settings(self):
+        Settings(self, child=self.settings_obj)
         
         
 class DevisionPage(Page):
@@ -346,6 +382,8 @@ class DevisionPage(Page):
         predict_button = self.add_settings(IOButton, text='Predict Egg Count', command=self.get_prediction)
         self.add_settings(IOButton, text='Export to Excel')
         self.add_settings(IOButton, text='Settings')
+        self.add_settings(IOButton, text='Help')
+        
         
         predict_counter = self.add_output(Counter, text='Frog Egg Count')
         predict_button.bind_out(predict_counter)
@@ -369,7 +407,6 @@ if __name__ == '__main__':
     notebook.add(frog, text='Devision Page')
     notebook.add(oyster, text='Oyster Page')
     
-    style_obj = Style(theme='darkly')
     notebook.grid(row=0, column=0, sticky='NSEW')
     
     root.rowconfigure(0, weight=1)

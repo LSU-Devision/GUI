@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from ttkbootstrap import Style
-from src.WarningWindow import WarningWindow
+from WarningWindow import WarningWindow
 
 import webbrowser
 from Scrapers import Scraper
@@ -14,15 +14,25 @@ from functools import partial
 
 # Window wrapper for settings, ensures that the window is not open when setting are initialized
 class Settings(tk.Toplevel):
+    instance = None
+    is_open = False
+    
     def __init__(self, *args, **kwargs):
+        if Settings.is_open:
+            return
+        
+        else:
+            Settings.is_open = True
+            
         super().__init__(*args)
         
         # Usually will be mainframe unless the code somehow changes
         self.parent = args[0]
         
-        # The settings window object is passed in as a child to put it in the grid of the new window
-        self.child = kwargs['child']
-        
+        if Settings.instance is None:
+            Settings.instance = SettingsWindow()
+            
+        self.child = Settings.instance
         self.title('Settings')
         
         # Pop up windows options
@@ -44,6 +54,10 @@ class Settings(tk.Toplevel):
         self.grid_columnconfigure(0, weight=1)
         self.child.grid(row=0, column=0, sticky='nsew')
         
+        self.bind('<Destroy>', self.on_destroy)        
+    
+    def on_destroy(self):
+        Settings.is_open = False
         
 # TODO: Integrate tooltips
 
@@ -57,7 +71,6 @@ class SettingsWindow(ttk.Frame):
     # Initializes before object creation to programmatically create class variables at runtime
     # but before the frame is created
     def __new__(cls, *args):
-        
         if not path.exists(cls.USER_SETTINGS):
             shutil.copy(cls.DEFAULT_SETTINGS, cls.USER_SETTINGS)
              
@@ -89,6 +102,7 @@ class SettingsWindow(ttk.Frame):
     def __init__(self, *args, **kwargs):
         self.cls = self.__class__
         self.read_only_settings = read_only_settings()
+        Settings.instance = self
     
     # Init analogue, runs only when called such that the frame is not created on app startup
     def create(self, *args, **kwargs):

@@ -1,7 +1,7 @@
 import tkinter as tk
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
-from src.Widgets import MutImmutable
+from Widgets import MutImmutable
 
 class WarningWindow(tk.Toplevel):
     def __init__(self, parent=None, dangerous_command_name=None):

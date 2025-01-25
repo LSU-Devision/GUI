@@ -28,6 +28,17 @@ class OysterExcel():
             'total-number'
         ])
         
+        self.data_to_readable = {'group':'Group Number',
+            'file-name': 'File Name',
+            'size-class': 'Size Class',
+            'seed-tray-weight': 'Seed Tray Weight (g)',
+            'slide-weight': 'Slide Weight (g)',
+            'slide-and-seed-weight': 'Slide and Seed Weight (g)',
+            'subsample-count': 'Subsample Count',
+            'total-number': 'Total Number'}
+        
+        self.readable_to_data = {self.data_to_readable[k]:k for k in self.data_to_readable}
+        
         # Goes into the statistics tab
         self.stats = None
         
@@ -143,16 +154,7 @@ class OysterExcel():
         """
         # Converting the internal dataframe names to human readable export
         print_df = self.df.copy()
-        print_df = print_df.rename(columns={
-            'group':'Group Number',
-            'file-name': 'File Name',
-            'size-class': 'Size Class',
-            'seed-tray-weight': 'Seed Tray Weight (g)',
-            'slide-weight': 'Slide Weight (g)',
-            'slide-and-seed-weight': 'Slide and Seed Weight (g)',
-            'subsample-count': 'Subsample Count',
-            'total-number': 'Total Number'
-        })
+        print_df = print_df.rename(columns=self.data_to_readable)
         print_df.index.name = 'Index'
         
         print_stats = self.stats.copy()
@@ -182,8 +184,18 @@ class OysterExcel():
         self._openpyxl_write(print_stats, wb, statistics, {'index':True, 'header':True})
         
         wb.save(self.file_name)
+    
+    #This assumes that the file was written by this excel writer or is in the same format
+    def read_excel(self, file_path=None):
+        if not file_path:
+            file_path = self.file_name
             
+        df = pd.read_excel(file_path, index_col=0, skiprows=[1], sheet_name='Data')
+        df = df.rename(columns=self.readable_to_data)
         
+        self.extend(df)
+        
+        return df
 
 # Testing function
 if __name__ == '__main__':  
@@ -193,4 +205,5 @@ if __name__ == '__main__':
     excel_obj.extend(import_df)
     excel_obj.write_excel()
     
+    print(excel_obj.read_excel())
     

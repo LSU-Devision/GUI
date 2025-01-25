@@ -1,3 +1,9 @@
+# Motivation for this file:
+# Tkinter widget callbacks are very lowlevel (just one step up from pure implementation of asynchronous
+# programming with event loops and callbacks). This file creates some widgets with some standard IO operations,
+# such as binding one widgets output field to multiple widgets output field (chaining outputs) and creating
+# some examples of callback functions that produce a value without having to implement asnychronous pipes/queues
+
 import tkinter.ttk as ttk
 import tkinter as tk
 
@@ -70,6 +76,8 @@ class TkIO(ttk.Frame):
         self._value = MutImmutable()
     
     #Abstract method
+    # I have declined to use the abstract method wrapper as that can potentially run into issues
+    # when inheriting from a different super class, as well as requiring a typing module to use
     def pop(self):
         current_input = self._value['']
         self._value[''] = None
