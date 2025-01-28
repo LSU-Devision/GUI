@@ -25,7 +25,7 @@ class Predictions:
         self.image_files = image_files
         self.master = parent
         self.device = '/GPU:0' if tf.config.experimental.list_physical_devices('GPU') else '/CPU:0'
-        # self.model = model
+        
         self.lbl_cmap = random_label_cmap()
         self.predictions_data = []
         self.prediction_files = {}

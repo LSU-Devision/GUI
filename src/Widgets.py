@@ -212,7 +212,7 @@ class IOButton(Outputable):
         self.command = command
         self.command_kwargs = command_kwargs
         self.button = ttk.Button(self, command=self.run, **kwargs)
-        self.button.pack(expand=True, fill=tk.BOTH)
+        self.button.pack(expand=True, fill=tk.BOTH, side=tk.BOTTOM, anchor=tk.CENTER)
 
     def run(self):
         self.value = self.command(**self.command_kwargs)

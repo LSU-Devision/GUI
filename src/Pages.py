@@ -5,6 +5,7 @@
 
 import tkinter as tk
 from tkinter.filedialog import askopenfilename
+import json
 
 from tkinter import ttk
 
@@ -14,7 +15,6 @@ from OysterExcel import OysterExcel
 
 from PIL.ImageTk import PhotoImage
 from PIL import Image
-from ttkbootstrap import Style
 
 import os
 from pathlib import Path
@@ -33,6 +33,77 @@ class IdNotFoundError(Exception):
     def __repr__(self):
         return f'Could not find id {self.value}'
 
+class ImageList(list):
+    def __init__(self, name, iterable=[]):
+        """Listlike object that contains paths and image references, but appends via image path for convienience
+           Use ImageList().paths to access the underlying path objects
+            *args: Iterable of path-like objects
+            
+        """
+        self.name = name
+        
+        self.black_photoimage = PhotoImage(Image.new(mode='RGB', color=(0, 0, 0), size=THUMBNAIL_SIZE))
+        self.paths = []
+        images = []
+        for path in iterable:
+            path, image = self._process_path(path)
+            self.paths.append(path)
+            images.append(image)
+        
+        super().__init__(images)
+        self._json_dump()
+    
+    def __setitem__(self, key, value):
+        path, image = self._process_path(value)
+        self.paths[key] = path
+        super().__setitem__(key, image)
+        self._json_dump()
+
+    def __delitem__(self, key):
+        del self.paths[key]
+        return_value = super().__delitem__(key)
+        self._json_dump()
+        return return_value
+    
+    def extend(self, iterable):
+        paths = []
+        images = []
+        for path in iterable:
+            path, image = self._process_path(path)
+            paths.append(path)
+            images.append(image)
+            
+        self.paths.extend(paths)
+        super().extend(images)
+        self._json_dump()
+
+    def append(self, path):
+        path, image = self._process_path(path)
+        self.paths.append(path)
+        super().append(image)
+        self._json_dump()
+    
+    def _process_path(self, path):
+        if path == None or path == 'None':
+            return None, self.black_photoimage
+        
+        path = Path(path).resolve()
+        image = Image.open(path)
+        image_copy = PhotoImage(image.resize(THUMBNAIL_SIZE))
+        image.close()
+        
+        return path, image_copy
+   
+    def _json_dump(self):
+        str_paths = list(map(lambda x: str(x), self.paths))
+        cwd = Path(os.getcwd())
+        file_path = cwd / Path('config') / Path(f'ImageList{self.name}.json')
+        
+        
+        with open(file_path, 'w') as file:
+            json.dump(obj=str_paths, fp=file, indent=2)
+
+
 #TODO: Add clear images button to image frame in page
 class Page(ttk.Frame):
     id = 0
@@ -44,7 +115,7 @@ class Page(ttk.Frame):
         if 'top_frame_kwargs' not in kwargs:
             top_frame_kwargs={'padx':5, 'pady':5, 'sticky':'NS'}
         if 'settings_frame_kwargs' not in kwargs:
-            settings_frame_kwargs={'sticky':'NSEW', 'padx':10}
+            settings_frame_kwargs={'sticky':'EW', 'padx':10}
         if 'output_frame_kwargs' not in kwargs:
             output_frame_kwargs={'sticky':'NSWE', 'padx':10}
         
@@ -52,6 +123,10 @@ class Page(ttk.Frame):
         
         self.id = Page.id
         Page.id += 1
+        
+        if not hasattr(self, 'name'):
+            self.name = f"Page{self.id}"
+        
         self.black_photoimage = PhotoImage(Page.black_image)
 
         self.file_name_dict = {}
@@ -62,7 +137,6 @@ class Page(ttk.Frame):
         self.top_frame_kwargs = top_frame_kwargs
         self.top_frame_saves = {}
 
-    
         self.output_frame = ttk.Frame(self)
         self.output_frame_iid = 0
         self.output_frame_widgets = {}
@@ -84,8 +158,18 @@ class Page(ttk.Frame):
             self.columnconfigure(column, weight=1)  
         
         self.image_pointer = 0
-        self.images = []
-        self.prediction_images = []
+        
+        true_json = [] 
+        pred_json = []
+        if os.path.exists(f'config/ImageListTrue{self.name}.json'):
+            with open(f'config/ImageListTrue{self.name}.json', 'r') as file:
+                true_json = list(json.load(file))
+        if os.path.exists(f'config/ImageListPred{self.name}.json'):
+            with open(f'config/ImageListPred{self.name}.json', 'r') as file:
+                pred_json = list(json.load(file))
+        
+        self.images = ImageList(iterable=true_json, name=f'True{self.name}')
+        self.prediction_images = ImageList(iterable=pred_json, name=f'Pred{self.name}')
         
         self.images_frame = ttk.Frame(self)
         self.images_frame_kwargs = {
@@ -123,7 +207,12 @@ class Page(ttk.Frame):
         
         self.settings_frame.rowconfigure(0, weight=1)
         self.top_frame.rowconfigure(0, weight=1)
-    
+
+        for index in range(len(self.images)):
+            file_path = self.images.paths[index]
+            self.update_image(file_path)
+        
+        
     def add_input(self, widget, **kwargs):
         assert issubclass(widget, Inputable)
         widget = widget(self.top_frame, **kwargs)
@@ -174,6 +263,10 @@ class Page(ttk.Frame):
         
     def write_frame(self):
         if self.image_pointer not in self.top_frame_saves:
+            for iid in self.top_frame_widgets:
+                self.top_frame_widgets[iid].push(None)
+            for iid in self.output_frame_widgets:
+                self.output_frame_widgets[iid].push(None)
             return
         
         widget_data = self.top_frame_saves[self.image_pointer]
@@ -211,11 +304,11 @@ class Page(ttk.Frame):
         return widget
     
     def next(self):
-        if len(self.images) == self.image_pointer + 1:
+        if len(self.images) == 0:
             return None
         
         self.save_frame()
-        self.image_pointer = min(len(self.images), self.image_pointer + 1)
+        self.image_pointer = min(len(self.images)-1, self.image_pointer + 1)
         self.write_frame()
 
         self.set_image()
@@ -237,17 +330,14 @@ class Page(ttk.Frame):
                                 title='Please select an image',
                                 filetypes=[('Images', '*.jpg *.JPG *.jpeg *.JPEG *.png *.PNG *.tif *.tiff')]
                             )
-        if Path(file_path).suffix not in ['.jpg', '.JPG', '.jpeg', '.png', '.PNG', '.tif', '.tiff']:
+        if file_path == () or Path(file_path).suffix not in ['.jpg', '.JPG', '.jpeg', '.png', '.PNG', '.tif', '.tiff']:
             return
                 
-        img = Image.open(file_path)
-        save_img = img.resize(THUMBNAIL_SIZE)
-        save_img = PhotoImage(save_img.convert('RGB'))
-        img.close()
-        
-        self.images.append(save_img)
+        self.images.append(file_path)
         self.prediction_images.append(None)
+        self.update_image(file_path)
         
+    def update_image(self, file_path):
         self.save_frame()
         self.image_pointer = len(self.images) - 1
         self.file_name_dict[self.image_pointer] = Path(file_path).name
@@ -263,28 +353,25 @@ class Page(ttk.Frame):
         self.images_frame.left_window.config(image=current_image)
         self.images_frame.counter.config(text=f'{self.image_pointer + 1}/{len(self.images)}')
 
-        if current_prediction_image:
-            self.images_frame.right_window.config(image=current_prediction_image)
-        else:
-            self.images_frame.right_window.config(image=self.black_photoimage)
+        self.images_frame.right_window.config(image=current_prediction_image)
     
-    def set_prediction_image(self, prediction_image_pointer, img):
+    def set_prediction_image(self, prediction_image_pointer, file_path):
         if len(self.images) == 0:
             return
         
         assert prediction_image_pointer >= 0 and prediction_image_pointer <= len(self.images) - 1
         self.image_pointer = prediction_image_pointer
-        self.prediction_images[prediction_image_pointer] = img
+        self.prediction_images[prediction_image_pointer] = file_path
         self.set_image()
     
     def clear_all_images(self):
         self.image_pointer = 0
         self.images_frame.right_window.config(image=self.black_photoimage)
         self.images_frame.left_window.config(image=self.black_photoimage)
-        self.images = []
+        self.images = ImageList(name=f'True{self.name}')
         self.top_frame_saves = {}
         self.output_frame_saves = {}
-        self.prediction_images = []
+        self.prediction_images = ImageList(name=f'Pred{self.name}')
         
         widgets = self.top_frame_widgets
         for key in self.top_frame_widgets:
@@ -299,6 +386,7 @@ class Page(ttk.Frame):
     
 class OysterPage(Page):
     def __init__(self, *args, **kwargs):
+        self.name = "Oyster"
         super().__init__(*args, **kwargs)
         
         self.brood_count_dict = {}
@@ -330,7 +418,7 @@ class OysterPage(Page):
         if len(self.images) == 0  or img_pointer >= len(self.images) or img_pointer < 0:
             return 0
                 
-        count, image = (0, self.black_photoimage)
+        count, image = (0, None)
         self.brood_count_dict[img_pointer] = count
         self.set_prediction_image(img_pointer, image)
         
@@ -413,17 +501,18 @@ class OysterPage(Page):
         
 class DevisionPage(Page):
     def __init__(self, *args, **kwargs):
+        self.name = "Devision"
         super().__init__(*args, **kwargs)
         
         self.egg_count_dict = {}
+        self.settings = SettingsWindow()
         
         self.add_input(DropdownBox, text='Select a Model Below', dropdowns = ['StarDist', 'CNN'])
         
         predict_button = self.add_settings(IOButton, text='Predict Egg Count', command=self.get_prediction)
         self.add_settings(IOButton, text='Export to Excel')
-        self.add_settings(IOButton, text='Settings')
+        self.add_settings(IOButton, text='Settings', command=self.open_settings)
         self.add_settings(IOButton, text='Help')
-        
         
         predict_counter = self.add_output(Counter, text='Frog Egg Count')
         predict_button.bind_out(predict_counter)
@@ -432,10 +521,13 @@ class DevisionPage(Page):
         if len(self.images) == 0:
             return 0
         
-        count, image = (0, self.black_photoimage)
+        count, image = (0, None)
         self.egg_count_dict[self.image_pointer] = count
         self.set_prediction_image(self.image_pointer, image)
         return count
+    
+    def open_settings(self):
+        Settings(self)
                 
 if __name__ == '__main__':
     root = tk.Tk()
