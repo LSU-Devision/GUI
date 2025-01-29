@@ -507,7 +507,7 @@ class DevisionPage(Page):
         self.egg_count_dict = {}
         self.settings = SettingsWindow()
         
-        self.add_input(DropdownBox, text='Select a Model Below', dropdowns = ['StarDist', 'CNN'])
+        self.add_input(DropdownBox, text='Select a Model Below', dropdowns = ['Frog Counter - StarDist2D', 'Frog Classification - StarDist2D', 'Oyster Counter - StarDist2D'])
         
         predict_button = self.add_settings(IOButton, text='Predict Egg Count', command=self.get_prediction)
         self.add_settings(IOButton, text='Export to Excel')
