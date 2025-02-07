@@ -229,10 +229,6 @@ class Counter(Outputable):
     def update(self):
         self.counter.config(text=self.value)
     
-    def pop(self):
-        old = self.value
-        self.value = ''
-        return old
         
     def push(self, inp):
         self.value = inp

@@ -3,6 +3,11 @@
 # Pages is specifically for image prediction pages like MainFrame and OysterPage, but the concept is
 # able to be generalized
 
+#TODO: Replace model usage in this file
+from stardist.models import StarDist2D
+import numpy as np
+from csbdeep.utils import normalize
+
 import tkinter as tk
 from tkinter.filedialog import askopenfilename
 import json
@@ -13,7 +18,7 @@ from Widgets import *
 from SettingsWindowProposal import SettingsWindow, Settings
 from OysterExcel import OysterExcel
 
-from PIL.ImageTk import PhotoImage
+from PIL.ImageTk import PhotoImage, getimage
 from PIL import Image
 
 import os
@@ -417,11 +422,20 @@ class OysterPage(Page):
         
         if len(self.images) == 0  or img_pointer >= len(self.images) or img_pointer < 0:
             return 0
-                
-        count, image = (0, None)
-        self.brood_count_dict[img_pointer] = count
-        self.set_prediction_image(img_pointer, image)
         
+        model = StarDist2D(config=None, name='empty-model', basedir='test/model')
+        
+        img = getimage(self.images[img_pointer])
+        img = img.convert('L')
+        img = np.array(img)
+        img = normalize(img, 1, 99.8, axis=(0, 1))
+        labels, details = model.predict_instances(img)
+        
+        count, predicted_image = (len(details['points']), None)
+        self.brood_count_dict[img_pointer] = count
+        self.set_prediction_image(img_pointer, predicted_image)
+        
+        #Legacy settings
         if self.settings['toggles']['excel-default']:
             self.to_excel(predict_all=False)
         
@@ -507,7 +521,8 @@ class DevisionPage(Page):
         self.egg_count_dict = {}
         self.settings = SettingsWindow()
         
-        self.add_input(DropdownBox, text='Select a Model Below', dropdowns = ['Frog Counter - StarDist2D', 'Frog Classification - StarDist2D', 'Oyster Counter - StarDist2D'])
+        #This button resizes at runtime and there's no built in way to change a ttk widget's width
+        self.add_input(DropdownBox, text='Select a Model Below', dropdowns = ['Frog Counter - StarDist2D', 'Frog Classification - StarDist2D'])
         
         predict_button = self.add_settings(IOButton, text='Predict Egg Count', command=self.get_prediction)
         self.add_settings(IOButton, text='Export to Excel')
