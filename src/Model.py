@@ -5,6 +5,9 @@ import numpy as np
 import pandas as pd
 import os
 import json
+from matplotlib import pyplot as plt
+from csbdeep.utils import normalize
+
 
 #### Training TUI
 class AnnotatedLoader():
@@ -34,7 +37,7 @@ class AnnotatedLoader():
             name = self.image_paths[index]
             
             with Image.open(name) as img:
-                img_rgb = img.convert('RGB')
+                img_rgb = img.convert('L')
                 self.images[name] = np.array(img_rgb)
             
                 if self.from_csv:
@@ -67,27 +70,32 @@ class AnnotatedLoader():
             yield self.images.pop(name), self.labels.pop(name)
 
 dataset = AnnotatedLoader().data()
-def create_arr()
 
 if __name__ == '__main__':
-    model = StarDist2D(name='empty-model', basedir='test/model')
-    model.prepare_for_training()
     
+    train = False
     
-    X_train = []
-    y_train = []
-    for _ in range(10):
-        X, y = next(dataset)
-        X_train.append(X)
-        y_train.append(y)
-    
-    X_train = np.array(X_train)
-    y_train = np.array(y_train)
-    
-    
-    
-    model.train(X, y)
-    
+    if train:
+        model = StarDist2D(name='empty-model', basedir='test/model')
+        model.prepare_for_training()
+
+        X_train = []
+        y_train = []
+        for _ in range(10):
+            X, y = next(dataset)
+            X_train.append(X)
+            y_train.append(y)
+            
+        X_val = []
+        y_val = []
+        for _ in range(5):
+            X, y = next(dataset)
+            X_val.append(X)
+            y_val.append(y)
+        
+    else:
+        model = StarDist2D(config=None, name='empty-model', basedir='test/model')
+   
     X_test = []
     y_test = []
     for _ in range(5):
@@ -95,8 +103,29 @@ if __name__ == '__main__':
         X_test.append(X)
         y_test.append(y)
     
+    if train:
+        X_train = np.array(X_train)
+        y_train = np.array(y_train)
+        
+        X_val = np.array(X_val)
+        y_val = np.array(y_val)    
+        
+        print('Model is training...')
+        history = model.train(X_train, y_train, validation_data=(X_val, y_val), epochs=1, steps_per_epoch=X_train.shape[0])
+        print('Model done training!')
+    
+        pd.DataFrame(history.history).plot(figsize=(8,5))
+        plt.show()
+       
     X_test = np.array(X_test)
     y_test = np.array(y_test)
     
-    y_pred = model.predict_instances(X_test)
+    
+    print('Model is predicting...')
+   
+    img = normalize(X_test[0], 1, 99.8, axis=(0,1))
+    y_pred = model.predict_instances(img)
+    
+    print('Model done predicting!')
+    
     print(y_pred)
