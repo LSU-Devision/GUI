@@ -3,7 +3,6 @@
 # Pages is specifically for image prediction pages like MainFrame and OysterPage, but the concept is
 # able to be generalized
 
-#TODO: Replace model usage in this file
 from stardist.models import StarDist2D
 import numpy as np
 from csbdeep.utils import normalize
@@ -109,7 +108,6 @@ class ImageList(list):
             json.dump(obj=str_paths, fp=file, indent=2)
 
 
-#TODO: Add clear images button to image frame in page
 class Page(ttk.Frame):
     id = 0
     black_image = Image.new(mode='RGB', color=(0, 0, 0), size=THUMBNAIL_SIZE)    
@@ -415,7 +413,7 @@ class OysterPage(Page):
         predict_counter = self.add_output(Counter, text='Oyster Brood Count')
         predict_button.bind_out(predict_counter)
         
-    #TODO: Implement get_prediction
+    #TODO: Convert this code to use some sort of image processing manager, more than ImageList
     def get_prediction(self, img_pointer=None):
         if not img_pointer:
             img_pointer = self.image_pointer
@@ -434,8 +432,8 @@ class OysterPage(Page):
         labels, details = model.predict_instances(img_arr, n_tiles=model._guess_n_tiles(img_arr))
         
         annotation_fp = f"test/annotations/oysterannotation{self.image_pointer}.png"
-        #annotation = Image.new(mode='RGB', color=(0, 0, 0), size=img.size)
-        annotation = img.convert('L')
+        #annotation = Image.new(mode='RGB', color=(0, 0, 0), size=img.size) # black base image
+        annotation = img.convert('L') # greyscale grey image
         annotation = annotation.convert('RGB')
         
         mask_image = Image.new(mode='1', color=0, size=img.size)
