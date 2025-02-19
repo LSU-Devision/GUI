@@ -423,17 +423,32 @@ class OysterPage(Page):
         if len(self.images) == 0  or img_pointer >= len(self.images) or img_pointer < 0:
             return 0
         
-        model = StarDist2D(config=None, name='empty-model', basedir='test/model')
+        model = StarDist2D(config=None, name='oyster_2-4mm', basedir='models')
+
         
-        img = getimage(self.images[img_pointer])
-        img = img.convert('L')
-        img = np.array(img)
-        img = normalize(img, 1, 99.8, axis=(0, 1))
-        labels, details = model.predict_instances(img)
+        img = Image.open(self.images.paths[img_pointer])
+        img_arr = img.convert('L')
+        img_arr = np.array(img_arr)
+        img_arr = normalize(img_arr, 1, 99.8, axis=(0, 1))
         
-        count, predicted_image = (len(details['points']), None)
+        labels, details = model.predict_instances(img_arr, n_tiles=model._guess_n_tiles(img_arr))
+        
+        annotation_fp = f"test/annotations/oysterannotation{self.image_pointer}.png"
+        #annotation = Image.new(mode='RGB', color=(0, 0, 0), size=img.size)
+        annotation = img.convert('L')
+        annotation = annotation.convert('RGB')
+        
+        mask_image = Image.new(mode='1', color=0, size=img.size)
+        mask_image.putdata(labels.flatten())
+        
+        annotation.paste(img, box=(0, 0), mask=mask_image)
+        annotation.save(fp=annotation_fp)
+        
+        img.close()
+        
+        count = len(details['points'])
         self.brood_count_dict[img_pointer] = count
-        self.set_prediction_image(img_pointer, predicted_image)
+        self.set_prediction_image(img_pointer, annotation_fp)
         
         #Legacy settings
         if self.settings['toggles']['excel-default']:

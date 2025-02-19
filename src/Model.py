@@ -1,4 +1,4 @@
-from stardist.models import StarDist2D
+from stardist.models import StarDist2D, Config2D
 from pathlib import Path
 from PIL import Image, ImageDraw
 import numpy as np
@@ -7,7 +7,7 @@ import os
 import json
 from matplotlib import pyplot as plt
 from csbdeep.utils import normalize
-
+from sklearn.metrics import mean_squared_error as mse
 
 #### Training TUI
 class AnnotatedLoader():
@@ -15,7 +15,7 @@ class AnnotatedLoader():
                  image_dir=Path('annotated-images') / Path('alloted-images'),
                  csv_dir = Path('annotated-images') / Path('csv-files'),
                  from_csv=True,
-                 memory_limit=64):
+                 memory_limit=32):
         
         self.image_dir = image_dir
         self.csv_dir = csv_dir
@@ -29,6 +29,8 @@ class AnnotatedLoader():
         
         self.images = {}
         self.labels = {}
+        self.counts = {}
+        self.give_counts = False
         
         self._load_images()
         
@@ -37,13 +39,17 @@ class AnnotatedLoader():
             name = self.image_paths[index]
             
             with Image.open(name) as img:
-                img_rgb = img.convert('L')
-                self.images[name] = np.array(img_rgb)
+                img_rgb = img.convert('RGB')
+                img_rgb = np.array(img_rgb)
+                img_rgb = normalize(img_rgb, 1, 99.8)
+                self.images[name] = img_rgb
             
                 if self.from_csv:
                     csv_path = self.csv_dir / Path(name).with_suffix('.csv').name
                     label = self._csv_to_label_mask(csv_path, img.size)
+                    count = pd.read_csv(csv_path)['region_count'].head(1).squeeze()
                     self.labels[name] = label
+                    self.counts[name] = count
                 
     def _csv_to_label_mask(self, path, img_size):
         mask = Image.new(mode='1', size=img_size, color=0)
@@ -67,16 +73,24 @@ class AnnotatedLoader():
                 self.image_len = (self.image_len[1]+1, min(self.image_len[1] + self.memory_limit, len(self.image_paths) - self.image_len[1]))
                 self._load_images()
             
-            yield self.images.pop(name), self.labels.pop(name)
+            img, lbl, count = self.images.pop(name), self.labels.pop(name), self.counts.pop(name)
+            
+            if self.give_counts:
+                yield img, count
+            else:
+                yield img, lbl
 
-dataset = AnnotatedLoader().data()
+loader = AnnotatedLoader()
+dataset = loader.data()
 
 if __name__ == '__main__':
     
     train = False
     
     if train:
-        model = StarDist2D(name='empty-model', basedir='test/model')
+        model = StarDist2D(config=Config2D(
+                n_channel_in=3
+            ), name='empty-model', basedir='test/model')
         model.prepare_for_training()
 
         X_train = []
@@ -96,6 +110,7 @@ if __name__ == '__main__':
     else:
         model = StarDist2D(config=None, name='empty-model', basedir='test/model')
    
+    loader.give_counts = True
     X_test = []
     y_test = []
     for _ in range(5):
@@ -104,6 +119,7 @@ if __name__ == '__main__':
         y_test.append(y)
     
     if train:
+        loader.give_counts = False
         X_train = np.array(X_train)
         y_train = np.array(y_train)
         
@@ -111,21 +127,22 @@ if __name__ == '__main__':
         y_val = np.array(y_val)    
         
         print('Model is training...')
-        history = model.train(X_train, y_train, validation_data=(X_val, y_val), epochs=1, steps_per_epoch=X_train.shape[0])
+        history = model.train(X_train, y_train, validation_data=(X_val, y_val), epochs=1)
+        model.
         print('Model done training!')
     
-        pd.DataFrame(history.history).plot(figsize=(8,5))
-        plt.show()
        
     X_test = np.array(X_test)
     y_test = np.array(y_test)
     
     
     print('Model is predicting...')
+    for img in X_test:
+        mask, output = model.predict_instances(img, n_tiles=model._guess_n_tiles(img))
+        break
    
-    img = normalize(X_test[0], 1, 99.8, axis=(0,1))
-    y_pred = model.predict_instances(img)
-    
     print('Model done predicting!')
     
-    print(y_pred)
+    print(len(output['points']), y_test[0])
+    print(output)
+    print(mask.shape)

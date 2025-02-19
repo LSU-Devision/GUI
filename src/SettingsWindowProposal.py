@@ -164,7 +164,7 @@ class SettingsWindow(ttk.Frame):
             id = self._settings_tree.focus()
             
             # Do not allow the user to automaticly clear if the excel file isn't being automatically created
-            if id=='clear-excel-default' and not self._settings_tree['toggles']['excel-default']:
+            if id=='clear-excel-default' and not self.cls._settings['toggles']['excel-default']:
                 return
             
             
