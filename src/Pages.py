@@ -16,6 +16,7 @@ from tkinter import ttk
 from Widgets import *
 from SettingsWindowProposal import SettingsWindow, Settings
 from OysterExcel import OysterExcel
+from ImageProcessing import ImageList, THUMBNAIL_SIZE, highlight_boundary
 
 from PIL.ImageTk import PhotoImage, getimage
 from PIL import Image
@@ -26,7 +27,6 @@ from pathlib import Path
 import pandas as pd
 
 INTIAL_DIR = Path.cwd()
-THUMBNAIL_SIZE = (400, 400)
 # There doesn't really exist a way to both resize a tkinter dialog and maintain a dynamically sized image
 # This is a motivating example for a website
 
@@ -36,77 +36,6 @@ class IdNotFoundError(Exception):
         
     def __repr__(self):
         return f'Could not find id {self.value}'
-
-class ImageList(list):
-    def __init__(self, name, iterable=[]):
-        """Listlike object that contains paths and image references, but appends via image path for convienience
-           Use ImageList().paths to access the underlying path objects
-            *args: Iterable of path-like objects
-            
-        """
-        self.name = name
-        
-        self.black_photoimage = PhotoImage(Image.new(mode='RGB', color=(0, 0, 0), size=THUMBNAIL_SIZE))
-        self.paths = []
-        images = []
-        for path in iterable:
-            path, image = self._process_path(path)
-            self.paths.append(path)
-            images.append(image)
-        
-        super().__init__(images)
-        self._json_dump()
-    
-    def __setitem__(self, key, value):
-        path, image = self._process_path(value)
-        self.paths[key] = path
-        super().__setitem__(key, image)
-        self._json_dump()
-
-    def __delitem__(self, key):
-        del self.paths[key]
-        return_value = super().__delitem__(key)
-        self._json_dump()
-        return return_value
-    
-    def extend(self, iterable):
-        paths = []
-        images = []
-        for path in iterable:
-            path, image = self._process_path(path)
-            paths.append(path)
-            images.append(image)
-            
-        self.paths.extend(paths)
-        super().extend(images)
-        self._json_dump()
-
-    def append(self, path):
-        path, image = self._process_path(path)
-        self.paths.append(path)
-        super().append(image)
-        self._json_dump()
-    
-    def _process_path(self, path):
-        if path == None or path == 'None':
-            return None, self.black_photoimage
-        
-        path = Path(path).resolve()
-        image = Image.open(path)
-        image_copy = PhotoImage(image.resize(THUMBNAIL_SIZE))
-        image.close()
-        
-        return path, image_copy
-   
-    def _json_dump(self):
-        str_paths = list(map(lambda x: str(x), self.paths))
-        cwd = Path(os.getcwd())
-        file_path = cwd / Path('config') / Path(f'ImageList{self.name}.json')
-        
-        
-        with open(file_path, 'w') as file:
-            json.dump(obj=str_paths, fp=file, indent=2)
-
 
 class Page(ttk.Frame):
     id = 0
@@ -432,14 +361,10 @@ class OysterPage(Page):
         labels, details = model.predict_instances(img_arr, n_tiles=model._guess_n_tiles(img_arr))
         
         annotation_fp = f"test/annotations/oysterannotation{self.image_pointer}.png"
-        #annotation = Image.new(mode='RGB', color=(0, 0, 0), size=img.size) # black base image
-        annotation = img.convert('L') # greyscale grey image
-        annotation = annotation.convert('RGB')
         
         mask_image = Image.new(mode='1', color=0, size=img.size)
         mask_image.putdata(labels.flatten())
-        
-        annotation.paste(img, box=(0, 0), mask=mask_image)
+        annotation = highlight_boundary(img, mask_image, (255, 0, 0), width=4)
         annotation.save(fp=annotation_fp)
         
         img.close()

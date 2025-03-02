@@ -86,7 +86,23 @@ class TkIO(ttk.Frame):
     #Abstract method
     def push(self, inp):
         self._value[''] = inp
+
+# This class is subclassed by our active widgets
+class Tooltips(ttk.Widget):
+    def __init__(self, tooltip_string):
+        self.tooltip = tooltip_string
     
+    def change_tooltip(self, string):
+        self.tooltip = string
+    
+    def display_tooltip(self):
+        #This displays a tooltip
+        
+        #Some functions here
+        
+        pass
+        
+
 class Inputable(TkIO):
     def __init__(self, parent):
         super().__init__(parent)
