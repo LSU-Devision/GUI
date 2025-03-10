@@ -32,18 +32,29 @@ INTIAL_DIR = Path.cwd()
 
 class IdNotFoundError(Exception):
     def __init__(self, value):
+        """Create a new exception for invalid Ids
+
+        Args:
+            value (object): id object
+        """
         self.value = value
         
     def __repr__(self):
         return f'Could not find id {self.value}'
 
+# A frame subclass that is meant to modularize the image-frame predictor setup, allowing for any image annotatation 
+# and prediction instance be easily replicated
+
 class Page(ttk.Frame):
+    # Static variables
     id = 0
     black_image = Image.new(mode='RGB', color=(0, 0, 0), size=THUMBNAIL_SIZE)    
+    
     def __init__(self,
                  *args,
                  **kwargs):
         
+        # Key word arguements to pass into the grid function of respective subframes of Page
         if 'top_frame_kwargs' not in kwargs:
             top_frame_kwargs={'padx':5, 'pady':5, 'sticky':'NS'}
         if 'settings_frame_kwargs' not in kwargs:
@@ -51,16 +62,20 @@ class Page(ttk.Frame):
         if 'output_frame_kwargs' not in kwargs:
             output_frame_kwargs={'sticky':'NSWE', 'padx':10}
         
+        # Initializing ttk widget methods in ttk.Frame
         super().__init__(*args)
         
+        # Creating a unique identifier for different pages
         self.id = Page.id
         Page.id += 1
         
         if not hasattr(self, 'name'):
             self.name = f"Page{self.id}"
         
+        # Default display for empty image frames so that the frame will be sized appropriately
         self.black_photoimage = PhotoImage(Page.black_image)
 
+        # Below are attributes that keep track of the various save states of widgets on subframes
         self.file_name_dict = {}
         
         self.top_frame = ttk.Frame(self)
@@ -80,6 +95,7 @@ class Page(ttk.Frame):
         self.settings_frame_widgets = {}
         self.settings_frame_kwargs = settings_frame_kwargs
         
+        # Grid styling options, giving more weight to the image subframes
         for row in [0, 2, 3]:
             self.rowconfigure(row, weight=1)
             
@@ -90,6 +106,8 @@ class Page(ttk.Frame):
             self.columnconfigure(column, weight=1)  
         
         self.image_pointer = 0
+        
+        # Reading and writing image data from file
         
         true_json = [] 
         pred_json = []
@@ -102,6 +120,9 @@ class Page(ttk.Frame):
         
         self.images = ImageList(iterable=true_json, name=f'True{self.name}')
         self.prediction_images = ImageList(iterable=pred_json, name=f'Pred{self.name}')
+        
+        # Manual setup for images frame, this is done as some of the functionality is very specific to images frame
+        # and doesn't need to be modularized for our use case
         
         self.images_frame = ttk.Frame(self)
         self.images_frame_kwargs = {
@@ -132,6 +153,8 @@ class Page(ttk.Frame):
         self.images_frame.columnconfigure(0, weight=1)
         self.images_frame.columnconfigure(2, weight=1)
         
+        # Placing the frames onto the page
+        
         self.top_frame.grid(row=0, column=0, sticky='NSEW')
         self.images_frame.grid(row=1, column=0, sticky='NSEW')
         self.output_frame.grid(row=2, column=0, sticky='NSEW')
@@ -140,12 +163,22 @@ class Page(ttk.Frame):
         self.settings_frame.rowconfigure(0, weight=1)
         self.top_frame.rowconfigure(0, weight=1)
 
+        # Writing images read from disk onto frame in order, if applicable
         for index in range(len(self.images)):
             file_path = self.images.paths[index]
             self.update_image(file_path)
         
         
     def add_input(self, widget, **kwargs):
+        """Adds and manages a subclass of Inputable onto the top frame, these
+        are meant to contain widgets that recieve inputs
+
+        Args:
+            widget (Inputable (Class)): An uninstantiated widget class
+            kwargs: Keyword arguments for the widget being instantiated
+        Returns:
+            Inputable (Object): A pointer to the instantiated widget object  
+        """
         assert issubclass(widget, Inputable)
         widget = widget(self.top_frame, **kwargs)
         
@@ -159,6 +192,18 @@ class Page(ttk.Frame):
         return widget
 
     def query_input(self, iid):
+        """Returns the value of an inputable widget based on its integer id,
+        widgets are given ids based on the order they were called in
+
+        Args:
+            iid (int): The integer id of the inputable widget on top frame
+
+        Raises:
+            IdNotFoundError: If there doesn't exist a widget with the integer id specified, an IdNotFoundError is raised
+
+        Returns:
+            MutImmutable: The value contained in widget
+        """
         if iid not in self.top_frame_widgets:
             raise IdNotFoundError(iid)
         
@@ -166,9 +211,19 @@ class Page(ttk.Frame):
         return widget.value
     
     def get_frame_inputs(self):
+        """Dataframe compatible version of all data stored in the top frame in the current image
+
+        Returns:
+            dict: Dictionary in dataframe format containing all top frame widget data from this image
+        """
         return {self.image_pointer:{iid:self.top_frame_widgets[iid].value for iid in self.top_frame_widgets}}   
     
     def get_all_inputs(self):
+        """Dataframe compatible version of all data stored in the top frame across all images
+
+        Returns:
+            dict: Dictionary in dataframe format containing all top frame widget data from all images
+        """
         if len(self.images) == 0:
             return {}
         
@@ -185,6 +240,8 @@ class Page(ttk.Frame):
         return data
     
     def save_frame(self):
+        """Saves all the current data into a dictionary
+        """
         top_widgets = tuple(self.top_frame_widgets.keys())
         top_widget_data = tuple(map(lambda x: self.top_frame_widgets[x].pop(), top_widgets))
         self.top_frame_saves[self.image_pointer] = tuple(zip(top_widgets, top_widget_data))
@@ -194,6 +251,8 @@ class Page(ttk.Frame):
         self.output_frame_saves[self.image_pointer] = tuple(zip(out_widgets, out_widget_data))
         
     def write_frame(self):
+        """Writes data from saved dictionaries to frame based on the current image selected
+        """
         if self.image_pointer not in self.top_frame_saves:
             for iid in self.top_frame_widgets:
                 self.top_frame_widgets[iid].push(None)
@@ -210,6 +269,14 @@ class Page(ttk.Frame):
             self.output_frame_widgets[widget[0]].push(widget[1])
         
     def add_settings(self, widget, **kwargs):
+        """_summary_
+
+        Args:
+            widget (_type_): _description_
+
+        Returns:
+            _type_: _description_
+        """
         assert issubclass(widget, ttk.Widget)
         widget = widget(self.settings_frame, **kwargs)
                 
@@ -223,6 +290,14 @@ class Page(ttk.Frame):
         return widget
 
     def add_output(self, widget, **kwargs):
+        """_summary_
+
+        Args:
+            widget (_type_): _description_
+
+        Returns:
+            _type_: _description_
+        """
         assert issubclass(widget, Outputable)
         widget = widget(self.output_frame, **kwargs)
         
@@ -236,6 +311,11 @@ class Page(ttk.Frame):
         return widget
     
     def next(self):
+        """_summary_
+
+        Returns:
+            _type_: _description_
+        """
         if len(self.images) == 0:
             return None
         
@@ -246,6 +326,11 @@ class Page(ttk.Frame):
         self.set_image()
         
     def prev(self):
+        """_summary_
+
+        Returns:
+            _type_: _description_
+        """
         if len(self.images) == 0:
             return None
         
@@ -257,6 +342,8 @@ class Page(ttk.Frame):
     
     
     def add_image(self):
+        """_summary_
+        """
         file_path = askopenfilename(
                                 initialdir=INTIAL_DIR,
                                 title='Please select an image',
@@ -270,6 +357,11 @@ class Page(ttk.Frame):
         self.update_image(file_path)
         
     def update_image(self, file_path):
+        """_summary_
+
+        Args:
+            file_path (_type_): _description_
+        """
         self.save_frame()
         self.image_pointer = len(self.images) - 1
         self.file_name_dict[self.image_pointer] = Path(file_path).name
@@ -279,6 +371,8 @@ class Page(ttk.Frame):
         
         
     def set_image(self):
+        """_summary_
+        """
         current_image = self.images[self.image_pointer]
         current_prediction_image = self.prediction_images[self.image_pointer]
         
@@ -288,6 +382,12 @@ class Page(ttk.Frame):
         self.images_frame.right_window.config(image=current_prediction_image)
     
     def set_prediction_image(self, prediction_image_pointer, file_path):
+        """_summary_
+
+        Args:
+            prediction_image_pointer (_type_): _description_
+            file_path (_type_): _description_
+        """
         if len(self.images) == 0:
             return
         
@@ -297,6 +397,8 @@ class Page(ttk.Frame):
         self.set_image()
     
     def clear_all_images(self):
+        """_summary_
+        """
         self.image_pointer = 0
         self.images_frame.right_window.config(image=self.black_photoimage)
         self.images_frame.left_window.config(image=self.black_photoimage)
@@ -350,8 +452,16 @@ class OysterPage(Page):
         if len(self.images) == 0  or img_pointer >= len(self.images) or img_pointer < 0:
             return 0
         
-        model = StarDist2D(config=None, name='oyster_2-4mm', basedir='models')
-
+        model_path = self.settings['paths']['model-save']
+        if model_path:
+            model_path = Path(model_path)
+            basedir = model_path.parent
+            name = model_path.name
+        else:
+            basedir = 'models'
+            name = 'oyster_2-4mm'        
+            
+        model = StarDist2D(config=None, name=name, basedir=basedir)
         
         img = Image.open(self.images.paths[img_pointer])
         img_arr = img.convert('L')
@@ -360,7 +470,7 @@ class OysterPage(Page):
         
         labels, details = model.predict_instances(img_arr, n_tiles=model._guess_n_tiles(img_arr))
         
-        annotation_fp = f"test/annotations/oysterannotation{self.image_pointer}.png"
+        annotation_fp = Path(self.settings['paths']['output-save'] / Path(f"oysterannotation{self.image_pointer}.png"))
         
         mask_image = Image.new(mode='1', color=0, size=img.size)
         mask_image.putdata(labels.flatten())
