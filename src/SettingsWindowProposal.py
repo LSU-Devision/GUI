@@ -63,14 +63,37 @@ class Settings(tk.Toplevel):
 
 class SettingsWindow(ttk.Frame):
     # Class constants
-    USER_SETTINGS = path.join('src', 'settings_user_proposal.json')
-    DEFAULT_SETTINGS = path.join('src', 'settings_default_proposal.json')
+    USER_SETTINGS = path.join('config', 'settings_user.json')
+    DEFAULT_SETTINGS = path.join('config', 'settings_default.json')
     USER_THEMES = path.join('config', 'user_themes.json')
-    USER_HOME = str(pathlib.Path.home())
+    CWD = pathlib.Path.cwd().absolute()
     
     # Initializes before object creation to programmatically create class variables at runtime
     # but before the frame is created
     def __new__(cls, *args):
+        if not path.exists(cls.DEFAULT_SETTINGS):
+            json_str = """
+{
+    "toggles":{
+        "excel-default": false,
+        "clear-excel-default" : false,
+        "clear-output-default" : true,
+        "autosave-image-default": false,
+        "create-dir-default": false
+    },
+
+    "theme":"darkly-style",
+
+    "paths":{
+        "model-save": null,
+        "excel-save": null,
+        "output-save": null
+    }
+
+}"""
+            with open(cls.DEFAULT_SETTINGS, 'w') as file:
+                file.write(json_str)
+        
         if not path.exists(cls.USER_SETTINGS):
             shutil.copy(cls.DEFAULT_SETTINGS, cls.USER_SETTINGS)
              
@@ -87,7 +110,7 @@ class SettingsWindow(ttk.Frame):
         
         # Create a default output path if not initialized
         if not cls._settings['paths']['output-save']:
-            cls._settings['paths']['output-save'] = path.join(cls.USER_HOME, 'output')
+            cls._settings['paths']['output-save'] = path.join(cls.CWD, 'output')
             
         # Create a default excel path if not initialized
         if not cls._settings['paths']['excel-save']:
@@ -204,7 +227,7 @@ class SettingsWindow(ttk.Frame):
         
         # Callback function changing default model filepath and writing to settings
         def model_select(event):
-            filename = tk.filedialog.askopenfilename(initialdir = SettingsWindow.USER_HOME, 
+            filename = tk.filedialog.askopenfilename(initialdir = SettingsWindow.CWD, 
                                                      title = "Select a File",
                                                      filetypes=[("Tensorflow Model files", '*.ckpt *.hdf5 *.pb')])
             if not filename:
@@ -217,7 +240,7 @@ class SettingsWindow(ttk.Frame):
         
         # Callback function changing default excel filepath and writing to settings
         def excel_select(event):
-            filename = tk.filedialog.askopenfilename(initialdir = SettingsWindow.USER_HOME, 
+            filename = tk.filedialog.askopenfilename(initialdir = SettingsWindow.CWD, 
                                                      title = "Select a File",
                                                      filetypes=[("Excel files", '*.xlsx')])
             if not filename:
@@ -230,7 +253,7 @@ class SettingsWindow(ttk.Frame):
         
         # Callback function changing default output file directory and writing to settings
         def output_select(event):
-            filedirectory = tk.filedialog.askdirectory(initialdir=SettingsWindow.USER_HOME,
+            filedirectory = tk.filedialog.askdirectory(initialdir=SettingsWindow.CWD,
                                                        title="Select a File Directory")
             if not filedirectory:
                 return
@@ -393,7 +416,7 @@ class SettingsWindow(ttk.Frame):
         def excel_select_yes(event, warn_state):
             if warn_state['']:
                 if not self.cls._settings['paths']['output-save']:
-                    excel_path = path.join(SettingsWindow.USER_HOME, 'output', 'data.xslx')
+                    excel_path = path.join(SettingsWindow.CWD, 'output', 'data.xslx')
                 else:
                     excel_path = path.join(self.cls._settings['paths']['output-save'], 'data.xlsx')
             
@@ -409,7 +432,7 @@ class SettingsWindow(ttk.Frame):
         
         def output_select_yes(event, warn_state):
             if warn_state['']:
-                self.cls._settings['paths']['output-save'] = path.join(SettingsWindow.USER_HOME, 'output')
+                self.cls._settings['paths']['output-save'] = path.join(SettingsWindow.CWD, 'output')
                 self.write_user_settings()
             self.unbind_all('<<WarningDone>>')
         
@@ -482,7 +505,7 @@ class SettingsWindow(ttk.Frame):
         
          # Create a default output path if not initialized
         if not self.cls._settings['paths']['output-save']:
-            self.cls._settings['paths']['output-save'] = path.join(SettingsWindow.USER_HOME, 'output')
+            self.cls._settings['paths']['output-save'] = path.join(SettingsWindow.CWD, 'output')
             
         # Create a default excel path if not initialized
         if not self.cls._settings['paths']['excel-save']:
