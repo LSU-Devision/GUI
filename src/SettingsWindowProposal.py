@@ -227,14 +227,13 @@ class SettingsWindow(ttk.Frame):
         
         # Callback function changing default model filepath and writing to settings
         def model_select(event):
-            filename = tk.filedialog.askopenfilename(initialdir = SettingsWindow.CWD, 
-                                                     title = "Select a File",
-                                                     filetypes=[("Tensorflow Model files", '*.ckpt *.hdf5 *.pb')])
-            if not filename:
+            filedirectory = tk.filedialog.askdirectory(initialdir=SettingsWindow.CWD,
+                                                       title="Select a Model Directory")
+            if not filedirectory:
                 return
             
-            self.cls._settings['paths']['model-save'] = filename
-            self._settings_tree.set('excel-save', column='status', value=filename)
+            self.cls._settings['paths']['model-save'] = filedirectory
+            self._settings_tree.set('model-save', column='status', value=filedirectory)
 
             self.write_user_settings() 
         
@@ -271,7 +270,7 @@ class SettingsWindow(ttk.Frame):
             self.write_user_settings()      
             
         settings_text = [
-            "Select default model file to import from on startup",
+            "Select default model directory (should contain config.json file)",
             "Select default excel file to import from on startup",
             "Select an output directory to automatically export data to"
             ]   

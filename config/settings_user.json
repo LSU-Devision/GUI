@@ -1,0 +1,15 @@
+{
+  "toggles": {
+    "excel-default": false,
+    "clear-excel-default": false,
+    "clear-output-default": true,
+    "autosave-image-default": false,
+    "create-dir-default": false
+  },
+  "theme": "darkly-style",
+  "paths": {
+    "model-save": "/home/dow/personal/work/math_clinic/winter_2024_gui/GUI/models/oyster_4-6mm",
+    "excel-save": "/home/dow/personal/work/math_clinic/winter_2024_gui/GUI/output/data.xlsx",
+    "output-save": "/home/dow/personal/work/math_clinic/winter_2024_gui/GUI/output"
+  }
+}

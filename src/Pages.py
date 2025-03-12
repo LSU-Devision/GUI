@@ -464,7 +464,14 @@ class OysterPage(Page):
         model = StarDist2D(config=None, name=name, basedir=basedir)
         
         img = Image.open(self.images.paths[img_pointer])
-        img_arr = img.convert('L')
+        
+        if model.config.n_channel_in == 3:
+            img_arr = img.convert('RGB')
+        elif model.config.n_channel_in == 1:
+            img_arr = img.convert('L')
+        else:
+            raise TypeError("Wrong image format for model, incorrect color channels")
+        
         img_arr = np.array(img_arr)
         img_arr = normalize(img_arr, 1, 99.8, axis=(0, 1))
         
