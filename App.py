@@ -3,6 +3,31 @@ import tensorflow as tf
 from tkinter import PhotoImage # for icons and image graphics
 from MainFrame import MainFrame
 
+'''
+Paul Yeon's note,
+which files have mentions of tooltips as of 2/13/2025:
+
+Utilities.py is this file, which contains the "ToolTips" class 
+
+SettingsWindow.py is a window, like the others it has a button dictionary
+
+MainFrame.py is a window
+
+ExcelWindow.py  is a window
+
+config/tool-tip.json has the blurbs
+
+tooltip.py does each individual tooltip
+
+Most of these files interface with Utilities.py, importing it as utils. 
+This function has since been lost due to a much-needed renovation, which though excellent made the replacement buttons 
+not have tooltips. If I can keep the same import structure and have the new buttons take the same tooltips
+
+2/20/2025: It looks like the tool-tip.json has the actual words that are used as blurbs for the stuff. 
+
+IT loads in as data alongside a build-in dictionary of buttons and a list of labels
+'''
+
 class App(tk.Tk):
     def __init__(self):
         super().__init__()

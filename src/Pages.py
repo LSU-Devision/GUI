@@ -31,6 +31,22 @@ THUMBNAIL_SIZE = (400, 400)
 # There doesn't really exist a way to both resize a tkinter dialog and maintain a dynamically sized image
 # This is a motivating example for a website
 
+"""
+Paul's list of running roadblocks: 
+strange sizing on the opening page for my windows laptop
+
+Paul's List of files that mention size, width, height:
+This page
+Mainframe.py, probably not relevant
+imageframe.py
+settingswindowproposal.py
+warningwindow.py
+excelwindow.py
+which of these does the startup page?
+
+
+"""
+
 class IdNotFoundError(Exception):
     def __init__(self, value):
         self.value = value
@@ -102,6 +118,9 @@ class ImageList(list):
     def _json_dump(self):
         str_paths = list(map(lambda x: str(x), self.paths))
         cwd = Path(os.getcwd())
+        print("file path = " + str(cwd))
+        print("file path = " + str(cwd / Path('config')))
+        print("file path = " + str(cwd / Path('config') / Path(f'ImageList{self.name}.json')))
         file_path = cwd / Path('config') / Path(f'ImageList{self.name}.json')
         
         
