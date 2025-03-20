@@ -14,7 +14,7 @@ import json
 from tkinter import ttk
 
 from Widgets import *
-from SettingsWindowProposal import SettingsWindow, Settings
+from SettingsWindow import SettingsWindow, Settings
 from OysterExcel import OysterExcel
 from ImageProcessing import ImageList, THUMBNAIL_SIZE, highlight_boundary
 
