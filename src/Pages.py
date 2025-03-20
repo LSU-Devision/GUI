@@ -476,12 +476,12 @@ class OysterPage(Page):
         img_arr = normalize(img_arr, 1, 99.8, axis=(0, 1))
         
         labels, details = model.predict_instances(img_arr, n_tiles=model._guess_n_tiles(img_arr))
-        
+                
         annotation_fp = Path(self.settings['paths']['output-save'] / Path(f"oysterannotation{self.image_pointer}.png"))
         
         mask_image = Image.new(mode='1', color=0, size=img.size)
         mask_image.putdata(labels.flatten())
-        annotation = highlight_boundary(img, mask_image, (255, 0, 0), width=4)
+        annotation = highlight_boundary(img, mask_image, width=4)
         annotation.save(fp=annotation_fp)
         
         img.close()
@@ -574,10 +574,11 @@ class DevisionPage(Page):
         super().__init__(*args, **kwargs)
         
         self.egg_count_dict = {}
-        self.settings = SettingsWindow()
+        self.settings_obj = SettingsWindow()
+        self.settings = self.settings_obj.settings
         
         #This button resizes at runtime and there's no built in way to change a ttk widget's width
-        self.add_input(DropdownBox, text='Select a Model Below', dropdowns = ['Frog Counter - StarDist2D', 'Frog Classification - StarDist2D'])
+        self.model_select = self.add_input(DropdownBox, text='Select a Model Below', dropdowns = ['Egg Counter - StarDist2D', 'Four Embryo Classification - StarDist2D'])
         
         predict_button = self.add_settings(IOButton, text='Predict Egg Count', command=self.get_prediction)
         self.add_settings(IOButton, text='Export to Excel')
@@ -587,13 +588,58 @@ class DevisionPage(Page):
         predict_counter = self.add_output(Counter, text='Frog Egg Count')
         predict_button.bind_out(predict_counter)
     
-    def get_prediction(self):
-        if len(self.images) == 0:
-            return 0
+    def get_prediction(self, img_pointer=None):
+        if not img_pointer:
+            img_pointer = self.image_pointer
         
-        count, image = (0, None)
-        self.egg_count_dict[self.image_pointer] = count
-        self.set_prediction_image(self.image_pointer, image)
+        if len(self.images) == 0  or img_pointer >= len(self.images) or img_pointer < 0:
+            return 0
+                
+        model_str = self.model_select.value
+        if model_str == 'Four Embryo Classification - StarDist2D':
+            base_dir = 'models'
+            model_name = 'xenopus-4-class'
+        
+        model = StarDist2D(config=None, name=model_name, basedir=base_dir)
+        
+        img = Image.open(self.images.paths[img_pointer])
+        
+        if model.config.n_channel_in == 3:
+            img_arr = img.convert('RGB')
+        elif model.config.n_channel_in == 1:
+            img_arr = img.convert('L')
+        else:
+            raise TypeError("Wrong image format for model, incorrect color channels")
+        
+        img_arr = np.array(img_arr)
+        img_arr = normalize(img_arr, 1, 99.8, axis=(0, 1))
+        
+        labels, details = model.predict_instances(img_arr, n_tiles=model._guess_n_tiles(img_arr))
+        
+        annotation_fp = Path(self.settings['paths']['output-save'] / Path(f"devisionannotation{self.image_pointer}.png"))
+        
+        mask_image = Image.new(mode='L', color=0, size=img.size)
+        mask_image.putdata(labels.flatten())
+
+        if model.config.n_classes > 1:
+            class_dct = {k+1:v+1 for k, v in enumerate(details['class_id'])}
+        else:
+            class_dct = {}
+        
+        if 'class_id' in details:
+            classes = len(np.unique(details['class_id']))
+        else:
+            classes = 1
+            
+        annotation = highlight_boundary(img, mask_image, width=4, classes=classes, class_dct=class_dct)
+        if self.settings['toggles']['autosave-image-default']:
+            annotation.save(fp=annotation_fp)
+        
+        img.close()
+        
+        count = len(details['points'])
+        self.egg_count_dict[img_pointer] = count
+        self.set_prediction_image(img_pointer, annotation_fp)
         return count
     
     def open_settings(self):

@@ -111,7 +111,7 @@ class Inputable(TkIO):
     @property
     def value(self):
         if self.ready_flag:
-            return self.value['']
+            return self._value['']
         else:
             return None
     

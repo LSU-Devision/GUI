@@ -79,54 +79,84 @@ class ImageList(list):
         with open(file_path, 'w') as file:
             json.dump(obj=str_paths, fp=file, indent=2)
 
-def highlight_boundary(img: Image.Image, mask: Image.Image, color, width=1):
+def highlight_boundary(img: Image.Image, mask: Image.Image, width=1, classes=1, class_dct={}):
     """_summary_
 
     Args:
         img (_type_): _description_
     """
-    mask_arr = np.asarray(mask, dtype=np.uint8)
+    class_dct.update({0:0})
+    
+    colors = {
+        1: 'red',
+        2: 'blue',
+        3: 'green',
+        4: 'yellow'
+    }
+    
+    if len(class_dct) == 1 and classes > 1:
+        raise ValueError("Attempted to use multiclass without class mapping dictionary")
+    elif len(class_dct) == 1:
+        class_dct.update({1:1})
 
-    right_arr = np.roll(mask_arr, shift=1, axis=0)
-    left_arr = np.roll(mask_arr, shift=-1, axis=0)
-    up_arr = np.roll(mask_arr, shift=1, axis=1)
-    down_arr = np.roll(mask_arr, shift=-1, axis=1)
+    mask_arr = np.asarray(mask, dtype=np.uint8)
+    if len(class_dct) > 1:
+        f = lambda x: class_dct[x]
+        f = np.vectorize(f)
+        mask_arr = f(mask_arr)
     
-    shifts = [right_arr, left_arr, up_arr, down_arr]
-    xor_shifts = list(map(lambda x: np.logical_xor(x, mask_arr), shifts))
-    
-    boundary = reduce(lambda x, y: np.logical_or(x, y), xor_shifts)
-    for roll in range(width - 1):
-        right_arr = np.roll(boundary, shift=1, axis=0)
-        left_arr = np.roll(boundary, shift=-1, axis=0)
-        up_arr = np.roll(boundary, shift=1, axis=1)
-        down_arr = np.roll(boundary, shift=-1, axis=1)
-        shifts = [right_arr, left_arr, up_arr, down_arr]
-        boundary = reduce(lambda x, y: np.logical_or(x, y), shifts, boundary)
-    
-    
-    color_img = Image.new(mode='RGB', size=img.size, color=color)
-    
-    boundary_img = Image.new(mode='1', size=mask.size)
-    boundary_img.putdata(boundary.flatten())
-    
+    classes_ids = np.unique(list(class_dct.values()))
+    colors_imgs = {}
+    class_imgs = {}
+    for i in classes_ids:
+        if i == 0: continue
+        mask_i = (mask_arr == i).astype(np.int32)
+        colors_imgs[i] = (Image.new(mode='RGB', size=img.size, color=colors[i]))
+        class_imgs[i] = mask_i
+        
     highlighted_img = img.copy()
-    highlighted_img.paste(color_img, box=(0, 0), mask=boundary_img)
+
+    
+    for i in colors_imgs:
+        mask_arr = class_imgs[i]
+        right_arr = np.roll(mask_arr, shift=1, axis=0)
+        left_arr = np.roll(mask_arr, shift=-1, axis=0)
+        up_arr = np.roll(mask_arr, shift=1, axis=1)
+        down_arr = np.roll(mask_arr, shift=-1, axis=1)
+        
+        shifts = [right_arr, left_arr, up_arr, down_arr]
+        xor_shifts = list(map(lambda x: np.logical_xor(x, mask_arr), shifts))
+        
+        boundary = reduce(lambda x, y: np.logical_or(x, y), xor_shifts)
+        for roll in range(width - 1):
+            right_arr = np.roll(boundary, shift=1, axis=0)
+            left_arr = np.roll(boundary, shift=-1, axis=0)
+            up_arr = np.roll(boundary, shift=1, axis=1)
+            down_arr = np.roll(boundary, shift=-1, axis=1)
+            shifts = [right_arr, left_arr, up_arr, down_arr]
+            boundary = reduce(lambda x, y: np.logical_or(x, y), shifts, boundary)
+        
+        boundary_img = Image.new(mode='1', size=mask.size)
+        boundary_img.putdata(boundary.flatten())
+        
+        highlighted_img.paste(colors_imgs[i], box=(0, 0), mask=boundary_img)
     
     
-    
+
     return highlighted_img
     
         
 if __name__ == '__main__':
-    mask = Image.new(mode='1', size=(400, 400), color=0)
+    mask = Image.new(mode='L', size=(400, 400), color=0)
     img = Image.new(mode='RGB', size=(400, 400), color=(0, 0, 0))
     canvas = ImageDraw.Draw(img, mode='RGB')
     canvas.rectangle(((200, 200), (250, 250)), fill=(155, 0, 0), )
     
-    canvas_mask = ImageDraw.Draw(mask, mode='1')
+    canvas_mask = ImageDraw.Draw(mask, mode='L')
     canvas_mask.circle((200, 200), radius=20, fill=1)
+    canvas_mask.circle((300, 300), radius=15, fill=2)
     
     
-    plt.imshow(highlight_boundary(img, mask, DARKBLUE, width=4))
+    
+    plt.imshow(highlight_boundary(img, mask, width=4, classes=2, class_dct={1:1, 2:2}))
     plt.show()
