@@ -212,6 +212,7 @@ class DropdownBox(Inputable):
     def pop(self):
         current_option = super().pop()
         self.menu_var.set('None')
+        self.unready()
         return current_option
     
     def push(self, option):
@@ -220,6 +221,9 @@ class DropdownBox(Inputable):
         
         self.menu_var.set(option)
         self.value = option
+        
+        if option is not None:
+            self.ready()
     
 class IOButton(Outputable):
     def __init__(self, parent, command=lambda: None, command_kwargs={}, **kwargs):

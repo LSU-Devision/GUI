@@ -17,6 +17,7 @@ class OysterExcel():
         # Goes into the data tab
         # Mass is in grams unless otherwise specified
         self.df = pd.DataFrame(columns=[
+            'model',
             'group',
             'file-name',
             'size-class',
@@ -27,7 +28,9 @@ class OysterExcel():
             'total-number'
         ])
         
-        self.data_to_readable = {'group':'Group Number',
+        self.data_to_readable = {
+            'model':'Model',
+            'group':'Group Number',
             'file-name': 'File Name',
             'size-class': 'Size Class',
             'seed-tray-weight': 'Seed Tray Weight (g)',
@@ -41,12 +44,13 @@ class OysterExcel():
         # Goes into the statistics tab
         self.stats = None
         
-    def insert(self, *, group_number, file_name, size_class,
+    def insert(self, *, model, group_number, file_name, size_class,
                         seed_tray_weight, slide_weight,
                         slide_and_seed_weight, subsample_count):
         """Inserts a new value into the OysterExcel dataframe
 
         Args:
+            model (str): The name of the model used to predict the sample
             group_number (int): The group number of the group being inserted
             file_name (str): The file name where the group count was taken from
             size_class (str): The size class of the group being inserted
@@ -59,6 +63,7 @@ class OysterExcel():
         
         total_count = (subsample_count / (slide_and_seed_weight - slide_weight)) * seed_tray_weight
         insert_row = pd.DataFrame([[
+                model,
                 group_number,
                 file_name, 
                 size_class,
@@ -85,7 +90,7 @@ class OysterExcel():
         pd.options.mode.chained_assignment = None
 
         
-        insert_df = insert_df[['group', 'file-name', 'size-class', 'seed-tray-weight', 'slide-weight', 'slide-and-seed-weight', 'subsample-count']]
+        insert_df = insert_df[['model', 'group', 'file-name', 'size-class', 'seed-tray-weight', 'slide-weight', 'slide-and-seed-weight', 'subsample-count']]
         total_count = insert_df['subsample-count'] / (insert_df['slide-and-seed-weight'] - insert_df['slide-weight']) * insert_df['seed-tray-weight']
         insert_df['total-number'] = total_count
         

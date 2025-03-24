@@ -5,7 +5,8 @@
         "clear-excel-default" : false,
         "clear-output-default" : true,
         "autosave-image-default": false,
-        "create-dir-default": false
+        "create-dir-default": false,
+        "load-default": false
     },
 
     "theme":"darkly-style",

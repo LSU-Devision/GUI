@@ -428,6 +428,14 @@ class OysterPage(Page):
         self.settings_obj = SettingsWindow()
         self.settings = self.settings_obj.settings
         
+        self.model_select = self.add_input(DropdownBox, text="Model Select", dropdowns=["2-4mm model", "4-6mm model"])
+        model_path = self.settings['paths']['model-save']
+        if model_path:
+            if Path(model_path).stem == 'oyster_2-4mm':
+                self.model_select.push('2-4mm model')
+            elif Path(model_path).stem == 'oyster_4-6mm':
+                self.model_select.push('4-6mm model')
+        
         self.add_input(LabelBox, text='Group Number')
         self.add_input(LabelBox, text='Size Class')
         self.add_input(LabelBox, text='Seed Tray Weight (g)')
@@ -444,6 +452,7 @@ class OysterPage(Page):
         predict_counter = self.add_output(Counter, text='Oyster Brood Count')
         predict_button.bind_out(predict_counter)
         
+        
     #TODO: Convert this code to use some sort of image processing manager, more than ImageList
     def get_prediction(self, img_pointer=None):
         if not img_pointer:
@@ -452,14 +461,15 @@ class OysterPage(Page):
         if len(self.images) == 0  or img_pointer >= len(self.images) or img_pointer < 0:
             return 0
         
-        model_path = self.settings['paths']['model-save']
-        if model_path:
-            model_path = Path(model_path)
-            basedir = model_path.parent
-            name = model_path.name
-        else:
+        model_path = self.model_select.value
+        if model_path == '2-4mm model':
             basedir = 'models'
-            name = 'oyster_2-4mm'        
+            name = 'oyster_2-4mm'
+        elif model_path == '4-6mm model':
+            basedir = 'models'
+            name = 'oyster_4-6mm'
+        else:
+            return      
             
         model = StarDist2D(config=None, name=name, basedir=basedir)
         
@@ -519,7 +529,7 @@ class OysterPage(Page):
         if df.empty:
             return
         
-        df = df.rename(columns={0:'group', 1:'size-class', 2:'seed-tray-weight', 3:'slide-weight', 4:'slide-and-seed-weight', 5:'file-name', 6:'subsample-count'})
+        df = df.rename(columns={0:'model', 1:'group', 2:'size-class', 3:'seed-tray-weight', 4:'slide-weight', 5:'slide-and-seed-weight', 6:'file-name', 7:'subsample-count'})
         
         numeric_columns = ['seed-tray-weight', 'slide-weight', 'slide-and-seed-weight', 'subsample-count']
         for col in numeric_columns:
@@ -558,6 +568,10 @@ class OysterPage(Page):
             return
 
         self.excel_obj.read_excel(file_path)
+        
+        if self.settings['load-default']:
+            ### Implement reloading frame based on excel and image data
+            pass
     
     def clear_all_images(self):
         super().clear_all_images()
