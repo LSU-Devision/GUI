@@ -441,8 +441,8 @@ class OysterPage(Page):
         #The way this method works is unfortuante, it results both from Tkinter being a bad language (not being able to reassign master widgets) as well as
         #Python not having static typing
         predict_button = self.add_settings(IOButton, text='Predict Brood Count', command=self.get_prediction, disable_during_run=True)
-        self.add_settings(IOButton, text='Load Data from Excel', command=self.load_excel)
-        self.add_settings(IOButton, text='Export to Excel', command=self.to_excel)
+        self.add_settings(IOButton, text='Append to Excel File', command=self.load_excel)
+        self.add_settings(IOButton, text='Predict all and Export', command=self.to_excel)
         self.add_settings(IOButton, text='Settings', command=self.open_settings)
         
         predict_counter = self.add_output(Counter, text='Oyster Brood Count')
@@ -470,7 +470,8 @@ class OysterPage(Page):
             count, annotation = api.get()
 
         annotation_fp = Path('output') / Path(f"oysterannotation{self.image_pointer}.png")
-        annotation.save(fp=annotation_fp)
+        if self.settings['toggles']['autosave-image-default']:
+            annotation.save(fp=annotation_fp)
         
         self.brood_count_dict[img_pointer] = count
         self.set_prediction_image(img_pointer, annotation_fp)
@@ -526,10 +527,10 @@ class OysterPage(Page):
 
         self.excel_obj.read_excel(file_path)
         
-        if self.settings['toggles']['load-default']:
-            ### Implement reloading frame based on excel and image data
-            pass
-    
+        # if self.settings['toggles']['load-default']:
+        #     ### Implement reloading frame based on excel and image data
+        #     pass
+                
     def clear_all_images(self):
         super().clear_all_images()
         if self.settings['toggles']['clear-output-default']:

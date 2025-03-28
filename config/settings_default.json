@@ -1,11 +1,10 @@
 
 {
     "toggles":{
-        "excel-default": false,
+        "excel-default": true,
         "clear-excel-default" : false,
-        "clear-output-default" : false,
-        "autosave-image-default": false,
-        "load-default": false
+        "clear-output-default" : true,
+        "autosave-image-default": true
     },
 
     "theme":"darkly-style"

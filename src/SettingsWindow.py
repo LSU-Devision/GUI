@@ -75,11 +75,10 @@ class SettingsWindow(ttk.Frame):
             json_str = """
 {
     "toggles":{
-        "excel-default": false,
+        "excel-default": true,
         "clear-excel-default" : false,
-        "clear-output-default" : false,
-        "autosave-image-default": false,
-        "load-default": false
+        "clear-output-default" : true,
+        "autosave-image-default": true
     },
 
     "theme":"darkly-style"
@@ -131,7 +130,6 @@ class SettingsWindow(ttk.Frame):
         header_id = [
             'default',
             'style',    
-            'save',
             'version',
             'clear',            
         ]
@@ -140,7 +138,6 @@ class SettingsWindow(ttk.Frame):
         header = [
             'Defaults',
             'Style',
-            'File',
             'Version',
             'Reset/Clear'
         ]
@@ -184,7 +181,6 @@ class SettingsWindow(ttk.Frame):
             "Append new predictions to a new Excel file upon predicting",
             "Create new Excel file upon clearing images",
             "Automatically save images to output after predicting",
-            "Load excel data into GUI (if possible)"
         ]
         
         settings_id = [
@@ -192,7 +188,6 @@ class SettingsWindow(ttk.Frame):
             "clear-excel-default",
             'clear-output-default',
             'autosave-image-default',
-            'load-default'
         ]
         
         # Place the default settings into the tree
