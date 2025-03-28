@@ -4,7 +4,7 @@ config/settings_user.json
 config/ImageList*.json
 build/
 dist/
-gui/
+gui/vm.tar
 data/
 
 output/*

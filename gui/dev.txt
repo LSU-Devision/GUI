@@ -1,0 +1,1 @@
+docker image build goes here, .bat and .sh use zip name "vm.tar" and docker name "gui"
