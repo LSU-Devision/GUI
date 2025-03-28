@@ -6,6 +6,7 @@
 
 import tkinter.ttk as ttk
 import tkinter as tk
+import threading
 
 # This is an object reference to store immutable values, used for carrying variables between callbacks
 class MutImmutable():
@@ -226,16 +227,31 @@ class DropdownBox(Inputable):
             self.ready()
     
 class IOButton(Outputable):
-    def __init__(self, parent, command=lambda: None, command_kwargs={}, **kwargs):
+    def __init__(self, parent, command=lambda: None, command_kwargs={}, disable_during_run=False, **kwargs):
         super().__init__(parent)
         
         self.command = command
         self.command_kwargs = command_kwargs
         self.button = ttk.Button(self, command=self.run, **kwargs)
         self.button.pack(expand=True, fill=tk.BOTH, side=tk.BOTTOM, anchor=tk.CENTER)
-
+        self.disable=disable_during_run
+        
     def run(self):
-        self.value = self.command(**self.command_kwargs)
+        def subprocess():
+            try:
+                if self.disable == True:
+                    self.button.config(state='disabled')
+                    
+                self.value = self.command(**self.command_kwargs)
+                
+                if self.disable == True:
+                    self.button.config(state='normal')
+                    
+            except:
+                if self.disable == True:
+                    self.button.config(state='normal')
+                
+        threading.Thread(target=subprocess).start()
         
 class Counter(Outputable):
     def __init__(self, parent, **kwargs):
