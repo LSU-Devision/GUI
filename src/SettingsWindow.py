@@ -180,7 +180,7 @@ class SettingsWindow(ttk.Frame):
             "Export Excel file to output folder upon predicting",
             "Append new predictions to a new Excel file upon predicting",
             "Create new Excel file upon clearing images",
-            "Automatically save images to output after predicting",
+            "Automatically save images to annotations after predicting",
         ]
         
         settings_id = [

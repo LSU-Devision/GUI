@@ -28,6 +28,9 @@ import pandas as pd
 
 from model import ModelAPI
 
+if not os.path.exists('annotations'):
+    os.mkdir('annotations')
+
 INTIAL_DIR = Path.cwd()
 # There doesn't really exist a way to both resize a tkinter dialog and maintain a dynamically sized image
 # This is a motivating example for a website
@@ -442,7 +445,7 @@ class OysterPage(Page):
         #Python not having static typing
         predict_button = self.add_settings(IOButton, text='Predict Brood Count', command=self.get_prediction, disable_during_run=True)
         self.add_settings(IOButton, text='Append to Excel File', command=self.load_excel)
-        self.add_settings(IOButton, text='Predict all and Export', command=self.to_excel)
+        self.add_settings(IOButton, text='Predict all and Export', command=self.to_excel, disable_during_run=True)
         self.add_settings(IOButton, text='Settings', command=self.open_settings)
         
         predict_counter = self.add_output(Counter, text='Oyster Brood Count')
@@ -469,7 +472,7 @@ class OysterPage(Page):
             api = ModelAPI(model_path, img, classes)    
             count, annotation = api.get()
 
-        annotation_fp = Path('output') / Path(f"oysterannotation{self.image_pointer}.png")
+        annotation_fp = Path('annotations') / Path(f"oysterannotation{self.image_pointer}.png")
         if self.settings['toggles']['autosave-image-default']:
             annotation.save(fp=annotation_fp)
         
@@ -515,7 +518,7 @@ class OysterPage(Page):
         self.excel_obj.write_excel()
     
     
-    def load_excel(self):
+    def load_excel(self):        
         file_path = askopenfilename(
             initialdir=INTIAL_DIR / Path('excel'),
             title='Please select an excel file to open',
@@ -577,7 +580,7 @@ class DevisionPage(Page):
             api = ModelAPI(model_dir, img, classes)
             count, annotation = api.get()
         
-        annotation_fp = Path('output') / Path(f"devisionannotation{self.image_pointer}.png")
+        annotation_fp = Path('annotations') / Path(f"devisionannotation{self.image_pointer}.png")
         if self.settings['toggles']['autosave-image-default']:
             annotation.save(fp=annotation_fp)
         
