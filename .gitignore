@@ -1,0 +1,11 @@
+__pycache__/
+test/
+src/settings_user_proposal.json
+config/ImageList*.json
+annotated-images/
+data/
+build/
+dist/
+
+output/*
+!output/.gitkeep

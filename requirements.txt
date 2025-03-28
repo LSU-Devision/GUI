@@ -34,11 +34,13 @@ Markdown==3.6
 MarkupSafe==2.1.5
 matplotlib==3.9.0
 networkx==3.2.1
+Nuitka==2.6.7
 numba==0.59.1
 numpy==1.26.4
 oauthlib==3.2.2
 openpyxl==3.1.5
 opt-einsum==3.3.0
+ordered-set==4.1.0
 packaging==24.0
 pandas==2.2.3
 patsy==1.0.1
@@ -81,3 +83,4 @@ urllib3==2.2.1
 Werkzeug==3.0.3
 wrapt==1.16.0
 zipp==3.20.0
+zstandard==0.23.0
