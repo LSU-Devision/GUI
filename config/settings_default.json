@@ -3,18 +3,10 @@
     "toggles":{
         "excel-default": false,
         "clear-excel-default" : false,
-        "clear-output-default" : true,
+        "clear-output-default" : false,
         "autosave-image-default": false,
-        "create-dir-default": false,
         "load-default": false
     },
 
-    "theme":"darkly-style",
-
-    "paths":{
-        "model-save": null,
-        "excel-save": null,
-        "output-save": null
-    }
-
+    "theme":"darkly-style"
 }

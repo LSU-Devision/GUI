@@ -247,9 +247,10 @@ class IOButton(Outputable):
                 if self.disable == True:
                     self.button.config(state='normal')
                     
-            except:
+            except Exception as e:
                 if self.disable == True:
                     self.button.config(state='normal')
+                raise e
                 
         threading.Thread(target=subprocess).start()
         

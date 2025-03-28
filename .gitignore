@@ -2,11 +2,10 @@ __pycache__/
 test/
 config/settings_user.json
 config/ImageList*.json
-annotated-images/
-data/
 build/
 dist/
-docker/
+gui/
+data/
 
 output/*
 !output/.gitkeep

@@ -77,20 +77,12 @@ class SettingsWindow(ttk.Frame):
     "toggles":{
         "excel-default": false,
         "clear-excel-default" : false,
-        "clear-output-default" : true,
+        "clear-output-default" : false,
         "autosave-image-default": false,
-        "create-dir-default": false,
         "load-default": false
     },
 
-    "theme":"darkly-style",
-
-    "paths":{
-        "model-save": null,
-        "excel-save": null,
-        "output-save": null
-    }
-
+    "theme":"darkly-style"
 }"""
             with open(cls.DEFAULT_SETTINGS, 'w') as file:
                 file.write(json_str)
@@ -108,14 +100,6 @@ class SettingsWindow(ttk.Frame):
         
         Style.instance.theme_use(cls._settings['theme'][:-6])
         
-        
-        # Create a default output path if not initialized
-        if not cls._settings['paths']['output-save']:
-            cls._settings['paths']['output-save'] = path.join(cls.CWD, 'output')
-            
-        # Create a default excel path if not initialized
-        if not cls._settings['paths']['excel-save']:
-            cls._settings['paths']['excel-save'] = path.join(cls._settings['paths']['output-save'], 'data.xlsx')
         
         with open(cls.USER_SETTINGS, 'w') as file:
             json.dump(cls._settings, file, indent=2)
@@ -167,7 +151,6 @@ class SettingsWindow(ttk.Frame):
         
         # Inititalize the dropdown menu, these methods are separated for readability
         self._default_settings()
-        self._save_settings()
         self._style_settings()
         self._version_settings()
         self._clear_settings()
@@ -190,9 +173,7 @@ class SettingsWindow(ttk.Frame):
             # Do not allow the user to automaticly clear if the excel file isn't being automatically created
             if id=='clear-excel-default' and not self.cls._settings['toggles']['excel-default']:
                 return
-            
-            
-            
+        
             value = 'inactive' if self.cls._settings['toggles'][id] else 'active'
             self._settings_tree.set(id, column='status', value=value)
             self.cls._settings['toggles'][id] = not self.cls._settings['toggles'][id]
@@ -203,7 +184,6 @@ class SettingsWindow(ttk.Frame):
             "Append new predictions to a new Excel file upon predicting",
             "Create new Excel file upon clearing images",
             "Automatically save images to output after predicting",
-            "Automatically create file directories to store outputs",
             "Load excel data into GUI (if possible)"
         ]
         
@@ -212,7 +192,6 @@ class SettingsWindow(ttk.Frame):
             "clear-excel-default",
             'clear-output-default',
             'autosave-image-default',
-            'create-dir-default',
             'load-default'
         ]
         
@@ -224,81 +203,6 @@ class SettingsWindow(ttk.Frame):
         self._settings_tree.tag_configure('Toggleable', font='TkDefaultFont')
         self._settings_tree.tag_bind('Toggleable', '<Return>', toggle_setting)
         self._settings_tree.tag_bind('Toggleable', '<Double-1>', toggle_setting)
-        
-    
-    def _save_settings(self):
-        
-        # Callback function changing default model filepath and writing to settings
-        def model_select(event):
-            filedirectory = tk.filedialog.askdirectory(initialdir=SettingsWindow.CWD,
-                                                       title="Select a Model Directory")
-            if not filedirectory:
-                return
-            
-            self.cls._settings['paths']['model-save'] = filedirectory
-            self._settings_tree.set('model-save', column='status', value=filedirectory)
-
-            self.write_user_settings() 
-        
-        # Callback function changing default excel filepath and writing to settings
-        def excel_select(event):
-            filename = tk.filedialog.askopenfilename(initialdir = SettingsWindow.CWD, 
-                                                     title = "Select a File",
-                                                     filetypes=[("Excel files", '*.xlsx')])
-            if not filename:
-                return
-            
-            self.cls._settings['paths']['excel-save'] = filename
-            self._settings_tree.set('excel-save', column='status', value=filename)
-            
-            self.write_user_settings()
-        
-        # Callback function changing default output file directory and writing to settings
-        def output_select(event):
-            filedirectory = tk.filedialog.askdirectory(initialdir=SettingsWindow.CWD,
-                                                       title="Select a File Directory")
-            if not filedirectory:
-                return
-            
-            excel_path = self.cls._settings['paths']['excel-save']
-            
-            # If the excel file is contained in the output directory, move the default excel file location automatically when the output directory is moved
-            if self.cls._settings['paths']['output-save'] == path.dirname(excel_path):
-                self.cls._settings['paths']['excel-save'] = path.join(filedirectory, path.basename(excel_path))
-                self._settings_tree.set('excel-save', column='status', value=self.cls._settings['paths']['excel-save'])
-                
-            self.cls._settings['paths']['output-save'] = filedirectory
-            self._settings_tree.set('output-save', column='status', value=filedirectory)
-            
-            self.write_user_settings()      
-            
-        settings_text = [
-            "Select default model directory (should contain config.json file)",
-            "Select default excel file to import from on startup",
-            "Select an output directory to automatically export data to"
-            ]   
-        
-        settings_id = [
-            'model-save',
-            'excel-save',
-            'output-save'
-        ] 
-        
-        settings_commands = [
-            model_select,
-            excel_select,
-            output_select
-        ]
-
-        # Insert settings into tree
-        for x, id in zip(settings_text, settings_id): 
-            self._settings_tree.insert('save', 'end', iid=id, text=x, values='undefined', tags=id)
-
-        # Bind functions onto their respective settings
-        for id, func in zip(settings_id, settings_commands):
-            self._settings_tree.tag_configure(id, font='TkDefaultFont')
-            self._settings_tree.tag_bind(id, '<Return>', func)
-            self._settings_tree.tag_bind(id, '<Double-1>', func)
         
     def _version_settings(self):
         
@@ -399,46 +303,6 @@ class SettingsWindow(ttk.Frame):
             user_yes_no = WarningWindow(self, command_name).wait_for()
             self.bind('<<WarningDone>>', partial(master_func, warn_state=user_yes_no))
         
-        
-        # Callback rewrites default model path
-        def model_select(event):
-            warn_user('Clear Model', model_select_yes)
-            
-        def model_select_yes(event, warn_state):
-            if warn_state['']:
-                self.cls._settings['paths']['model-save'] = None
-                self.write_user_settings()
-            self.unbind_all('<<WarningDone>>')
-        
-        
-        def excel_select(event):
-            warn_user('Clear Excel', excel_select_yes)
-            
-        # Callback rewrites default excel path
-        def excel_select_yes(event, warn_state):
-            if warn_state['']:
-                if not self.cls._settings['paths']['output-save']:
-                    excel_path = path.join(SettingsWindow.CWD, 'output', 'data.xslx')
-                else:
-                    excel_path = path.join(self.cls._settings['paths']['output-save'], 'data.xlsx')
-            
-                self.cls._settings['paths']['excel-save'] = excel_path
-                self.write_user_settings()
-            self.unbind_all('<<WarningDone>>')
-
-            
-        
-        # Callback rewrites defaults output directory
-        def output_select(event):
-            warn_user('Clear Output', output_select_yes)
-        
-        def output_select_yes(event, warn_state):
-            if warn_state['']:
-                self.cls._settings['paths']['output-save'] = path.join(SettingsWindow.CWD, 'output')
-                self.write_user_settings()
-            self.unbind_all('<<WarningDone>>')
-        
-        
         # Resets all settings to default
         def reset_select(event):
             warn_user('Reset All Settings', reset_select_yes)
@@ -451,23 +315,14 @@ class SettingsWindow(ttk.Frame):
 
         
         settings_text = [
-            "Clear selected model",
-            "Clear excel file",
-            "Clear output folder",
             "Reset all settings"
         ]
         
         settings_id = [
-            'model-clear',
-            'excel-clear',
-            'output-clear',
             'settings-clear'
         ]
         
         settings_commands = [
-            model_select,
-            excel_select,
-            output_select,
             reset_select
         ]
         
@@ -503,21 +358,7 @@ class SettingsWindow(ttk.Frame):
         # Read toggleable option states from file and set
         for id in self.cls._settings['toggles']:
             value = 'active' if self.cls._settings['toggles'][id] else 'inactive'
-            self._settings_tree.set(id, column='status', value=value)
-        
-         # Create a default output path if not initialized
-        if not self.cls._settings['paths']['output-save']:
-            self.cls._settings['paths']['output-save'] = path.join(SettingsWindow.CWD, 'output')
-            
-        # Create a default excel path if not initialized
-        if not self.cls._settings['paths']['excel-save']:
-            self.cls._settings['paths']['excel-save'] = path.join(self.cls._settings['paths']['output-save'], 'data.xlsx')
-        
-        
-        # Read paths and set to tree
-        for id in self.cls._settings['paths']:
-            value = self.cls._settings['paths'][id]
-            self._settings_tree.set(id, column='status', value=value)            
+            self._settings_tree.set(id, column='status', value=value)     
     
         
     def write_user_settings(self):

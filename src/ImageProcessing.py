@@ -73,7 +73,7 @@ class ImageList(list):
     def _json_dump(self):
         str_paths = list(map(lambda x: str(x), self.paths))
         cwd = Path(os.getcwd())
-        file_path = cwd / Path('config') / Path(f'ImageList{self.name}.json')
+        file_path = cwd / Path('data') / Path(f'ImageList{self.name}.json')
         
         
         with open(file_path, 'w') as file:

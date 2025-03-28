@@ -3,10 +3,18 @@ from openpyxl import Workbook
 from openpyxl.utils.dataframe import dataframe_to_rows
 from datetime import datetime
 from scipy.stats import t
+from pathlib import Path
+import os
 
+if not os.path.exists('excel'):
+    os.mkdir('excel')
 
 class OysterExcel():
+    id = 0
     def __init__(self, *, file_name='oyster-data.xlsx', staff_name=''):
+        self.id = OysterExcel.id 
+        OysterExcel.id += 1
+        
         self.file_name = file_name
         
         formatted_datetime = datetime.now().strftime('%m/%d/%Y %I:%M:%S %p')
@@ -150,14 +158,13 @@ class OysterExcel():
 
             worksheet.column_dimensions[column_letter].width = max_width + 1
     
-    def write_excel(self, file_path=None):
+    def write_excel(self):
         """Writes this object into an excel file with three sheets:
            info, which contains date and staff fields;
            data, which contains data of all subsamples;
            and statistics, which contains aggregate data performed on subsamples
         """
-        if not file_path:
-            file_path = self.file_name
+        file_path = Path('excel') / Path(f'data{self.id}.xlsx')
         
         # Converting the internal dataframe names to human readable export
         print_df = self.df.copy()

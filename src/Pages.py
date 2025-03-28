@@ -347,7 +347,7 @@ class Page(ttk.Frame):
         """_summary_
         """
         file_path = askopenfilename(
-                                initialdir=INTIAL_DIR,
+                                initialdir=INTIAL_DIR / Path('images'),
                                 title='Please select an image',
                                 filetypes=[('Images', '*.jpg *.JPG *.jpeg *.JPEG *.png *.PNG *.tif *.tiff')]
                             )
@@ -431,12 +431,6 @@ class OysterPage(Page):
         self.settings = self.settings_obj.settings
         
         self.model_select = self.add_input(DropdownBox, text="Model Select", dropdowns=["2-4mm model", "4-6mm model"])
-        model_path = self.settings['paths']['model-save']
-        if model_path:
-            if Path(model_path).stem == 'oyster_2-4mm':
-                self.model_select.push('2-4mm model')
-            elif Path(model_path).stem == 'oyster_4-6mm':
-                self.model_select.push('4-6mm model')
         
         self.add_input(LabelBox, text='Group Number')
         self.add_input(LabelBox, text='Size Class')
@@ -446,7 +440,7 @@ class OysterPage(Page):
         
         #The way this method works is unfortuante, it results both from Tkinter being a bad language (not being able to reassign master widgets) as well as
         #Python not having static typing
-        predict_button = self.add_settings(IOButton, text='Predict Brood Count', command=self.get_prediction)
+        predict_button = self.add_settings(IOButton, text='Predict Brood Count', command=self.get_prediction, disable_during_run=True)
         self.add_settings(IOButton, text='Load Data from Excel', command=self.load_excel)
         self.add_settings(IOButton, text='Export to Excel', command=self.to_excel)
         self.add_settings(IOButton, text='Settings', command=self.open_settings)
@@ -470,15 +464,12 @@ class OysterPage(Page):
         elif model_path == '4-6mm model':
             model_path = Path('models') / Path('oyster_4-6mm')
             classes = 1
-        else:
-            return      
         
-        with Image.open(self.images.path[self.image_pointer]) as img:  
-            api = ModelAPI(model_path, img, classes)
-                
-        count, annotation = api.get()
+        with Image.open(self.images.paths[self.image_pointer]) as img:  
+            api = ModelAPI(model_path, img, classes)    
+            count, annotation = api.get()
 
-        annotation_fp = Path(self.settings['paths']['output-save'] / Path(f"oysterannotation{self.image_pointer}.png"))
+        annotation_fp = Path('output') / Path(f"oysterannotation{self.image_pointer}.png")
         annotation.save(fp=annotation_fp)
         
         self.brood_count_dict[img_pointer] = count
@@ -520,34 +511,16 @@ class OysterPage(Page):
             df[col] = pd.to_numeric(df[col])
 
         self.excel_obj.extend(df)
-        
-        file_path = self.settings['paths']['output-save']
-        if file_path:
-            if not os.path.exists(Path(file_path).parent) and self.settings['toggles']['create-dir-default']:
-                os.makedirs(Path(file_path).parent)
-                self.excel_obj.write_excel(file_path + '/data.xlsx')
-                
-            elif os.path.exists(Path(file_path).parent):
-                self.excel_obj.write_excel(file_path=file_path + '/data.xlsx')
-                
-            else:
-                raise FileNotFoundError('The given output directory does not exist, try creating the directories or enabling create directory by default in settings')
-        else:
-            raise FileNotFoundError('No output directory selected, consider changing the location in settings')
+        self.excel_obj.write_excel()
     
     
     def load_excel(self):
-        default_file_path = self.settings['paths']['excel-save']
-        if default_file_path and os.path.exists(default_file_path):
-            file_path = default_file_path
-            
-        else:
-            file_path = askopenfilename(
-                initialdir=INTIAL_DIR,
-                title='Please select an excel file to open',
-                filetypes=[('Excel Files', '*.xlsx *.xlsb *.xltx *.xltm *.xls *.xlt *.ods')]
-            )
-            
+        file_path = askopenfilename(
+            initialdir=INTIAL_DIR / Path('excel'),
+            title='Please select an excel file to open',
+            filetypes=[('Excel Files', '*.xlsx *.xlsb *.xltx *.xltm *.xls *.xlt *.ods')]
+        )
+        
         if Path(file_path).suffix not in '.xlsx .xlsb .xltx .xltm .xls .xlt .ods'.split(' '):
             return
 
@@ -583,7 +556,7 @@ class DevisionPage(Page):
         self.add_settings(IOButton, text='Settings', command=self.open_settings)
         self.add_settings(IOButton, text='Help')
         
-        predict_counter = self.add_output(Counter, text='Frog Egg Count')
+        predict_counter = self.add_output(Counter, text='Model Count')
         predict_button.bind_out(predict_counter)
     
     def get_prediction(self, img_pointer=None):
@@ -603,7 +576,7 @@ class DevisionPage(Page):
             api = ModelAPI(model_dir, img, classes)
             count, annotation = api.get()
         
-        annotation_fp = Path(self.settings['paths']['output-save'] / Path(f"devisionannotation{self.image_pointer}.png"))
+        annotation_fp = Path('output') / Path(f"devisionannotation{self.image_pointer}.png")
         if self.settings['toggles']['autosave-image-default']:
             annotation.save(fp=annotation_fp)
         
