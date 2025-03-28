@@ -1,11 +1,12 @@
 __pycache__/
 test/
-src/settings_user_proposal.json
+config/settings_user.json
 config/ImageList*.json
 annotated-images/
 data/
 build/
 dist/
+docker/
 
 output/*
 !output/.gitkeep

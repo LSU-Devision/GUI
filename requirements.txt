@@ -34,7 +34,6 @@ Markdown==3.6
 MarkupSafe==2.1.5
 matplotlib==3.9.0
 networkx==3.2.1
-Nuitka==2.6.7
 numba==0.59.1
 numpy==1.26.4
 oauthlib==3.2.2
@@ -49,8 +48,6 @@ pillow==11.1.0
 protobuf==3.19.6
 pyasn1==0.6.0
 pyasn1_modules==0.4.0
-pyinstaller==6.7.0
-pyinstaller-hooks-contrib==2024.6
 pyparsing==3.1.2
 python-dateutil==2.9.0.post0
 pytz==2024.2
