@@ -1,0 +1,100 @@
+Got matlab installed, changed environment to vscode because hdmi change and code changes 
+did not fix window error. 
+
+notes from sima meeting: 
+
+clint is in contact with dr wolenski. they should speak with each other since clint has repository access. 
+
+is it possible our current version is missing something? The version was acquired from pennington, which should have the latest. 
+
+The version sent from steve should be good. 
+
+We have access to github, and clint also has this. 
+If he doesn't have it, Alex Dunkle, a grad student here, should have a lot of the code available, as well as coding expertise. 
+
+He also did a lot of the testing and has access to the repository. 
+
+The portion which handles cleaning the mesh (it has holes involved) there are about 1/10 of avatars that might get 
+screwed up passing through the mesh. 
+
+There was a generic idea that under a mesh, situations like holes should be filled in. 
+When the code was written and tested on avatars, it would sometiems get confused. Under testing, 
+there were discovered some "edge cases" unconsidered like triangles which would flip on top of each other exactly,
+which does not create a clean, closeable convex surface. This would confuse the program. 
+Another code was written to remove the possibility of very rare "crazy cases" involving overlaps, and somehow, 
+a strange intersections. 
+This would widen the hole but there would be a nicely-closed boundary. 
+
+Around this time, Sima left. Rooms for improvement include: 
+- Taking this to a python base so that the project can be continued sustainably with easier transitions to newer
+coders. Also python has a lot of nice libraries. 
+- Sima can help in that as we go through each function, we can message her and she'll (at least dimonthly) explain
+the function of a function. The syntax is usually not inscrutable but a lot of stuff handling the work are things
+that would normally be handled by a python library. 
+It's best to start with places that the code runs easily and discover meshes where the code breaks, 
+including hopefully more creative and less "band-aid" solutions. 
+
+With a single avatar we could get a lot transfered. 
+There was a "die-q" company that had very clean meshes. 
+A lot of the raw meshes from without can have weird stuff.
+Five or so "conference papers" could be made for one of these examples, or a longer paper. 
+
+Again, dr. wolenski would be a great way to meet mr clint. 
+
+Sima will contact people on her own end, including marcelline. 
+
+One clean mesh alone should be enough to transfer the base of the code, 
+which should be simple syntax-to-syntax conversions and fair to visualize. 
+
+Given the side of our team, responsibilities ought to be divided. 
+Not in terms of examples but types of tasks. 
+
+Many of the meshes will have multiple layers.
+
+try to find weird detections made by the programs we use, 
+for example "false crotches" underneath the ribcage of a human model. 
+this may involve a lot of trial and error using python visualization softwares. 
+
+try to write on a way that makes other people citing us readily doable. 
+
+Will the code or github tell us where to make changes? 
+Publications should be our point of access. 
+There's one that defines the sites and explains how we take circumferences, 
+there's another one on cleaning the mesh. 
+
+"Anthropometry" for body circumference measurements. 
+
+The original versions of the paper should tell us the most about what is "going on" in defining parts,
+since many parts were pared down later on. 
+
+the "young children" one should be skipped
+
+There's an interesting paper right afterwards on the github that may be useful. 
+
+Sima also mentions a paper regarding babies sucking on bottles that she worked on. 
+
+A different paper (4) was affected by patient obesity. 
+Also sima's mesh is in one of the pages lol. 
+One of the pages also has a pseudocode that we can use and a discussion on algorithms that handle mesh ruptures. 
+
+A rupture in a triangle, or it sticking out, can confuse the surface a lot.
+ People don't have two-dimensional spurs sticking out of their body. 
+
+Ideally, all of the meshes should be the same "rotation"
+ according to the right hand curl rule from linear algebra.
+
+Every face has three corners. The order of the corners should always either be clockwise or counter clockwise, 
+otherwise there will be problems, particularly with "subtracting volume space" D:
+
+A friend's body parts are meshed in a diagram with more definitions, with explanations
+of defining volume and surface area. 
+
+Triangles which are well-shaped should have equal sides. 
+
+"spirals" created on limbs are also something worth avoiding, and ways have been infented to avoid them. 
+There's also the top of the head, the soles of the feet, the arms, the crotch, which create spirals due
+to shadows. 
+
+This is from the "hole filling" paper. 
+
+Finding the tip of the nose was also given an explanation. 
