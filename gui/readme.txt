@@ -1,11 +1,12 @@
 How to run:
     Windows:
         To run the program, please execute run.bat as administrator. 
-        If you don't have docker installed, this step will do so for you, and you will be prompted to restart your computer
-        This is a one time event
+        If you don't have docker installed, this step will do so for you, and you will be prompted to restart your computer, this is a one time event
         
     Linux or Mac:
-        To run the program, please give run.sh permissions by executing 'chmod +x run.sh', then execute './run.sh'. If you don't have docker installed this step will do so for you
+        To run the program, please give run.sh permissions by executing 'chmod +x run.sh', then execute './run.sh'. 
+        If you don't have docker installed this step will do so for you, this is a one time event
+        
 
 Guide:
     - Please place any images you wish to enter into the program into the images folder contained in this folder

@@ -542,7 +542,8 @@ class OysterPage(Page):
     def open_settings(self):
         Settings(self)
         
-        
+#TODO: Add group number
+#TODO: Add temperature    
 class DevisionPage(Page):
     def __init__(self, *args, **kwargs):
         self.name = "Devision"

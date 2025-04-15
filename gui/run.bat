@@ -11,9 +11,27 @@ set "VCXSRV_PATH=C:\Program Files\VcXsrv\vcxsrv.exe"
 set "VCXSRV_CONFIG_PATH=%USERPROFILE%\vcxsrv.config"
 set "INSTALLER_PATH=vcxsrv_installer.exe"
 
+
+:: Check if Hyper-V is installed
+systeminfo | find "Hyper-V Requirements: A hypervisor has been detected" >nul 2>&1
+if %errorlevel% neq 0 (
+    echo Hyper-V/WSL2 required for Docker, installing Hyper-V now
+    
+    :: Enable Hyper-V and required Windows features
+    dism.exe /online /enable-feature /featurename:Microsoft-Hyper-V-All /all /norestart
+    dism.exe /online /enable-feature /featurename:Containers /all /norestart
+    
+    echo Hyper-V installation complete! A restart is required.
+    echo Restarting in 10 seconds... Press Ctrl+C to cancel.
+    timeout /t 10
+    exit
+) else (
+    echo Hyper-V is already enabled.
+)
+
 :: Check if VcXsrv is installed
 if exist "%VCXSRV_PATH%" (
-    echo Path exists
+    echo VcXsrv Path exists
 ) else (
     echo VcXsrv is not installed, downloading now...
 
@@ -85,14 +103,15 @@ if %errorlevel% neq 0 (
 echo Running Program...
 docker run --rm ^
     -e DISPLAY=%DISPLAY% ^
-    -v "%CD%\output:/app/excel" ^
+    -v "%CD%\excel:/app/excel" ^
     -v "%CD%\config:/app/config" ^
     -v "%CD%\images:/app/images" ^
-    -v "%CD%\images:/app/annotations/" ^
+    -v "%CD%\annotations:/app/annotations/" ^
     %IMAGE_NAME%
 
 echo Shutting down...
 taskkill /IM vcxsrv.exe /F >nul 2>&1
+taskkill /IM "Docker Desktop.exe" /F >nul 2>&1
 
 shutdown -a >nul 2>&1
 del "%INSTALLER_PATH%"

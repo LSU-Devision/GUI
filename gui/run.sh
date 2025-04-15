@@ -32,4 +32,4 @@ else
 fi
 
 xhost +local:docker
-docker run --rm -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix  -v "$(pwd)/output":/app/excel -v "$(pwd)/config":/app/config -v "$(pwd)/images":/app/images -v "$(pwd)/images":/app/annotations/ gui
+docker run --rm -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix  -v "$(pwd)/excel":/app/excel -v "$(pwd)/config":/app/config -v "$(pwd)/images":/app/images -v "$(pwd)/annotations":/app/annotations/ gui
