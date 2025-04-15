@@ -10,3 +10,10 @@ data/*
 
 output/*
 !output/.gitkeep
+
+.venv
+.idea
+.vscode
+.pytest_cache
+.DS_Store
+.env
