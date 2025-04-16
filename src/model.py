@@ -51,7 +51,7 @@ class ModelAPI:
         
     def _predict(self):
         n_tiles = self._model._guess_n_tiles(self._arr)
-        lbls, details = self._model.predict_instances(self._arr, n_tiles=n_tiles)
+        lbls, details = self._model.predict_instances(self._arr, n_tiles=n_tiles, axes='YXC')
         
         if self._nclasses > 1:
             class_dct = {k+1:v+1 for k, v in enumerate(details['class_id'])}

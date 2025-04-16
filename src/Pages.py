@@ -28,6 +28,15 @@ import pandas as pd
 
 from model import ModelAPI
 
+import tempfile
+import cv2
+try:
+    from picamera import PiCamera
+    from picamera.array import PiRGBArray
+except ImportError:
+    PiCamera = None
+    PiRGBArray = None
+
 if not os.path.exists('annotations'):
     os.mkdir('annotations')
 
@@ -101,14 +110,13 @@ class Page(ttk.Frame):
         self.settings_frame_kwargs = settings_frame_kwargs
         
         # Grid styling options, giving more weight to the image subframes
-        for row in [0, 2, 3]:
-            self.rowconfigure(row, weight=1)
-            
-        for row in [1]:
-            self.rowconfigure(row, weight=10, minsize=600)
-        
+        # Set minsize and weights for all rows to prevent overlap and hiding
+        self.rowconfigure(0, weight=3, minsize=60)   # top_frame
+        self.rowconfigure(1, weight=2, minsize=200)  # images_frame
+        self.rowconfigure(2, weight=3, minsize=60)   # output_frame
+        self.rowconfigure(3, weight=3, minsize=60)   # settings_frame
         for column in range(0,1):
-            self.columnconfigure(column, weight=1)  
+            self.columnconfigure(column, weight=1)
         
         self.image_pointer = 0
         
@@ -126,37 +134,50 @@ class Page(ttk.Frame):
         self.images = ImageList(iterable=true_json, name=f'True{self.name}')
         self.prediction_images = ImageList(iterable=pred_json, name=f'Pred{self.name}')
         
-        # Manual setup for images frame, this is done as some of the functionality is very specific to images frame
-        # and doesn't need to be modularized for our use case
-        
+        # Store original PIL images for resizing
+        self._original_images = []
+        self._original_pred_images = []
+        # Manual setup for images frame
         self.images_frame = ttk.Frame(self)
         self.images_frame_kwargs = {
             'padx':5,
             'pady':10
         }
+        # --- Button frame for centering image buttons ---
+        self.images_frame.button_frame = ttk.Frame(self.images_frame)
+        self.images_frame.button_frame.grid(row=0, column=0, columnspan=3, sticky='EW', **self.images_frame_kwargs)
+        self.images_frame.button_frame.columnconfigure(0, weight=1)
+        self.images_frame.button_frame.columnconfigure(1, weight=1)
+        # Create buttons with same width
+        button_width = 20
+        self.images_frame.file_select = ttk.Button(self.images_frame.button_frame, text='Select an image', command=self.add_image, style='Image.TButton', width=button_width)
+        self.images_frame.take_image = ttk.Button(self.images_frame.button_frame, text='Take an image', command=self.take_image, style='Image.TButton', width=button_width)
+        self.images_frame.file_select.grid(row=0, column=0, padx=5, pady=0, sticky='EW')
+        self.images_frame.take_image.grid(row=0, column=1, padx=5, pady=0, sticky='EW')
+        # --- End button frame ---
         self.images_frame.left_window = ttk.Label(self.images_frame, relief='groove', image=self.black_photoimage)
         self.images_frame.right_window = ttk.Label(self.images_frame, relief='groove', image=self.black_photoimage)
         self.images_frame.next_button = ttk.Button(self.images_frame, text='Next', command=self.next)
         self.images_frame.prev_button = ttk.Button(self.images_frame, text='Prev', command=self.prev)
         self.images_frame.counter = ttk.Label(self.images_frame, text='-/0', relief='groove', anchor='center')
-        self.images_frame.file_select = ttk.Button(self.images_frame, text='Select an image', command=self.add_image)
         self.images_frame.clear_images = ttk.Button(self.images_frame, text='Clear all images', command=self.clear_all_images)
-        
-        self.images_frame.left_window.grid(row=1, column=0, rowspan=2, sticky='NSEW', **self.images_frame_kwargs)
-        self.images_frame.right_window.grid(row=1, column=2, rowspan=2, sticky='NSEW', **self.images_frame_kwargs)
+        self.images_frame.left_window.grid(row=1, column=0, rowspan=2, sticky='', **self.images_frame_kwargs)
+        self.images_frame.right_window.grid(row=1, column=2, rowspan=2, sticky='', **self.images_frame_kwargs)
         self.images_frame.prev_button.grid(row=3, column=0, sticky='', **self.images_frame_kwargs)
         self.images_frame.next_button.grid(row=3, column=2, sticky='', **self.images_frame_kwargs)
         self.images_frame.counter.grid(row=3, column=1, sticky='EW', **self.images_frame_kwargs)
-        self.images_frame.file_select.grid(row=0, column=1, sticky='EW', **self.images_frame_kwargs)
+        # Remove old button placements (file_select, take_image)
+        # self.images_frame.file_select.grid(row=0, column=1, sticky='EW', **self.images_frame_kwargs)
+        # self.images_frame.take_image.grid(row=0, column=2, sticky='EW', **self.images_frame_kwargs)
         self.images_frame.clear_images.grid(row=2, column=1, stick='EW', **self.images_frame_kwargs)
-        
         for row in [0,3]:
-            self.images_frame.rowconfigure(row, weight=1)
+            self.images_frame.rowconfigure(row, weight=1, minsize=50)
         for row in [1, 2]:
-            self.images_frame.rowconfigure(row, weight=2)
-        
+            self.images_frame.rowconfigure(row, weight=2, minsize=50 if row == 2 else 0)
         self.images_frame.columnconfigure(0, weight=1)
         self.images_frame.columnconfigure(2, weight=1)
+        # Bind resize event to images_frame
+        self.images_frame.bind('<Configure>', self._on_images_frame_resize)
         
         # Placing the frames onto the page
         
@@ -356,9 +377,12 @@ class Page(ttk.Frame):
                             )
         if file_path == () or Path(file_path).suffix not in ['.jpg', '.JPG', '.jpeg', '.png', '.PNG', '.tif', '.tiff']:
             return
-                
+        # Store original PIL image
+        pil_img = Image.open(file_path)
+        self._original_images.append(pil_img.copy())
         self.images.append(file_path)
         self.prediction_images.append(None)
+        self._original_pred_images.append(None)
         self.update_image(file_path)
         
     def update_image(self, file_path):
@@ -372,38 +396,60 @@ class Page(ttk.Frame):
         self.file_name_dict[self.image_pointer] = Path(file_path).name
         self.write_frame()
         
-        self.set_image()        
-        
         
     def set_image(self):
-        """_summary_
-        """
-        current_image = self.images[self.image_pointer]
-        current_prediction_image = self.prediction_images[self.image_pointer]
-        
-        self.images_frame.left_window.config(image=current_image)
+        """Update the displayed images, resizing to fit the label size, keeping aspect ratio, and centering."""
+        pil_img = None
+        pil_pred_img = None
+        if self._original_images and self.image_pointer < len(self._original_images):
+            pil_img = self._original_images[self.image_pointer]
+        if self._original_pred_images and self.image_pointer < len(self._original_pred_images):
+            pil_pred_img = self._original_pred_images[self.image_pointer]
+        lw = self.images_frame.left_window
+        rw = self.images_frame.right_window
+        lw_w = lw.winfo_width() or THUMBNAIL_SIZE[0]
+        lw_h = lw.winfo_height() or THUMBNAIL_SIZE[1]
+        rw_w = rw.winfo_width() or THUMBNAIL_SIZE[0]
+        rw_h = rw.winfo_height() or THUMBNAIL_SIZE[1]
+        def resize_and_center(pil_img, box_w, box_h):
+            if pil_img is None:
+                return self.black_photoimage
+            img_w, img_h = pil_img.size
+            scale = min(box_w / img_w, box_h / img_h)
+            new_w = int(img_w * scale)
+            new_h = int(img_h * scale)
+            img_resized = pil_img.copy().resize((new_w, new_h), Image.LANCZOS)
+            # Create black background
+            bg = Image.new('RGB', (box_w, box_h), (0, 0, 0))
+            # Center the image
+            x = (box_w - new_w) // 2
+            y = (box_h - new_h) // 2
+            bg.paste(img_resized, (x, y))
+            return PhotoImage(bg)
+        # Left image
+        lw_img = resize_and_center(pil_img, lw_w, lw_h)
+        lw.image = lw_img
+        lw.config(image=lw_img)
+        # Right image
+        rw_img = resize_and_center(pil_pred_img, rw_w, rw_h)
+        rw.image = rw_img
+        rw.config(image=rw_img)
         self.images_frame.counter.config(text=f'{self.image_pointer + 1}/{len(self.images)}')
-
-        self.images_frame.right_window.config(image=current_prediction_image)
     
     def set_prediction_image(self, prediction_image_pointer, file_path):
-        """_summary_
-
-        Args:
-            prediction_image_pointer (_type_): _description_
-            file_path (_type_): _description_
-        """
         if len(self.images) == 0:
             return
-        
         assert prediction_image_pointer >= 0 and prediction_image_pointer <= len(self.images) - 1
         self.image_pointer = prediction_image_pointer
+        # Store original PIL prediction image
+        pil_pred_img = Image.open(file_path)
+        if len(self._original_pred_images) <= prediction_image_pointer:
+            self._original_pred_images.extend([None] * (prediction_image_pointer + 1 - len(self._original_pred_images)))
+        self._original_pred_images[prediction_image_pointer] = pil_pred_img.copy()
         self.prediction_images[prediction_image_pointer] = file_path
         self.set_image()
     
     def clear_all_images(self):
-        """_summary_
-        """
         self.image_pointer = 0
         self.images_frame.right_window.config(image=self.black_photoimage)
         self.images_frame.left_window.config(image=self.black_photoimage)
@@ -411,18 +457,164 @@ class Page(ttk.Frame):
         self.top_frame_saves = {}
         self.output_frame_saves = {}
         self.prediction_images = ImageList(name=f'Pred{self.name}')
-        
+        self._original_images = []
+        self._original_pred_images = []
         widgets = self.top_frame_widgets
         for key in self.top_frame_widgets:
             widgets[key].push(None)
-        
         widgets = self.output_frame_widgets
         for key in self.output_frame_widgets:
             widgets[key].push(None)
-        
         self.images_frame.counter.config(text='-/0')
 
-    
+    def _on_images_frame_resize(self, event):
+        """Handle resizing of the images_frame to update image sizes."""
+        self.set_image()
+
+    def take_image(self):
+        """Open a window with a live camera feed and capture/cancel buttons."""
+        self._open_camera_window()
+
+    def _open_camera_window(self):
+        import threading
+        import tkinter.messagebox as mb
+        from PIL import Image, ImageTk
+        import tkinter as tk
+        # Camera setup
+        cap = cv2.VideoCapture(0)
+        if not cap.isOpened():
+            mb.showerror('Camera Error', 'Could not open webcam')
+            return
+        # Try to set to max resolution
+        cap.set(cv2.CAP_PROP_FRAME_WIDTH, 9999)
+        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 9999)
+        native_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        native_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        aspect = native_width / native_height if native_height != 0 else 4/3
+        # Get screen size and set initial window size
+        root = self.winfo_toplevel()
+        screen_w = root.winfo_screenwidth()
+        screen_h = root.winfo_screenheight()
+        max_preview_w = int(screen_w * 0.8)
+        max_preview_h = int(screen_h * 0.7)
+        if max_preview_w / aspect <= max_preview_h:
+            preview_w = max_preview_w
+            preview_h = int(max_preview_w / aspect)
+        else:
+            preview_h = max_preview_h
+            preview_w = int(max_preview_h * aspect)
+        button_area = 60
+        extra_margin = 30
+        total_height = preview_h + button_area + extra_margin
+        # Create a new Toplevel window
+        cam_win = tk.Toplevel(self)
+        cam_win.title('Camera')
+        cam_win.geometry(f'{preview_w}x{total_height}')
+        cam_win.minsize(320, 240 + button_area + extra_margin)
+        cam_win.resizable(True, True)
+        # Camera frame
+        video_frame = ttk.Label(cam_win)
+        video_frame.pack(padx=10, pady=(10, 0), fill=tk.BOTH, expand=True)
+        # Buttons
+        btn_frame = ttk.Frame(cam_win)
+        btn_frame.pack(pady=(10, 20))
+        capture_btn = ttk.Button(btn_frame, text='Capture')
+        cancel_btn = ttk.Button(btn_frame, text='Cancel')
+        capture_btn.grid(row=0, column=0, padx=20)
+        cancel_btn.grid(row=0, column=1, padx=20)
+        btn_frame.grid_columnconfigure(0, weight=1)
+        btn_frame.grid_columnconfigure(1, weight=1)
+        # State
+        self._camera_running = True
+        self._camera_frame = None
+        self._last_preview_size = (preview_w, preview_h)
+        def update_frame():
+            if not self._camera_running:
+                return
+            ret, frame = cap.read()
+            if ret:
+                self._camera_frame = frame.copy()
+                # For preview, resize to fit window/aspect
+                w, h = self._last_preview_size
+                preview_img = frame.copy()
+                preview_img = cv2.cvtColor(preview_img, cv2.COLOR_BGR2RGB)
+                preview_pil = Image.fromarray(preview_img)
+                preview_pil = preview_pil.resize((w, h))
+                imgtk = ImageTk.PhotoImage(image=preview_pil)
+                video_frame.imgtk = imgtk
+                video_frame.config(image=imgtk)
+            cam_win.after(20, update_frame)
+        def on_resize(event):
+            # Calculate new preview size based on window size and aspect ratio
+            win_w = cam_win.winfo_width() - 20  # account for padding
+            win_h = cam_win.winfo_height() - button_area - extra_margin - 20
+            if win_w / aspect <= win_h:
+                new_w = max(1, win_w)
+                new_h = max(1, int(win_w / aspect))
+            else:
+                new_h = max(1, win_h)
+                new_w = max(1, int(win_h * aspect))
+            self._last_preview_size = (new_w, new_h)
+        cam_win.bind('<Configure>', on_resize)
+        def on_capture():
+            if self._camera_frame is not None:
+                # Save to temp file at native resolution
+                with tempfile.NamedTemporaryFile(suffix='.jpg', delete=False) as tmp:
+                    img_path = tmp.name
+                    # Save the full-res frame
+                    cv2.imwrite(img_path, self._camera_frame)
+                # Now the file is closed, safe to open
+                pil_img = Image.open(img_path)
+                self._original_images.append(pil_img.copy())
+                pil_img.close()
+                self.images.append(img_path)
+                self.prediction_images.append(None)
+                self._original_pred_images.append(None)
+                self.update_image(img_path)
+                self.set_image()  # Immediately update the display to the new image
+            cleanup()
+        def on_cancel():
+            cleanup()
+        def cleanup():
+            self._camera_running = False
+            cap.release()
+            cam_win.destroy()
+        capture_btn.config(command=on_capture)
+        cancel_btn.config(command=on_cancel)
+        cam_win.protocol('WM_DELETE_WINDOW', on_cancel)
+        update_frame()
+
+def is_raspberry_pi():
+    """
+    Check if the current system is running on any Raspberry Pi hardware,
+    regardless of OS version or distribution.
+    """
+    try:
+        # Method 1: Check for Raspberry Pi in /proc/cpuinfo
+        with open('/proc/cpuinfo', 'r') as f:
+            cpuinfo = f.read().lower()
+        if any(x in cpuinfo for x in ['raspberry pi', 'bcm2708', 'bcm2709', 'bcm2710', 'bcm2711', 'bcm2712']):
+            return True
+        # Method 2: Check for Raspberry Pi model file
+        try:
+            with open('/sys/firmware/devicetree/base/model', 'r') as f:
+                model = f.read()
+                if 'raspberry pi' in model.lower():
+                    return True
+        except:
+            pass
+        # Method 3: Check for specific hardware identifiers
+        try:
+            with open('/proc/device-tree/model', 'r') as f:
+                model = f.read()
+                if 'raspberry pi' in model.lower():
+                    return True
+        except:
+            pass
+        return False
+    except:
+        return False
+
 class OysterPage(Page):
     def __init__(self, *args, **kwargs):
         self.name = "Oyster"
@@ -441,19 +633,33 @@ class OysterPage(Page):
         self.add_input(LabelBox, text='Slide Weight (g)')
         self.add_input(LabelBox, text='Slide + Seed Weight (g)')
         
-        #The way this method works is unfortuante, it results both from Tkinter being a bad language (not being able to reassign master widgets) as well as
-        #Python not having static typing
+        # Add error label above Predict Brood Count button
+        self.model_error_label = ttk.Label(self.settings_frame, text='', foreground='red', font='TkDefaultFont')
+        self.model_error_label.grid(row=0, column=0, columnspan=4, sticky='EW', pady=(0, 2))
+        
+        # Add the settings buttons in a single row
         predict_button = self.add_settings(IOButton, text='Predict Brood Count', command=self.get_prediction, disable_during_run=True)
         self.add_settings(IOButton, text='Append to Excel File', command=self.load_excel)
         self.add_settings(IOButton, text='Predict all and Export', command=self.to_excel, disable_during_run=True)
         self.add_settings(IOButton, text='Settings', command=self.open_settings)
         
         predict_counter = self.add_output(Counter, text='Oyster Brood Count')
+        self.model_error_label = ttk.Label(self.output_frame, text='', foreground='red', font='TkDefaultFont')
+        self.model_error_label.grid(row=0, column=1, sticky='W', padx=(10, 0))
         predict_button.bind_out(predict_counter)
         
+        # Bind callback to model_select dropdown to clear error label when a valid model is selected
+        def clear_error_on_select(*args):
+            value = self.model_select.value
+            if value != 'None' and value:
+                self.model_error_label.config(text='')
+        self.model_select.menu_var.trace_add('write', clear_error_on_select)
         
     #TODO: Convert this code to use some sort of image processing manager, more than ImageList
     def get_prediction(self, img_pointer=None):
+        # Hide error label by default
+        self.model_error_label.config(text='')
+        
         if not img_pointer:
             img_pointer = self.image_pointer
         
@@ -461,12 +667,17 @@ class OysterPage(Page):
             return 0
         
         model_path = self.model_select.value
+        if model_path == 'None' or not model_path:
+            self.model_error_label.config(text='Please select a model before predicting.')
+            return 0
+        classes = 1  # Default value
         if model_path == '2-4mm model':
             model_path = Path('models') / Path('oyster_2-4mm')
-            classes = 1
         elif model_path == '4-6mm model':
             model_path = Path('models') / Path('oyster_4-6mm')
-            classes = 1
+        else:
+            self.model_error_label.config(text='Please select a model before predicting.')
+            return 0
         
         with Image.open(self.images.paths[self.image_pointer]) as img:  
             api = ModelAPI(model_path, img, classes)    
