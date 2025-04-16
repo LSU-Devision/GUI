@@ -31,6 +31,38 @@ from model import ModelAPI
 import tempfile
 import cv2
 
+# Raspberry Pi detection and picamera2 import check
+def is_raspberry_pi():
+    try:
+        with open('/proc/cpuinfo', 'r') as f:
+            cpuinfo = f.read().lower()
+        if any(x in cpuinfo for x in ['raspberry pi', 'bcm2708', 'bcm2709', 'bcm2710', 'bcm2711', 'bcm2712']):
+            return True
+        try:
+            with open('/sys/firmware/devicetree/base/model', 'r') as f:
+                model = f.read()
+                if 'raspberry pi' in model.lower():
+                    return True
+        except:
+            pass
+        try:
+            with open('/proc/device-tree/model', 'r') as f:
+                model = f.read()
+                if 'raspberry pi' in model.lower():
+                    return True
+        except:
+            pass
+        return False
+    except:
+        return False
+
+def has_picamera2():
+    try:
+        import picamera2
+        return True
+    except ImportError:
+        return False
+
 INTIAL_DIR = Path.cwd()
 # There doesn't really exist a way to both resize a tkinter dialog and maintain a dynamically sized image
 # This is a motivating example for a website
@@ -474,15 +506,32 @@ class Page(ttk.Frame):
         from PIL import Image, ImageTk
         import tkinter as tk
         # Camera setup
-        cap = cv2.VideoCapture(0)
-        if not cap.isOpened():
-            mb.showerror('Camera Error', 'Could not open webcam')
-            return
-        # Try to set to max resolution
-        cap.set(cv2.CAP_PROP_FRAME_WIDTH, 9999)
-        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 9999)
-        native_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-        native_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        use_picamera2 = False
+        if is_raspberry_pi() and has_picamera2():
+            use_picamera2 = True
+        if use_picamera2:
+            try:
+                from picamera2 import Picamera2
+                import numpy as np
+            except ImportError:
+                mb.showerror('Camera Error', 'picamera2 is not installed')
+                return
+            picam = Picamera2()
+            config = picam.create_preview_configuration()
+            picam.configure(config)
+            picam.start()
+            # Get camera resolution
+            cam_res = picam.capture_metadata()['ScalerCrop'][2:]
+            native_width, native_height = cam_res if cam_res else (640, 480)
+        else:
+            cap = cv2.VideoCapture(0)
+            if not cap.isOpened():
+                mb.showerror('Camera Error', 'Could not open webcam')
+                return
+            cap.set(cv2.CAP_PROP_FRAME_WIDTH, 9999)
+            cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 9999)
+            native_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+            native_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         aspect = native_width / native_height if native_height != 0 else 4/3
         # Get screen size and set initial window size
         root = self.winfo_toplevel()
@@ -524,22 +573,30 @@ class Page(ttk.Frame):
         def update_frame():
             if not self._camera_running:
                 return
-            ret, frame = cap.read()
-            if ret:
+            if use_picamera2:
+                frame = picam.capture_array()
                 self._camera_frame = frame.copy()
-                # For preview, resize to fit window/aspect
                 w, h = self._last_preview_size
-                preview_img = frame.copy()
-                preview_img = cv2.cvtColor(preview_img, cv2.COLOR_BGR2RGB)
+                preview_img = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 preview_pil = Image.fromarray(preview_img)
                 preview_pil = preview_pil.resize((w, h))
                 imgtk = ImageTk.PhotoImage(image=preview_pil)
                 video_frame.imgtk = imgtk
                 video_frame.config(image=imgtk)
+            else:
+                ret, frame = cap.read()
+                if ret:
+                    self._camera_frame = frame.copy()
+                    w, h = self._last_preview_size
+                    preview_img = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                    preview_pil = Image.fromarray(preview_img)
+                    preview_pil = preview_pil.resize((w, h))
+                    imgtk = ImageTk.PhotoImage(image=preview_pil)
+                    video_frame.imgtk = imgtk
+                    video_frame.config(image=imgtk)
             cam_win.after(20, update_frame)
         def on_resize(event):
-            # Calculate new preview size based on window size and aspect ratio
-            win_w = cam_win.winfo_width() - 20  # account for padding
+            win_w = cam_win.winfo_width() - 20
             win_h = cam_win.winfo_height() - button_area - extra_margin - 20
             if win_w / aspect <= win_h:
                 new_w = max(1, win_w)
@@ -551,12 +608,13 @@ class Page(ttk.Frame):
         cam_win.bind('<Configure>', on_resize)
         def on_capture():
             if self._camera_frame is not None:
-                # Save to temp file at native resolution
                 with tempfile.NamedTemporaryFile(suffix='.jpg', delete=False) as tmp:
                     img_path = tmp.name
-                    # Save the full-res frame
-                    cv2.imwrite(img_path, self._camera_frame)
-                # Now the file is closed, safe to open
+                    if use_picamera2:
+                        # Save using OpenCV
+                        cv2.imwrite(img_path, self._camera_frame)
+                    else:
+                        cv2.imwrite(img_path, self._camera_frame)
                 pil_img = Image.open(img_path)
                 self._original_images.append(pil_img.copy())
                 pil_img.close()
@@ -570,7 +628,10 @@ class Page(ttk.Frame):
             cleanup()
         def cleanup():
             self._camera_running = False
-            cap.release()
+            if use_picamera2:
+                picam.stop()
+            else:
+                cap.release()
             cam_win.destroy()
         capture_btn.config(command=on_capture)
         cancel_btn.config(command=on_cancel)
