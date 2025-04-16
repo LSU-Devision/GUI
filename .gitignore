@@ -7,8 +7,9 @@ dist/
 gui/vm.tar
 data/*
 !data/.gitkeep
-excel/*
-annotation/*
+excel/
+annotation/
+
 
 
 output/*

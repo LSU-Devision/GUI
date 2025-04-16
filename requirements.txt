@@ -7,4 +7,3 @@ pandas==2.2.3
 openpyxl==3.1.5
 opencv-python
 # If using a Raspberry Pi and want PiCamera2 support, see the README for instructions.
-openpyxl==3.1.5
