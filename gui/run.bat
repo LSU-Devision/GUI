@@ -3,6 +3,13 @@ setlocal
 
 cd /d "%~dp0"
 
+net session >nul 2>&1
+if %errorlevel% neq 0 (
+    echo This script must be run as Administrator!
+    pause
+    exit /b
+)
+
 set IMAGE_NAME=gui
 
 :: Set VcXsrv Installer URL and expected install path
@@ -12,21 +19,30 @@ set "VCXSRV_CONFIG_PATH=%USERPROFILE%\vcxsrv.config"
 set "INSTALLER_PATH=vcxsrv_installer.exe"
 
 
-:: Check if Hyper-V is installed
-systeminfo | find "Hyper-V Requirements: A hypervisor has been detected" >nul 2>&1
+:: Check if WSL is installed
+wsl --version >nul 2>&1
 if %errorlevel% neq 0 (
-    echo Hyper-V/WSL2 required for Docker, installing Hyper-V now
+    echo WSL2 is required for Docker integration, installing WSL2 now...
     
-    :: Enable Hyper-V and required Windows features
-    dism.exe /online /enable-feature /featurename:Microsoft-Hyper-V-All /all /norestart
-    dism.exe /online /enable-feature /featurename:Containers /all /norestart
+    :: Enable WSL and Virtual Machine Platform
+    dism.exe /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart
+    dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /norestart
     
-    echo Hyper-V installation complete! A restart is required.
-    echo Restarting in 10 seconds... Press Ctrl+C to cancel.
-    timeout /t 10
+    powershell -Command "& {Invoke-WebRequest -Uri 'https://aka.ms/wsl2kernel' -OutFile '%TEMP%\wsl_update.msi'}"
+    start /wait msiexec /i "%TEMP%\wsl_update.msi" /quiet /norestart
+    
+    echo Setting the default WSL version 
+    wsl --set-default-version 2
+
+    echo Installing Ubuntu...
+    wsl --install -d Ubuntu
+
+    echo WSL2 installation complete! A restart is required.
+    echo Please restart your computer and rerun this script
+    pause     
     exit
 ) else (
-    echo Hyper-V is already enabled.
+    echo WSL2 is already installed.
 )
 
 :: Check if VcXsrv is installed
@@ -103,10 +119,10 @@ if %errorlevel% neq 0 (
 echo Running Program...
 docker run --rm ^
     -e DISPLAY=%DISPLAY% ^
-    -v "%CD%\excel:/app/excel" ^
+    -v "%CD%\output:/app/excel" ^
     -v "%CD%\config:/app/config" ^
     -v "%CD%\images:/app/images" ^
-    -v "%CD%\annotations:/app/annotations/" ^
+    -v "%CD%\images:/app/annotations/" ^
     %IMAGE_NAME%
 
 echo Shutting down...
