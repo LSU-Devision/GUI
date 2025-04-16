@@ -571,7 +571,7 @@ class Page(ttk.Frame):
                 self.prediction_images.append(None)
                 self._original_pred_images.append(None)
                 self.update_image(img_path)
-                self.set_image()  # Immediately update the display to the new image
+                self.set_image() 
             cleanup()
         def on_cancel():
             cleanup()
