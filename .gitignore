@@ -7,6 +7,7 @@ dist/
 gui/vm.tar
 data/*
 !data/.gitkeep
+annotation/*
 
 output/*
 !output/.gitkeep
