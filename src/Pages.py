@@ -30,15 +30,6 @@ from model import ModelAPI
 
 import tempfile
 import cv2
-try:
-    from picamera import PiCamera
-    from picamera.array import PiRGBArray
-except ImportError:
-    PiCamera = None
-    PiRGBArray = None
-
-if not os.path.exists('annotations'):
-    os.mkdir('annotations')
 
 INTIAL_DIR = Path.cwd()
 # There doesn't really exist a way to both resize a tkinter dialog and maintain a dynamically sized image
@@ -193,6 +184,7 @@ class Page(ttk.Frame):
         for index in range(len(self.images)):
             file_path = self.images.paths[index]
             self.update_image(file_path)
+            self.set_image()
         
         
     def add_input(self, widget, **kwargs):
@@ -384,6 +376,7 @@ class Page(ttk.Frame):
         self.prediction_images.append(None)
         self._original_pred_images.append(None)
         self.update_image(file_path)
+        self.set_image()
         
     def update_image(self, file_path):
         """_summary_
@@ -584,37 +577,6 @@ class Page(ttk.Frame):
         cam_win.protocol('WM_DELETE_WINDOW', on_cancel)
         update_frame()
 
-def is_raspberry_pi():
-    """
-    Check if the current system is running on any Raspberry Pi hardware,
-    regardless of OS version or distribution.
-    """
-    try:
-        # Method 1: Check for Raspberry Pi in /proc/cpuinfo
-        with open('/proc/cpuinfo', 'r') as f:
-            cpuinfo = f.read().lower()
-        if any(x in cpuinfo for x in ['raspberry pi', 'bcm2708', 'bcm2709', 'bcm2710', 'bcm2711', 'bcm2712']):
-            return True
-        # Method 2: Check for Raspberry Pi model file
-        try:
-            with open('/sys/firmware/devicetree/base/model', 'r') as f:
-                model = f.read()
-                if 'raspberry pi' in model.lower():
-                    return True
-        except:
-            pass
-        # Method 3: Check for specific hardware identifiers
-        try:
-            with open('/proc/device-tree/model', 'r') as f:
-                model = f.read()
-                if 'raspberry pi' in model.lower():
-                    return True
-        except:
-            pass
-        return False
-    except:
-        return False
-
 class OysterPage(Page):
     def __init__(self, *args, **kwargs):
         self.name = "Oyster"
@@ -626,6 +588,8 @@ class OysterPage(Page):
         self.settings = self.settings_obj.settings
         
         self.model_select = self.add_input(DropdownBox, text="Model Select", dropdowns=["2-4mm model", "4-6mm model"])
+        # Give the Model Select column a higher weight and minsize to prevent shrinking
+        self.top_frame.columnconfigure(0, weight=3, minsize=180)
         
         self.add_input(LabelBox, text='Group Number')
         self.add_input(LabelBox, text='Size Class')
