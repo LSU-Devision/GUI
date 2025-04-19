@@ -58,7 +58,7 @@ def is_raspberry_pi():
 
 def has_picamera2():
     try:
-        import picamera2
+        import picamera2 # type: ignore
         return True
     except ImportError:
         return False
@@ -511,7 +511,7 @@ class Page(ttk.Frame):
             use_picamera2 = True
         if use_picamera2:
             try:
-                from picamera2 import Picamera2
+                from picamera2 import Picamera2 # type: ignore
                 import numpy as np
             except ImportError:
                 mb.showerror('Camera Error', 'picamera2 is not installed')
