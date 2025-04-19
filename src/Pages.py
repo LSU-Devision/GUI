@@ -178,8 +178,31 @@ class Page(ttk.Frame):
         self.images_frame.file_select.grid(row=0, column=0, padx=5, pady=0, sticky='EW')
         self.images_frame.take_image.grid(row=0, column=1, padx=5, pady=0, sticky='EW')
         # --- End button frame ---
-        self.images_frame.left_window = ttk.Label(self.images_frame, relief='groove', image=self.black_photoimage)
-        self.images_frame.right_window = ttk.Label(self.images_frame, relief='groove', image=self.black_photoimage)
+        # Set fixed size for image display labels
+        self.images_frame.left_window = tk.Label(
+            self.images_frame,
+            relief='groove',
+            image=self.black_photoimage,
+            width=THUMBNAIL_SIZE[0],
+            height=THUMBNAIL_SIZE[1]
+        )
+        self.images_frame.right_window = tk.Label(
+            self.images_frame,
+            relief='groove',
+            image=self.black_photoimage,
+            width=THUMBNAIL_SIZE[0],
+            height=THUMBNAIL_SIZE[1]
+        )
+        # Add fullscreen buttons for left and right images
+        self.images_frame.left_fullscreen_btn = ttk.Button(
+            self.images_frame, text='⛶', width=2, command=lambda: self.show_fullscreen_image('left'))
+        self.images_frame.right_fullscreen_btn = ttk.Button(
+            self.images_frame, text='⛶', width=2, command=lambda: self.show_fullscreen_image('right'))
+        # Place fullscreen buttons near the image labels (top-right corner of each image label)
+        self.images_frame.left_window.grid(row=1, column=0, rowspan=2, sticky='', **self.images_frame_kwargs)
+        self.images_frame.left_fullscreen_btn.grid(row=1, column=0, sticky='ne', padx=8, pady=8)
+        self.images_frame.right_window.grid(row=1, column=2, rowspan=2, sticky='', **self.images_frame_kwargs)
+        self.images_frame.right_fullscreen_btn.grid(row=1, column=2, sticky='ne', padx=8, pady=8)
         self.images_frame.next_button = ttk.Button(self.images_frame, text='Next', command=self.next)
         self.images_frame.prev_button = ttk.Button(self.images_frame, text='Prev', command=self.prev)
         self.images_frame.counter = ttk.Label(self.images_frame, text='-/0', relief='groove', anchor='center')
@@ -459,7 +482,10 @@ class Page(ttk.Frame):
         rw_img = resize_and_center(pil_pred_img, rw_w, rw_h)
         rw.image = rw_img
         rw.config(image=rw_img)
-        self.images_frame.counter.config(text=f'{self.image_pointer + 1}/{len(self.images)}')
+        if len(self.images) == 0:
+            self.images_frame.counter.config(text='0/0')
+        else:
+            self.images_frame.counter.config(text=f'{self.image_pointer + 1}/{len(self.images)}')
     
     def set_prediction_image(self, prediction_image_pointer, file_path):
         if len(self.images) == 0:
@@ -638,6 +664,57 @@ class Page(ttk.Frame):
         cam_win.protocol('WM_DELETE_WINDOW', on_cancel)
         update_frame()
 
+    def show_fullscreen_image(self, which):
+        """Display the selected image (left or right) in a fullscreen Toplevel window."""
+        import tkinter as tk
+        from PIL import ImageTk
+        # Get the image to display
+        if which == 'left':
+            pil_img = None
+            if self._original_images and self.image_pointer < len(self._original_images):
+                pil_img = self._original_images[self.image_pointer]
+        elif which == 'right':
+            pil_img = None
+            if self._original_pred_images and self.image_pointer < len(self._original_pred_images):
+                pil_img = self._original_pred_images[self.image_pointer]
+        else:
+            return
+        if pil_img is None:
+            return
+        # Create fullscreen window
+        win = tk.Toplevel(self)
+        win.title('Fullscreen Image')
+        win.attributes('-fullscreen', True)
+        win.configure(bg='black')
+        # Close on click or Escape
+        win.bind('<Escape>', lambda e: win.destroy())
+        win.bind('<Button-1>', lambda e: win.destroy())
+        # Get screen size
+        screen_w = win.winfo_screenwidth()
+        screen_h = win.winfo_screenheight()
+        # Resize image to fit screen, maintaining aspect ratio
+        img_w, img_h = pil_img.size
+        scale = min(screen_w / img_w, screen_h / img_h)
+        new_w = int(img_w * scale)
+        new_h = int(img_h * scale)
+        img_resized = pil_img.copy().resize((new_w, new_h), Image.LANCZOS)
+        imgtk = ImageTk.PhotoImage(img_resized)
+        label = tk.Label(win, image=imgtk, bg='black')
+        label.image = imgtk  # Keep reference
+        label.pack(expand=True)
+        # Add a close button in the top-right corner
+        close_btn = tk.Label(
+            win,
+            text='X',
+            bg='white',
+            fg='black',
+            font=('Arial', 24, 'bold'),
+            width=2,
+            height=1
+        )
+        close_btn.place(relx=1.0, rely=0.0, anchor='ne', x=-20, y=20)
+        close_btn.bind('<Button-1>', lambda e: win.destroy())
+
 class OysterPage(Page):
     def __init__(self, *args, **kwargs):
         self.name = "Oyster"
@@ -792,6 +869,10 @@ class DevisionPage(Page):
         #This button resizes at runtime and there's no built in way to change a ttk widget's width
         self.model_select = self.add_input(DropdownBox, text='Select a Model Below', dropdowns = ['Egg Counter - StarDist2D', 'Four Embryo Classification - StarDist2D'])
         
+        # Add error label above Predict and Annotate button
+        self.model_error_label = ttk.Label(self.settings_frame, text='', foreground='red', font='TkDefaultFont')
+        self.model_error_label.grid(row=0, column=0, columnspan=4, sticky='EW', pady=(0, 2))
+        
         predict_button = self.add_settings(IOButton, text='Predict and Annotate', command=self.get_prediction, disable_during_run=True)
         self.add_settings(IOButton, text='Export to Excel')
         self.add_settings(IOButton, text='Settings', command=self.open_settings)
@@ -811,7 +892,12 @@ class DevisionPage(Page):
         if model_str == 'Four Embryo Classification - StarDist2D':
             model_dir = Path('models') / Path('xenopus-4-class')
             classes = 4
-        
+        elif model_str == 'Egg Counter - StarDist2D':
+            model_dir = Path('models') / Path('frog-egg-counter')
+            classes = 1
+        else:
+            self.model_error_label.config(text='Failed to load model: Please select a valid model.')
+            return 0
         
         with Image.open(self.images.paths[img_pointer]) as img:
             api = ModelAPI(model_dir, img, classes)

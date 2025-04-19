@@ -42,7 +42,9 @@ class ModelAPI:
             img = img.convert('L') 
         
         img_arr = np.array(img)
-        
+        # Ensure the array is always 3D (H, W, C)
+        if img_arr.ndim == 2:
+            img_arr = np.expand_dims(img_arr, axis=-1)
         self._arr = normalize(img_arr, 1, 99.8, axis=(0, 1))
         self._prediction_flag = False
         

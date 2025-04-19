@@ -75,7 +75,7 @@ class ImageList(list):
         cwd = Path(os.getcwd())
         file_path = cwd / Path('data') / Path(f'ImageList{self.name}.json')
         
-        
+        file_path.parent.mkdir(parents=True, exist_ok=True)
         with open(file_path, 'w') as file:
             json.dump(obj=str_paths, fp=file, indent=2)
 

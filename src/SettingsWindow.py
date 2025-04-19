@@ -26,6 +26,9 @@ class Settings(tk.Toplevel):
             
         super().__init__(*args)
         
+        # Make the settings window resizable
+        self.resizable(True, True)
+        
         # Usually will be mainframe unless the code somehow changes
         self.parent = args[0]
         
@@ -39,8 +42,8 @@ class Settings(tk.Toplevel):
         main_window_width = self.parent.winfo_width()
         main_window_height = self.parent.winfo_height()
         
-        self.pop_up_window_width = 1250
-        self.pop_up_window_height = 450
+        self.pop_up_window_width = 550
+        self.pop_up_window_height = 330
         
         x = main_window_width + 75
         y = main_window_height // 2 - self.pop_up_window_height // 2 
@@ -114,15 +117,31 @@ class SettingsWindow(ttk.Frame):
     # Init analogue, runs only when called such that the frame is not created on app startup
     def create(self, *args, **kwargs):
         super().__init__(*args)
-                
+        
+        # Frame to hold treeview and scrollbars
+        container = ttk.Frame(self)
+        container.grid(row=0, column=0, sticky='nsew')
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
+        container.grid_rowconfigure(0, weight=1)
+        container.grid_columnconfigure(0, weight=1)
+
         # The dropdown menu object with various visual settings
-        self._settings_tree = ttk.Treeview(self, columns=("status"), height=30, selectmode='browse')
+        self._settings_tree = ttk.Treeview(container, columns=("status"), height=30, selectmode='browse')
         
         self._settings_tree.column("#0", width=(args[0].pop_up_window_width // 3) * 2, minwidth=400)
         self._settings_tree.column('status', width=args[0].pop_up_window_width // 3, minwidth=200)
         
         self._settings_tree.heading("status", text="Status", anchor="w")
         
+        # Add scrollbars
+        vsb = ttk.Scrollbar(container, orient="vertical", command=self._settings_tree.yview)
+        hsb = ttk.Scrollbar(container, orient="horizontal", command=self._settings_tree.xview)
+        self._settings_tree.configure(yscrollcommand=vsb.set, xscrollcommand=hsb.set)
+        self._settings_tree.grid(row=0, column=0, sticky='nsew')
+        vsb.grid(row=0, column=1, sticky='ns')
+        hsb.grid(row=1, column=0, sticky='ew')
+
         # Names for the theme styles
         self.__styles = StyleSettings()
         
@@ -155,10 +174,14 @@ class SettingsWindow(ttk.Frame):
         # Initialize the tree from user settings
         self.load_user_settings(SettingsWindow.USER_SETTINGS)
         
-        # Place the tree
-        self._settings_tree.grid_rowconfigure(0, weight=1)
-        self._settings_tree.grid_columnconfigure(0, weight=1)
-        self._settings_tree.grid(column=0, row=0, sticky='nsew')
+        # Make sure the container and treeview expand with the window
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
+        container.grid_rowconfigure(0, weight=1)
+        container.grid_columnconfigure(0, weight=1)
+        self._settings_tree.grid(row=0, column=0, sticky='nsew')
+        vsb.grid(row=0, column=1, sticky='ns')
+        hsb.grid(row=1, column=0, sticky='ew')
     
     # Settings for the default tab
     def _default_settings(self):
