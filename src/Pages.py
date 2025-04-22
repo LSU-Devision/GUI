@@ -435,6 +435,7 @@ class Page(ttk.Frame):
         # Store original PIL image
         pil_img = Image.open(file_path)
         self._original_images.append(pil_img.copy())
+        pil_img.close()
         self.images.append(file_path)
         self.prediction_images.append(None)
         self._original_pred_images.append(None)
@@ -611,9 +612,8 @@ class Page(ttk.Frame):
                 frame = picam.capture_array()
                 self._camera_frame = frame.copy()
                 w, h = self._last_preview_size
-                # preview_img = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                # preview_pil = Image.fromarray(preview_img)
-                preview_pil = Image.fromarray(frame)
+                preview_img = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+                preview_pil = Image.fromarray(preview_img)
                 preview_pil = preview_pil.resize((w, h))
                 imgtk = ImageTk.PhotoImage(image=preview_pil)
                 video_frame.imgtk = imgtk
