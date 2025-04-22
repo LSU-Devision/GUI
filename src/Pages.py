@@ -715,6 +715,17 @@ class Page(ttk.Frame):
         close_btn.place(relx=1.0, rely=0.0, anchor='ne', x=-20, y=20)
         close_btn.bind('<Button-1>', lambda e: win.destroy())
 
+def get_model_path(relative_path):
+    """Helper function to get model path with environment variable support"""
+    model_path = Path(relative_path)
+    if os.environ.get('DEVISION_MODELS'):
+        # If we're in a bundled app, use the environment variable path
+        if str(model_path).startswith('models'):
+            subdir = str(model_path).split('models/', 1)[1] if 'models/' in str(model_path) else ''
+            model_path = Path(os.environ.get('DEVISION_MODELS')) / subdir
+            print(f"Using bundled model path: {model_path}")
+    return model_path
+
 class OysterPage(Page):
     def __init__(self, *args, **kwargs):
         self.name = "Oyster"
@@ -774,9 +785,9 @@ class OysterPage(Page):
             return 0
         classes = 1  # Default value
         if model_path == '2-4mm model':
-            model_path = Path('models') / Path('oyster_2-4mm')
+            model_path = get_model_path('models/oyster_2-4mm')
         elif model_path == '4-6mm model':
-            model_path = Path('models') / Path('oyster_4-6mm')
+            model_path = get_model_path('models/oyster_4-6mm')
         else:
             self.model_error_label.config(text='Please select a model before predicting.')
             return 0
@@ -890,10 +901,10 @@ class DevisionPage(Page):
                 
         model_str = self.model_select.value
         if model_str == 'Four Embryo Classification - StarDist2D':
-            model_dir = Path('models') / Path('xenopus-4-class')
+            model_dir = get_model_path('models/xenopus-4-class')
             classes = 4
         elif model_str == 'Egg Counter - StarDist2D':
-            model_dir = Path('models') / Path('frog-egg-counter')
+            model_dir = get_model_path('models/frog-egg-counter')
             classes = 1
         else:
             self.model_error_label.config(text='Failed to load model: Please select a valid model.')

@@ -1,15 +1,49 @@
 # -*- mode: python ; coding: utf-8 -*-
+import os
 
+# Create a runtime hook to help with path resolution
+with open('runtime_hook.py', 'w') as f:
+    f.write('''
+import os
+import sys
+from pathlib import Path
+
+# Make sure the bundled data directories are accessible
+def add_data_dir(dir_name):
+    if getattr(sys, 'frozen', False):
+        # Running as bundled exe
+        base_path = Path(sys._MEIPASS)
+        data_dir = base_path / dir_name
+        if not os.environ.get(f'DEVISION_{dir_name.upper()}'):
+            os.environ[f'DEVISION_{dir_name.upper()}'] = str(data_dir)
+    else:
+        # Running as script
+        base_path = Path(os.path.abspath('.'))
+        data_dir = base_path / dir_name
+        if not os.environ.get(f'DEVISION_{dir_name.upper()}'):
+            os.environ[f'DEVISION_{dir_name.upper()}'] = str(data_dir)
+
+add_data_dir('models')
+add_data_dir('config')
+''')
 
 a = Analysis(
     ['./src/Pages.py'],
     pathex=[],
     binaries=[],
-    datas=[('config', 'config'), ('models', 'models')],
+    datas=[
+        ('config', 'config'),
+        ('models/xenopus-4-class', 'models/xenopus-4-class'),
+        ('models/oyster_4-6mm', 'models/oyster_4-6mm'),
+        ('models/oyster_2-4mm', 'models/oyster_2-4mm'),
+        ('models/frog-egg-counter', 'models/frog-egg-counter'),
+        ('models/Xenopus Frog Embryos Classification Model', 'models/Xenopus Frog Embryos Classification Model'),
+        ('models/Oyster_model', 'models/Oyster_model'),
+    ],
     hiddenimports=['PIL._tkinter_finder'],
     hookspath=[],
     hooksconfig={},
-    runtime_hooks=[],
+    runtime_hooks=['runtime_hook.py'],
     excludes=[],
     noarchive=False,
     optimize=0,
