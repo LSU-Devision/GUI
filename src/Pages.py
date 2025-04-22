@@ -663,6 +663,7 @@ class Page(ttk.Frame):
         def cleanup():
             if use_picamera2:
                 picam.stop()
+                picam.close()
             else:
                 cap.release()
             self._camera_running = False
