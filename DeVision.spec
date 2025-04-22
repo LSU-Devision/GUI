@@ -16,15 +16,25 @@ def add_data_dir(dir_name):
         data_dir = base_path / dir_name
         if not os.environ.get(f'DEVISION_{dir_name.upper()}'):
             os.environ[f'DEVISION_{dir_name.upper()}'] = str(data_dir)
+        # Create directory if it doesn't exist
+        if dir_name in ['annotations', 'excel', 'data', 'images']:
+            os.makedirs(data_dir, exist_ok=True)
     else:
         # Running as script
         base_path = Path(os.path.abspath('.'))
         data_dir = base_path / dir_name
         if not os.environ.get(f'DEVISION_{dir_name.upper()}'):
             os.environ[f'DEVISION_{dir_name.upper()}'] = str(data_dir)
+        # Create directory if it doesn't exist
+        if dir_name in ['annotations', 'excel', 'data', 'images']:
+            os.makedirs(data_dir, exist_ok=True)
 
 add_data_dir('models')
 add_data_dir('config')
+add_data_dir('annotations')
+add_data_dir('excel')
+add_data_dir('data')
+add_data_dir('images')
 ''')
 
 a = Analysis(
@@ -39,6 +49,10 @@ a = Analysis(
         ('models/frog-egg-counter', 'models/frog-egg-counter'),
         ('models/Xenopus Frog Embryos Classification Model', 'models/Xenopus Frog Embryos Classification Model'),
         ('models/Oyster_model', 'models/Oyster_model'),
+        ('annotations', 'annotations'),
+        ('excel', 'excel'),
+        ('data', 'data'),
+        ('images', 'images'),
     ],
     hiddenimports=['PIL._tkinter_finder'],
     hookspath=[],

@@ -9,6 +9,23 @@ from matplotlib import pyplot as plt
 
 THUMBNAIL_SIZE = (400, 400)
 DARKBLUE = (0, 0, 75)
+
+# Helper function for path resolution
+def get_data_path(relative_path):
+    """Helper function to get data path with environment variable support"""
+    if relative_path.startswith('data/') or relative_path == 'data':
+        path = Path(relative_path)
+        if os.environ.get('DEVISION_DATA'):
+            # If we're in a bundled app, use the environment variable path
+            subdir = str(path).split('data/', 1)[1] if 'data/' in str(path) else ''
+            path = Path(os.environ.get('DEVISION_DATA')) / subdir
+            print(f"Using bundled data path: {path}")
+        # Make sure directory exists
+        os.makedirs(os.path.dirname(path) if subdir else path, exist_ok=True)
+        return path
+    else:
+        return Path(relative_path)
+
 class ImageList(list):
     def __init__(self, name, iterable=[]):
         """Listlike object that contains paths and image references, but appends via image path for convienience
@@ -72,10 +89,9 @@ class ImageList(list):
    
     def _json_dump(self):
         str_paths = list(map(lambda x: str(x), self.paths))
-        cwd = Path(os.getcwd())
-        file_path = cwd / Path('data') / Path(f'ImageList{self.name}.json')
+        file_path = get_data_path(f'data/ImageList{self.name}.json')
         
-        file_path.parent.mkdir(parents=True, exist_ok=True)
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
         with open(file_path, 'w') as file:
             json.dump(obj=str_paths, fp=file, indent=2)
 
