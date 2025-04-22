@@ -645,11 +645,12 @@ class Page(ttk.Frame):
             if self._camera_frame is not None:
                 with tempfile.NamedTemporaryFile(suffix='.jpg', delete=False) as tmp:
                     img_path = tmp.name
+                    # Convert color before saving captured frame
                     if use_picamera2:
-                        # Save using OpenCV
-                        cv2.imwrite(img_path, self._camera_frame)
+                        frame_to_save = cv2.cvtColor(self._camera_frame, cv2.COLOR_RGBA2RGB)
                     else:
-                        cv2.imwrite(img_path, self._camera_frame)
+                        frame_to_save = cv2.cvtColor(self._camera_frame, cv2.COLOR_BGR2RGB)
+                    cv2.imwrite(img_path, frame_to_save)
                 pil_img = Image.open(img_path)
                 self._original_images.append(pil_img.copy())
                 self.images.append(img_path)
