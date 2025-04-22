@@ -42,8 +42,8 @@ class Settings(tk.Toplevel):
         main_window_width = self.parent.winfo_width()
         main_window_height = self.parent.winfo_height()
         
-        self.pop_up_window_width = 550
-        self.pop_up_window_height = 330
+        self.pop_up_window_width = 1000
+        self.pop_up_window_height = 600
         
         x = main_window_width + 75
         y = main_window_height // 2 - self.pop_up_window_height // 2 
