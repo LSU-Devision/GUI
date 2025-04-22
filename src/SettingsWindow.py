@@ -74,62 +74,85 @@ class SettingsWindow(ttk.Frame):
     # Initializes before object creation to programmatically create class variables at runtime
     # but before the frame is created
     def __new__(cls, *args):
-        # Handle paths for both standard and PyInstaller frozen environments
-        import sys
-        import os
-        
-        # Get the application path, whether running normally or as a frozen PyInstaller app
-        if getattr(sys, 'frozen', False):
-            # If the application is run as a bundle (PyInstaller)
-            application_path = sys._MEIPASS
-        else:
-            # If running in normal Python environment
-            application_path = os.path.dirname(os.path.abspath(__file__))
-            # Go one directory up if we're in src/
-            if os.path.basename(application_path) == 'src':
-                application_path = os.path.dirname(application_path)
-        
-        # Create config directory if it doesn't exist
-        config_dir = os.path.join(application_path, 'config')
-        if not os.path.exists(config_dir):
-            os.makedirs(config_dir)
-            
-        # Update paths to use absolute paths
-        cls.USER_SETTINGS = os.path.join(config_dir, 'settings_user.json')
-        cls.DEFAULT_SETTINGS = os.path.join(config_dir, 'settings_default.json')
-        cls.USER_THEMES = os.path.join(config_dir, 'user_themes.json')
-        
+        # Make sure the config directory exists
+        config_dir = path.dirname(cls.DEFAULT_SETTINGS)
+        if not path.exists(config_dir):
+            try:
+                pathlib.Path(config_dir).mkdir(parents=True, exist_ok=True)
+            except Exception as e:
+                print(f"Error creating config directory: {e}")
+                
         if not path.exists(cls.DEFAULT_SETTINGS):
             json_str = """
-{
-    "toggles":{
-        "excel-default": true,
-        "clear-excel-default" : false,
-        "clear-output-default" : true,
-        "autosave-image-default": true
-    },
+                        {
+                            "toggles":{
+                                "excel-default": true,
+                                "clear-excel-default" : false,
+                                "clear-output-default" : true,
+                                "autosave-image-default": true
+                            },
 
-    "theme":"darkly-style"
-}"""
-            with open(cls.DEFAULT_SETTINGS, 'w') as file:
-                file.write(json_str)
+                            "theme":"darkly-style"
+                        }"""
+            try:
+                with open(cls.DEFAULT_SETTINGS, 'w') as file:
+                    file.write(json_str)
+            except Exception as e:
+                print(f"Error writing default settings: {e}")
         
         if not path.exists(cls.USER_SETTINGS):
-            shutil.copy(cls.DEFAULT_SETTINGS, cls.USER_SETTINGS)
+            try:
+                shutil.copy(cls.DEFAULT_SETTINGS, cls.USER_SETTINGS)
+            except Exception as e:
+                print(f"Error copying default settings to user settings: {e}")
              
-        with open(cls.USER_SETTINGS, 'r') as file:
-            cls._settings = json.load(file)
+        try:
+            with open(cls.USER_SETTINGS, 'r') as file:
+                cls._settings = json.load(file)
+        except Exception as e:
+            print(f"Error loading user settings: {e}")
+            # If we can't load user settings, use default settings
+            try:
+                with open(cls.DEFAULT_SETTINGS, 'r') as file:
+                    cls._settings = json.load(file)
+            except Exception as e2:
+                print(f"Error loading default settings: {e2}")
+                # Fallback to hardcoded settings if everything else fails
+                cls._settings = {
+                    "toggles": {
+                        "excel-default": True,
+                        "clear-excel-default": False,
+                        "clear-output-default": True,
+                        "autosave-image-default": True
+                    },
+                    "theme": "darkly-style"
+                }
         
+        # Create USER_THEMES file if it doesn't exist
+        if not path.exists(cls.USER_THEMES):
+            try:
+                with open(cls.USER_THEMES, 'w') as file:
+                    file.write('{}')  # Initialize with empty JSON object
+            except Exception as e:
+                print(f"Error creating user themes file: {e}")
+                
         # Load in custom themes from the Style singleton
-        Style().load_user_themes(file=cls.USER_THEMES)
+        try:
+            Style().load_user_themes(file=cls.USER_THEMES)
+        except Exception as e:
+            print(f"Error loading user themes: {e}")
         
         # Intialize the theme from file
+        try:
+            Style.instance.theme_use(cls._settings['theme'][:-6])
+        except Exception as e:
+            print(f"Error setting theme: {e}")
         
-        Style.instance.theme_use(cls._settings['theme'][:-6])
-        
-        
-        with open(cls.USER_SETTINGS, 'w') as file:
-            json.dump(cls._settings, file, indent=2)
+        try:
+            with open(cls.USER_SETTINGS, 'w') as file:
+                json.dump(cls._settings, file, indent=2)
+        except Exception as e:
+            print(f"Error writing user settings: {e}")
         
         # Create a new class object from super method, this also instantiates an object put doesn't call supers init
         return super().__new__(cls)
