@@ -646,11 +646,13 @@ class Page(ttk.Frame):
                 with tempfile.NamedTemporaryFile(suffix='.jpg', delete=False) as tmp:
                     img_path = tmp.name
                     # Convert color before saving captured frame
-                    frame = self._camera_frame
+                    frame = self._camera_frame.copy()
                     if use_picamera2:
-                        frame_to_save = cv2.cvtColor(frame, cv2.COLOR_RGBA2RGB)
+                        # Convert RGBA camera frame to BGR for correct color saving
+                        frame_to_save = cv2.cvtColor(frame, cv2.COLOR_RGBA2BGR)
                     else:
-                        frame_to_save = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                        # Frame is already in BGR format
+                        frame_to_save = frame
                     cv2.imwrite(img_path, frame_to_save)
                 pil_img = Image.open(img_path)
                 self._original_images.append(pil_img.copy())
