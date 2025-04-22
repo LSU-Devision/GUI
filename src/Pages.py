@@ -611,8 +611,9 @@ class Page(ttk.Frame):
                 frame = picam.capture_array()
                 self._camera_frame = frame.copy()
                 w, h = self._last_preview_size
-                preview_img = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                preview_pil = Image.fromarray(preview_img)
+                # preview_img = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                # preview_pil = Image.fromarray(preview_img)
+                preview_pil = Image.fromarray(frame)
                 preview_pil = preview_pil.resize((w, h))
                 imgtk = ImageTk.PhotoImage(image=preview_pil)
                 video_frame.imgtk = imgtk

@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, font
 from ttkbootstrap import Style
 from WarningWindow import WarningWindow
 
@@ -38,17 +38,38 @@ class Settings(tk.Toplevel):
         self.child = Settings.instance
         self.title('Settings')
         
-        # Pop up windows options
+        # Get screen dimensions
+        screen_width = self.winfo_screenwidth()
+        screen_height = self.winfo_screenheight()
+        
+        # Scale fonts based on screen resolution
+        self._scale_fonts(screen_width, screen_height)
+        
+        # Calculate window size based on screen size (using percentages)
+        # Use at most 80% of screen width/height, but not less than minimum values
+        width_percentage = 0.35  # 35% of screen width
+        height_percentage = 0.6  # 60% of screen height
+        
+        self.pop_up_window_width = min(max(int(screen_width * width_percentage), 400), 600)
+        self.pop_up_window_height = min(max(int(screen_height * height_percentage), 400), 600)
+        
+        # Position the window - prefer to the right of main window if space allows
         main_window_width = self.parent.winfo_width()
         main_window_height = self.parent.winfo_height()
+        main_window_x = self.parent.winfo_rootx()
+        main_window_y = self.parent.winfo_rooty()
         
-        self.pop_up_window_width = 600
-        self.pop_up_window_height = 600
+        # First try positioning to the right of main window
+        x = main_window_x + main_window_width + 20
+        y = main_window_y + (main_window_height // 2 - self.pop_up_window_height // 2)
         
-        x = main_window_width + 75
-        y = main_window_height // 2 - self.pop_up_window_height // 2 
+        # If window would be off-screen, center it on screen instead
+        if x + self.pop_up_window_width > screen_width:
+            x = screen_width // 2 - self.pop_up_window_width // 2
+            y = screen_height // 2 - self.pop_up_window_height // 2
 
-        self.minsize(self.pop_up_window_width, self.pop_up_window_height)
+        # Set minimum size and geometry
+        self.minsize(400, 400)
         self.geometry(f'{self.pop_up_window_width}x{self.pop_up_window_height}+{x}+{y}')
         
         # Placing the child object within the new window
@@ -58,6 +79,27 @@ class Settings(tk.Toplevel):
         self.child.grid(row=0, column=0, sticky='nsew')
         
         self.bind('<Destroy>', self.on_destroy)        
+    
+    def _scale_fonts(self, screen_width, screen_height):
+        """Scale fonts based on screen resolution"""
+        # Base font sizes for different screen resolutions
+        if screen_width >= 2560:  # 4K and higher
+            label_size = 11
+            default_size = 10
+            text_size = 10
+        elif screen_width >= 1920:  # Full HD
+            label_size = 10
+            default_size = 9
+            text_size = 9
+        else:  # Smaller screens
+            label_size = 9
+            default_size = 8
+            text_size = 8
+            
+        # Configure font sizes
+        font.nametofont("TkHeadingFont").configure(size=label_size)
+        font.nametofont("TkDefaultFont").configure(size=default_size)
+        font.nametofont("TkTextFont").configure(size=text_size)
     
     def on_destroy(self, event):
         Settings.is_open = False
@@ -177,8 +219,14 @@ class SettingsWindow(ttk.Frame):
         # The dropdown menu object with various visual settings
         self._settings_tree = ttk.Treeview(container, columns=("status"), height=30, selectmode='browse')
         
-        self._settings_tree.column("#0", width=(args[0].pop_up_window_width // 3) * 2, minwidth=400)
-        self._settings_tree.column('status', width=args[0].pop_up_window_width // 3, minwidth=200)
+        # Calculate proportional column widths based on window size
+        total_width = args[0].pop_up_window_width - 20  # Account for scrollbar and borders
+        main_column_width = int(total_width * 0.7)  # 70% for main column
+        status_column_width = int(total_width * 0.3)  # 30% for status column
+        
+        # Set minimum width smaller to accommodate smaller screens
+        self._settings_tree.column("#0", width=main_column_width, minwidth=200)
+        self._settings_tree.column('status', width=status_column_width, minwidth=100)
         
         self._settings_tree.heading("status", text="Status", anchor="w")
         
@@ -230,6 +278,25 @@ class SettingsWindow(ttk.Frame):
         self._settings_tree.grid(row=0, column=0, sticky='nsew')
         vsb.grid(row=0, column=1, sticky='ns')
         hsb.grid(row=1, column=0, sticky='ew')
+        
+        # Add resize handler to adjust column widths when window is resized
+        args[0].bind("<Configure>", self._on_window_resize)
+    
+    def _on_window_resize(self, event):
+        """Adjust column widths when window is resized"""
+        # Only respond to our parent window's resize events
+        if event.widget == self.master:
+            # Get current window width
+            window_width = event.width
+            
+            # Recalculate column widths
+            total_width = window_width - 20  # Account for scrollbar and borders
+            main_column_width = int(total_width * 0.7)
+            status_column_width = int(total_width * 0.3)
+            
+            # Update column widths
+            self._settings_tree.column("#0", width=main_column_width)
+            self._settings_tree.column('status', width=status_column_width)
     
     # Settings for the default tab
     def _default_settings(self):
@@ -247,11 +314,12 @@ class SettingsWindow(ttk.Frame):
             self.cls._settings['toggles'][id] = not self.cls._settings['toggles'][id]
             self.write_user_settings()
         
+        # More concise, screen-friendly text
         settings_text = [
-            "Export Excel file to output folder upon predicting",
-            "Append new predictions to a new Excel file upon predicting",
-            "Create new Excel file upon clearing images",
-            "Automatically save images to annotations after predicting",
+            "Auto-export Excel file",
+            "New Excel for predictions",
+            "New Excel when clearing",
+            "Auto-save images",
         ]
         
         settings_id = [
@@ -308,7 +376,7 @@ class SettingsWindow(ttk.Frame):
         
         settings_text = [
            'Check for updates',
-           'Open user guide' 
+           'User guide' 
         ]
         
         settings_id = [
@@ -330,7 +398,6 @@ class SettingsWindow(ttk.Frame):
         self._settings_tree.tag_bind('guide-version', '<Double-1>', guide_select)
         self._settings_tree.tag_bind('guide-version', '<Return>', guide_select)
         
-        
     def _style_settings(self):
         # Callback function for changing style at runtime, writing settings to file
         def theme_select(event):
@@ -350,12 +417,27 @@ class SettingsWindow(ttk.Frame):
         # Create header for dark themes
         self._settings_tree.insert('style', 'end', iid='dt', text="Dark Themes", tags="Label")
         
-        # Fill theme menus
-        for x in self.__styles.lt_names: 
-            self._settings_tree.insert('lt', 'end', iid= x + '-style', text=x, tags="Theme", values='inactive')
+        # Group themes for more compact display - first create light themes
+        light_themes_per_row = 3
+        for i in range(0, len(self.__styles.lt_names), light_themes_per_row):
+            group = self.__styles.lt_names[i:i+light_themes_per_row]
+            row_id = f'light_row_{i//light_themes_per_row}'
             
-        for x in self.__styles.dt_names: 
-            self._settings_tree.insert('dt', 'end', iid= x + '-style', text=x, tags="Theme", values='inactive')
+            # For each group, create a row in the tree
+            for theme in group:
+                # Add individual theme as menu item with proper tag
+                self._settings_tree.insert('lt', 'end', iid=theme + '-style', text=theme, tags="Theme", values='inactive')
+            
+        # Create dark themes rows
+        dark_themes_per_row = 3
+        for i in range(0, len(self.__styles.dt_names), dark_themes_per_row):
+            group = self.__styles.dt_names[i:i+dark_themes_per_row]
+            row_id = f'dark_row_{i//dark_themes_per_row}'
+            
+            # For each group, create a row in the tree
+            for theme in group:
+                # Add individual theme as menu item with proper tag
+                self._settings_tree.insert('dt', 'end', iid=theme + '-style', text=theme, tags="Theme", values='inactive')
         
         self._settings_tree.tag_configure("Theme", font="TkTextFont")
         
