@@ -5,7 +5,7 @@ a = Analysis(
     ['./src/Pages.py'],
     pathex=[],
     binaries=[],
-    datas=[('config', 'config')],
+    datas=[('config', 'config'), ('models', 'models')],
     hiddenimports=['PIL._tkinter_finder'],
     hookspath=[],
     hooksconfig={},
