@@ -74,6 +74,31 @@ class SettingsWindow(ttk.Frame):
     # Initializes before object creation to programmatically create class variables at runtime
     # but before the frame is created
     def __new__(cls, *args):
+        # Handle paths for both standard and PyInstaller frozen environments
+        import sys
+        import os
+        
+        # Get the application path, whether running normally or as a frozen PyInstaller app
+        if getattr(sys, 'frozen', False):
+            # If the application is run as a bundle (PyInstaller)
+            application_path = sys._MEIPASS
+        else:
+            # If running in normal Python environment
+            application_path = os.path.dirname(os.path.abspath(__file__))
+            # Go one directory up if we're in src/
+            if os.path.basename(application_path) == 'src':
+                application_path = os.path.dirname(application_path)
+        
+        # Create config directory if it doesn't exist
+        config_dir = os.path.join(application_path, 'config')
+        if not os.path.exists(config_dir):
+            os.makedirs(config_dir)
+            
+        # Update paths to use absolute paths
+        cls.USER_SETTINGS = os.path.join(config_dir, 'settings_user.json')
+        cls.DEFAULT_SETTINGS = os.path.join(config_dir, 'settings_default.json')
+        cls.USER_THEMES = os.path.join(config_dir, 'user_themes.json')
+        
         if not path.exists(cls.DEFAULT_SETTINGS):
             json_str = """
 {
