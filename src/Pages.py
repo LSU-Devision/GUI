@@ -652,7 +652,6 @@ class Page(ttk.Frame):
                         cv2.imwrite(img_path, self._camera_frame)
                 pil_img = Image.open(img_path)
                 self._original_images.append(pil_img.copy())
-                pil_img.close()
                 self.images.append(img_path)
                 self.prediction_images.append(None)
                 self._original_pred_images.append(None)
@@ -662,11 +661,11 @@ class Page(ttk.Frame):
         def on_cancel():
             cleanup()
         def cleanup():
-            self._camera_running = False
             if use_picamera2:
                 picam.stop()
             else:
                 cap.release()
+            self._camera_running = False
             cam_win.destroy()
         capture_btn.config(command=on_capture)
         cancel_btn.config(command=on_cancel)
