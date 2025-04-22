@@ -86,6 +86,7 @@ class Page(ttk.Frame):
     # Static variables
     id = 0
     black_image = Image.new(mode='RGB', color=(0, 0, 0), size=THUMBNAIL_SIZE)    
+    _active_picam = None  # Class variable to track active picamera2 instance
     
     def __init__(self,
                  *args,
@@ -510,6 +511,9 @@ class Page(ttk.Frame):
         self.set_image()
     
     def clear_all_images(self):
+        # Ensure camera is closed
+        self.close_camera()
+        
         self.image_pointer = 0
         self.images_frame.right_window.config(image=self.black_photoimage)
         self.images_frame.left_window.config(image=self.black_photoimage)
@@ -540,33 +544,65 @@ class Page(ttk.Frame):
         import tkinter.messagebox as mb
         from PIL import Image, ImageTk
         import tkinter as tk
+        
+        # If there's already an active picamera instance, close it first
+        if Page._active_picam is not None:
+            try:
+                Page._active_picam.stop()
+                Page._active_picam = None
+                print("Released previously active camera")
+            except Exception as e:
+                print(f"Error closing previous camera: {e}")
+        
         # Camera setup
         use_picamera2 = False
         if is_raspberry_pi() and has_picamera2():
             use_picamera2 = True
+        
+        picam = None
+        cap = None
+        
         if use_picamera2:
             try:
                 from picamera2 import Picamera2 # type: ignore
                 import numpy as np
-            except ImportError:
-                mb.showerror('Camera Error', 'picamera2 is not installed')
+                picam = Picamera2()
+                config = picam.create_preview_configuration()
+                picam.configure(config)
+                picam.start()
+                Page._active_picam = picam  # Store reference to active camera
+                # Get camera resolution
+                cam_res = picam.capture_metadata()['ScalerCrop'][2:]
+                native_width, native_height = cam_res if cam_res else (640, 480)
+            except Exception as e:
+                mb.showerror('Camera Error', f'Error initializing picamera2: {str(e)}')
+                # Clean up if initialization fails
+                if picam is not None:
+                    try:
+                        picam.stop()
+                        Page._active_picam = None
+                    except:
+                        pass
                 return
-            picam = Picamera2()
-            config = picam.create_preview_configuration()
-            picam.configure(config)
-            picam.start()
-            # Get camera resolution
-            cam_res = picam.capture_metadata()['ScalerCrop'][2:]
-            native_width, native_height = cam_res if cam_res else (640, 480)
         else:
-            cap = cv2.VideoCapture(0)
-            if not cap.isOpened():
-                mb.showerror('Camera Error', 'Could not open webcam')
+            try:
+                cap = cv2.VideoCapture(0)
+                if not cap.isOpened():
+                    mb.showerror('Camera Error', 'Could not open webcam')
+                    return
+                cap.set(cv2.CAP_PROP_FRAME_WIDTH, 9999)
+                cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 9999)
+                native_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+                native_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+            except Exception as e:
+                mb.showerror('Camera Error', f'Error initializing webcam: {str(e)}')
+                if cap is not None:
+                    try:
+                        cap.release()
+                    except:
+                        pass
                 return
-            cap.set(cv2.CAP_PROP_FRAME_WIDTH, 9999)
-            cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 9999)
-            native_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-            native_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+                
         aspect = native_width / native_height if native_height != 0 else 4/3
         # Get screen size and set initial window size
         root = self.winfo_toplevel()
@@ -608,28 +644,36 @@ class Page(ttk.Frame):
         def update_frame():
             if not self._camera_running:
                 return
-            if use_picamera2:
-                frame = picam.capture_array()
-                self._camera_frame = frame.copy()
-                w, h = self._last_preview_size
-                preview_img = cv2.cvtColor(frame, cv2.COLOR_RGBA2RGB)
-                preview_pil = Image.fromarray(preview_img)
-                preview_pil = preview_pil.resize((w, h))
-                imgtk = ImageTk.PhotoImage(image=preview_pil)
-                video_frame.imgtk = imgtk
-                video_frame.config(image=imgtk)
-            else:
-                ret, frame = cap.read()
-                if ret:
+            try:
+                if use_picamera2:
+                    if picam is None or Page._active_picam is None:
+                        return
+                    frame = picam.capture_array()
                     self._camera_frame = frame.copy()
                     w, h = self._last_preview_size
-                    preview_img = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                    preview_img = cv2.cvtColor(frame, cv2.COLOR_RGBA2RGB)
                     preview_pil = Image.fromarray(preview_img)
                     preview_pil = preview_pil.resize((w, h))
                     imgtk = ImageTk.PhotoImage(image=preview_pil)
                     video_frame.imgtk = imgtk
                     video_frame.config(image=imgtk)
-            cam_win.after(20, update_frame)
+                else:
+                    if cap is None:
+                        return
+                    ret, frame = cap.read()
+                    if ret:
+                        self._camera_frame = frame.copy()
+                        w, h = self._last_preview_size
+                        preview_img = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                        preview_pil = Image.fromarray(preview_img)
+                        preview_pil = preview_pil.resize((w, h))
+                        imgtk = ImageTk.PhotoImage(image=preview_pil)
+                        video_frame.imgtk = imgtk
+                        video_frame.config(image=imgtk)
+                cam_win.after(20, update_frame)
+            except Exception as e:
+                print(f"Error in update_frame: {str(e)}")
+                cleanup()
         def on_resize(event):
             win_w = cam_win.winfo_width() - 20
             win_h = cam_win.winfo_height() - button_area - extra_margin - 20
@@ -664,10 +708,29 @@ class Page(ttk.Frame):
         def cleanup():
             self._camera_running = False
             if use_picamera2:
-                picam.stop()
+                try:
+                    if picam is not None:
+                        picam.stop()
+                        Page._active_picam = None
+                        print("Camera resources released in cleanup")
+                except Exception as e:
+                    print(f"Error stopping picamera: {str(e)}")
             else:
-                cap.release()
+                try:
+                    if cap is not None:
+                        cap.release()
+                except Exception as e:
+                    print(f"Error releasing camera: {str(e)}")
             cam_win.destroy()
+            
+        # Ensure cleanup happens when main app closes too
+        root = self.winfo_toplevel()
+        root_destroy_orig = root.destroy
+        def root_destroy_wrapper():
+            cleanup()
+            root_destroy_orig()
+        root.destroy = root_destroy_wrapper
+        
         capture_btn.config(command=on_capture)
         cancel_btn.config(command=on_cancel)
         cam_win.protocol('WM_DELETE_WINDOW', on_cancel)
@@ -723,6 +786,30 @@ class Page(ttk.Frame):
         )
         close_btn.place(relx=1.0, rely=0.0, anchor='ne', x=-20, y=20)
         close_btn.bind('<Button-1>', lambda e: win.destroy())
+
+    def __del__(self):
+        """Destructor to ensure camera resources are released when the page is destroyed."""
+        try:
+            # Close any active camera when page is destroyed
+            if Page._active_picam is not None:
+                try:
+                    Page._active_picam.stop()
+                    Page._active_picam = None
+                    print("Camera resources released in destructor")
+                except Exception as e:
+                    print(f"Error closing camera in destructor: {e}")
+        except:
+            pass
+
+    def close_camera(self):
+        """Explicitly close any active camera."""
+        try:
+            if Page._active_picam is not None:
+                Page._active_picam.stop()
+                Page._active_picam = None
+                print("Camera resources explicitly released")
+        except Exception as e:
+            print(f"Error explicitly closing camera: {e}")
 
 def get_model_path(relative_path):
     """Helper function to get model path with environment variable support"""
@@ -1003,6 +1090,19 @@ if __name__ == '__main__':
     
     notebook.add(frog, text='Devision Page')
     notebook.add(oyster, text='Oyster Page')
+    
+    # Ensure camera is closed when switching tabs
+    def on_tab_change(event):
+        # Close any active camera when switching tabs
+        if hasattr(Page, '_active_picam') and Page._active_picam is not None:
+            try:
+                Page._active_picam.stop()
+                Page._active_picam = None
+                print("Camera closed due to tab switch")
+            except Exception as e:
+                print(f"Error closing camera on tab switch: {e}")
+    
+    notebook.bind("<<NotebookTabChanged>>", on_tab_change)
     
     notebook.grid(row=0, column=0, sticky='NSEW')
     
