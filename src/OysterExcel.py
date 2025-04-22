@@ -13,13 +13,16 @@ def get_excel_path(relative_path):
     """Helper function to get excel path with environment variable support"""
     if relative_path.startswith('excel/') or relative_path == 'excel':
         path = Path(relative_path)
+        subdir = ""
         if os.environ.get('DEVISION_EXCEL'):
             # If we're in a bundled app, use the environment variable path
-            subdir = str(path).split('excel/', 1)[1] if 'excel/' in str(path) else ''
+            if 'excel/' in str(path):
+                subdir = str(path).split('excel/', 1)[1]
             path = Path(os.environ.get('DEVISION_EXCEL')) / subdir
             print(f"Using bundled excel path: {path}")
         # Make sure directory exists
-        os.makedirs(os.path.dirname(path) if subdir else path, exist_ok=True)
+        dir_to_create = os.path.dirname(path) if subdir else path
+        os.makedirs(dir_to_create, exist_ok=True)
         return path
     else:
         return Path(relative_path)

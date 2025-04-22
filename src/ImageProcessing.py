@@ -15,13 +15,27 @@ def get_data_path(relative_path):
     """Helper function to get data path with environment variable support"""
     if relative_path.startswith('data/') or relative_path == 'data':
         path = Path(relative_path)
+        subdir = ""
         if os.environ.get('DEVISION_DATA'):
             # If we're in a bundled app, use the environment variable path
-            subdir = str(path).split('data/', 1)[1] if 'data/' in str(path) else ''
+            if 'data/' in str(path):
+                subdir = str(path).split('data/', 1)[1]
             path = Path(os.environ.get('DEVISION_DATA')) / subdir
             print(f"Using bundled data path: {path}")
+        
         # Make sure directory exists
-        os.makedirs(os.path.dirname(path) if subdir else path, exist_ok=True)
+        try:
+            dir_to_create = os.path.dirname(path) if subdir else path
+            
+            # Check if a file exists where we want to create a directory
+            if os.path.isfile(dir_to_create):
+                print(f"Found file instead of directory at {dir_to_create}, removing it")
+                os.remove(dir_to_create)
+                
+            os.makedirs(dir_to_create, exist_ok=True)
+        except Exception as e:
+            print(f"Warning: Error handling data path {path}: {str(e)}")
+            
         return path
     else:
         return Path(relative_path)
@@ -91,9 +105,26 @@ class ImageList(list):
         str_paths = list(map(lambda x: str(x), self.paths))
         file_path = get_data_path(f'data/ImageList{self.name}.json')
         
-        os.makedirs(os.path.dirname(file_path), exist_ok=True)
-        with open(file_path, 'w') as file:
-            json.dump(obj=str_paths, fp=file, indent=2)
+        # Ensure parent directory exists
+        try:
+            parent_dir = os.path.dirname(file_path)
+            # Check if a file exists where we want to create a directory
+            if os.path.isfile(parent_dir):
+                os.remove(parent_dir)  # Remove the file if it exists
+            os.makedirs(parent_dir, exist_ok=True)
+            
+            with open(file_path, 'w') as file:
+                json.dump(obj=str_paths, fp=file, indent=2)
+        except Exception as e:
+            print(f"Warning: Could not save image list to {file_path}: {str(e)}")
+            # Try to write to a fallback location if needed
+            try:
+                fallback_path = Path(f'ImageList{self.name}.json')
+                with open(fallback_path, 'w') as file:
+                    json.dump(obj=str_paths, fp=file, indent=2)
+                print(f"Saved image list to fallback location: {fallback_path}")
+            except Exception as e2:
+                print(f"Failed to save image list to fallback location: {str(e2)}")
 
 def highlight_boundary(img: Image.Image, mask: Image.Image, width=1, classes=1, class_dct={}):
     """_summary_

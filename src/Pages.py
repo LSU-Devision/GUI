@@ -418,8 +418,12 @@ class Page(ttk.Frame):
         """_summary_
         """
         initialdir = get_images_path('images')
-        # Make sure the directory exists
-        os.makedirs(initialdir, exist_ok=True)
+        # Always ensure the directory exists
+        try:
+            os.makedirs(initialdir, exist_ok=True)
+            print(f"Ensured images directory exists: {initialdir}")
+        except Exception as e:
+            print(f"Warning: Could not create images directory: {str(e)}")
         
         file_path = askopenfilename(
                             initialdir=initialdir,
@@ -725,7 +729,9 @@ def get_model_path(relative_path):
     if os.environ.get('DEVISION_MODELS'):
         # If we're in a bundled app, use the environment variable path
         if str(model_path).startswith('models'):
-            subdir = str(model_path).split('models/', 1)[1] if 'models/' in str(model_path) else ''
+            subdir = ""
+            if 'models/' in str(model_path):
+                subdir = str(model_path).split('models/', 1)[1]
             model_path = Path(os.environ.get('DEVISION_MODELS')) / subdir
             print(f"Using bundled model path: {model_path}")
     return model_path
@@ -736,7 +742,9 @@ def get_annotation_path(relative_path):
     if os.environ.get('DEVISION_ANNOTATIONS'):
         # If we're in a bundled app, use the environment variable path
         if str(annotation_path).startswith('annotations'):
-            subdir = str(annotation_path).split('annotations/', 1)[1] if 'annotations/' in str(annotation_path) else ''
+            subdir = ""
+            if 'annotations/' in str(annotation_path):
+                subdir = str(annotation_path).split('annotations/', 1)[1]
             annotation_path = Path(os.environ.get('DEVISION_ANNOTATIONS')) / subdir
             print(f"Using bundled annotation path: {annotation_path}")
     return annotation_path
@@ -747,7 +755,9 @@ def get_images_path(relative_path):
     if os.environ.get('DEVISION_IMAGES'):
         # If we're in a bundled app, use the environment variable path
         if str(images_path).startswith('images'):
-            subdir = str(images_path).split('images/', 1)[1] if 'images/' in str(images_path) else ''
+            subdir = ""
+            if 'images/' in str(images_path):
+                subdir = str(images_path).split('images/', 1)[1]
             images_path = Path(os.environ.get('DEVISION_IMAGES')) / subdir
             print(f"Using bundled images path: {images_path}")
     return images_path
@@ -758,7 +768,9 @@ def get_excel_path(relative_path):
     if os.environ.get('DEVISION_EXCEL'):
         # If we're in a bundled app, use the environment variable path
         if str(excel_path).startswith('excel'):
-            subdir = str(excel_path).split('excel/', 1)[1] if 'excel/' in str(excel_path) else ''
+            subdir = ""
+            if 'excel/' in str(excel_path):
+                subdir = str(excel_path).split('excel/', 1)[1]
             excel_path = Path(os.environ.get('DEVISION_EXCEL')) / subdir
             print(f"Using bundled excel path: {excel_path}")
     return excel_path
@@ -835,9 +847,12 @@ class OysterPage(Page):
 
         annotation_fp = get_annotation_path(f"annotations/oysterannotation{self.image_pointer}.png")
         if self.settings['toggles']['autosave-image-default']:
-            # Make sure annotations directory exists
-            os.makedirs(os.path.dirname(annotation_fp), exist_ok=True)
-            annotation.save(fp=annotation_fp)
+            # Ensure annotations directory exists
+            try:
+                os.makedirs(os.path.dirname(annotation_fp), exist_ok=True)
+                annotation.save(fp=annotation_fp)
+            except Exception as e:
+                print(f"Warning: Could not save annotation: {str(e)}")
         
         self.brood_count_dict[img_pointer] = count
         self.set_prediction_image(img_pointer, annotation_fp)
@@ -883,8 +898,12 @@ class OysterPage(Page):
     
     def load_excel(self):        
         initialdir = get_excel_path('excel')
-        # Make sure the directory exists
-        os.makedirs(initialdir, exist_ok=True)
+        # Always ensure the directory exists
+        try:
+            os.makedirs(initialdir, exist_ok=True)
+            print(f"Ensured excel directory exists: {initialdir}")
+        except Exception as e:
+            print(f"Warning: Could not create excel directory: {str(e)}")
         
         file_path = askopenfilename(
             initialdir=initialdir,
@@ -959,9 +978,12 @@ class DevisionPage(Page):
         
         annotation_fp = get_annotation_path(f"annotations/devisionannotation{self.image_pointer}.png")
         if self.settings['toggles']['autosave-image-default']:
-            # Make sure annotations directory exists
-            os.makedirs(os.path.dirname(annotation_fp), exist_ok=True)
-            annotation.save(fp=annotation_fp)
+            # Ensure annotations directory exists
+            try:
+                os.makedirs(os.path.dirname(annotation_fp), exist_ok=True)
+                annotation.save(fp=annotation_fp)
+            except Exception as e:
+                print(f"Warning: Could not save annotation: {str(e)}")
         
         
         self.egg_count_dict[img_pointer] = count
