@@ -69,6 +69,9 @@ This step is only required for Raspberry Pi users who want to use the Pi camera.
 
 Note: For ease of setup, we recommend having a USB keyboard, mouse, and flash drive
 
+### Hardware Setup Tutorial 
+* video link: https://youtu.be/5IRF50kIswU
+
 ### Camera Setup
 1. Connect to WiFi
 2. Install updates for Raspberry Pi Software 
@@ -96,6 +99,3 @@ Note: For ease of setup, we recommend having a USB keyboard, mouse, and flash dr
    * Recommended placement is along the base of the screen intersecting casing at a 10-30 degree angle
    * This allows the battery to double as a base/stand for the Pi
 * Fill unused cooling holes and ports (to prevent water/dust damage)
-
-### Additional Configuration
-* Hiding the taskbar to allow for more screen space:
