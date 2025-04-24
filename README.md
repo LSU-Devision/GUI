@@ -59,7 +59,7 @@ This step is only required for Raspberry Pi users who want to use the Pi camera.
 * Raspberry Pi native camera (Raspberry Pi AI Camera recommended)
    * Note: You can use any Raspberry Pi camera or USB camera, but the casing was designed specifically for the Pi AI/Module 2 cameras
 * Raspberry Pi 7" touchscreen display
-* 3D printed housing (see attached files)
+* 3D printed housing ([see attached files](https://github.com/LSU-Devision/GUI/tree/main/3d-raspberry-pi-housing))
    * Requires 4-40 x ¼ screws (x8) for assembly
 * Portable Battery Solution:
    * ~65W USB-C Power Delivery Power Bank 
