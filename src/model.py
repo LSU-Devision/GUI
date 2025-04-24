@@ -54,13 +54,13 @@ class ModelAPI:
     def _predict(self):
         n_tiles = self._model._guess_n_tiles(self._arr)
         lbls, details = self._model.predict_instances(self._arr, n_tiles=n_tiles, axes='YXC')
-        
+                
         if self._nclasses > 1:
-            class_dct = {k+1:v+1 for k, v in enumerate(details['class_id'])}
+            class_dct = {k+1:v for k, v in enumerate(details['class_id'])}
         else:
             class_dct = {}
         
-        mask_image = Image.new(mode='1', color=0, size=self._image.size)
+        mask_image = Image.new(mode='L', color=0, size=self._image.size)
         mask_image.putdata(lbls.flatten())
         
         self._count = len(details['points'])

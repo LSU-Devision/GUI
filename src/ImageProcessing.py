@@ -86,7 +86,6 @@ def highlight_boundary(img: Image.Image, mask: Image.Image, width=1, classes=1, 
         img (_type_): _description_
     """
     class_dct.update({0:0})
-    
     colors = {
         1: 'red',
         2: 'blue',
@@ -104,7 +103,7 @@ def highlight_boundary(img: Image.Image, mask: Image.Image, width=1, classes=1, 
         f = lambda x: class_dct[x]
         f = np.vectorize(f)
         mask_arr = f(mask_arr)
-    
+        
     classes_ids = np.unique(list(class_dct.values()))
     colors_imgs = {}
     class_imgs = {}

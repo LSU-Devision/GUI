@@ -20,4 +20,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 ENV DISPLAY=:0
 
 # Run the Tkinter application when the container starts
-CMD ["python", "src/main.py"]
+CMD ["python", "src/Pages.py"]
