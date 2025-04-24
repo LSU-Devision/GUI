@@ -6,8 +6,6 @@ Framework created by [Jeffrey Tepper](https://github.com/jeffreytepper)
 - [Building an Executable](#building-an-executable)
 - [Raspberry Pi Setup](#raspberry-pi-setup)
 
-This step is only required for Raspberry Pi users who want to use the Pi camera. On other systems, only `opencv-python` is required for webcam support.
-
 ## Building an Executable
 To build an executable on your target system:
 
@@ -52,6 +50,7 @@ If you are running this application in development mode (not using the pre-built
 ```bash
 pip install picamera2
 ```
+This step is only required for Raspberry Pi users who want to use the Pi camera. On other systems, only `opencv-python` is required for webcam support.
 
 ### Hardware Requirements
 * Raspberry Pi 5 (>=8GB recommended)
