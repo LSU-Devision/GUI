@@ -417,16 +417,25 @@ class Page(ttk.Frame):
     def add_image(self):
         """_summary_
         """
+        initialdir = get_images_path('images')
+        # Always ensure the directory exists
+        try:
+            os.makedirs(initialdir, exist_ok=True)
+            print(f"Ensured images directory exists: {initialdir}")
+        except Exception as e:
+            print(f"Warning: Could not create images directory: {str(e)}")
+        
         file_path = askopenfilename(
-                                initialdir=INTIAL_DIR / Path('images'),
-                                title='Please select an image',
-                                filetypes=[('Images', '*.jpg *.JPG *.jpeg *.JPEG *.png *.PNG *.tif *.tiff')]
-                            )
+                            initialdir=initialdir,
+                            title='Please select an image',
+                            filetypes=[('Images', '*.jpg *.JPG *.jpeg *.JPEG *.png *.PNG *.tif *.tiff')]
+                        )
         if file_path == () or Path(file_path).suffix not in ['.jpg', '.JPG', '.jpeg', '.png', '.PNG', '.tif', '.tiff']:
             return
         # Store original PIL image
         pil_img = Image.open(file_path)
         self._original_images.append(pil_img.copy())
+        pil_img.close()
         self.images.append(file_path)
         self.prediction_images.append(None)
         self._original_pred_images.append(None)
@@ -603,7 +612,7 @@ class Page(ttk.Frame):
                 frame = picam.capture_array()
                 self._camera_frame = frame.copy()
                 w, h = self._last_preview_size
-                preview_img = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                preview_img = cv2.cvtColor(frame, cv2.COLOR_RGBA2RGB)
                 preview_pil = Image.fromarray(preview_img)
                 preview_pil = preview_pil.resize((w, h))
                 imgtk = ImageTk.PhotoImage(image=preview_pil)
@@ -636,14 +645,17 @@ class Page(ttk.Frame):
             if self._camera_frame is not None:
                 with tempfile.NamedTemporaryFile(suffix='.jpg', delete=False) as tmp:
                     img_path = tmp.name
+                    # Convert color before saving captured frame
+                    frame = self._camera_frame.copy()
                     if use_picamera2:
-                        # Save using OpenCV
-                        cv2.imwrite(img_path, self._camera_frame)
+                        # Convert RGBA camera frame to BGR for correct color saving
+                        frame_to_save = cv2.cvtColor(frame, cv2.COLOR_RGBA2BGR)
                     else:
-                        cv2.imwrite(img_path, self._camera_frame)
+                        # Frame is already in BGR format
+                        frame_to_save = frame
+                    cv2.imwrite(img_path, frame_to_save)
                 pil_img = Image.open(img_path)
                 self._original_images.append(pil_img.copy())
-                pil_img.close()
                 self.images.append(img_path)
                 self.prediction_images.append(None)
                 self._original_pred_images.append(None)
@@ -653,11 +665,12 @@ class Page(ttk.Frame):
         def on_cancel():
             cleanup()
         def cleanup():
-            self._camera_running = False
             if use_picamera2:
                 picam.stop()
+                picam.close()
             else:
                 cap.release()
+            self._camera_running = False
             cam_win.destroy()
         capture_btn.config(command=on_capture)
         cancel_btn.config(command=on_cancel)
@@ -714,6 +727,58 @@ class Page(ttk.Frame):
         )
         close_btn.place(relx=1.0, rely=0.0, anchor='ne', x=-20, y=20)
         close_btn.bind('<Button-1>', lambda e: win.destroy())
+
+def get_model_path(relative_path):
+    """Helper function to get model path with environment variable support"""
+    model_path = Path(relative_path)
+    if os.environ.get('DEVISION_MODELS'):
+        # If we're in a bundled app, use the environment variable path
+        if str(model_path).startswith('models'):
+            subdir = ""
+            if 'models/' in str(model_path):
+                subdir = str(model_path).split('models/', 1)[1]
+            model_path = Path(os.environ.get('DEVISION_MODELS')) / subdir
+            print(f"Using bundled model path: {model_path}")
+    return model_path
+
+def get_annotation_path(relative_path):
+    """Helper function to get annotation path with environment variable support"""
+    annotation_path = Path(relative_path)
+    if os.environ.get('DEVISION_ANNOTATIONS'):
+        # If we're in a bundled app, use the environment variable path
+        if str(annotation_path).startswith('annotations'):
+            subdir = ""
+            if 'annotations/' in str(annotation_path):
+                subdir = str(annotation_path).split('annotations/', 1)[1]
+            annotation_path = Path(os.environ.get('DEVISION_ANNOTATIONS')) / subdir
+            print(f"Using bundled annotation path: {annotation_path}")
+    return annotation_path
+
+def get_images_path(relative_path):
+    """Helper function to get images path with environment variable support"""
+    images_path = Path(relative_path)
+    if os.environ.get('DEVISION_IMAGES'):
+        # If we're in a bundled app, use the environment variable path
+        if str(images_path).startswith('images'):
+            subdir = ""
+            if 'images/' in str(images_path):
+                subdir = str(images_path).split('images/', 1)[1]
+            images_path = Path(os.environ.get('DEVISION_IMAGES')) / subdir
+            print(f"Using bundled images path: {images_path}")
+    return images_path
+
+def get_excel_path(relative_path):
+    """Helper function to get excel path with environment variable support"""
+    excel_path = Path(relative_path)
+    if os.environ.get('DEVISION_EXCEL'):
+        # If we're in a bundled app, use the environment variable path
+        if str(excel_path).startswith('excel'):
+            subdir = ""
+            if 'excel/' in str(excel_path):
+                subdir = str(excel_path).split('excel/', 1)[1]
+            excel_path = Path(os.environ.get('DEVISION_EXCEL')) / subdir
+            print(f"Using bundled excel path: {excel_path}")
+    return excel_path
 
 class OysterPage(Page):
     def __init__(self, *args, **kwargs):
@@ -774,9 +839,9 @@ class OysterPage(Page):
             return 0
         classes = 1  # Default value
         if model_path == '2-4mm model':
-            model_path = Path('models') / Path('oyster_2-4mm')
+            model_path = get_model_path('models/oyster_2-4mm')
         elif model_path == '4-6mm model':
-            model_path = Path('models') / Path('oyster_4-6mm')
+            model_path = get_model_path('models/oyster_4-6mm')
         else:
             self.model_error_label.config(text='Please select a model before predicting.')
             return 0
@@ -785,9 +850,14 @@ class OysterPage(Page):
             api = ModelAPI(model_path, img, classes)    
             count, annotation = api.get()
 
-        annotation_fp = Path('annotations') / Path(f"oysterannotation{self.image_pointer}.png")
+        annotation_fp = get_annotation_path(f"annotations/oysterannotation{self.image_pointer}.png")
         if self.settings['toggles']['autosave-image-default']:
-            annotation.save(fp=annotation_fp)
+            # Ensure annotations directory exists
+            try:
+                os.makedirs(os.path.dirname(annotation_fp), exist_ok=True)
+                annotation.save(fp=annotation_fp)
+            except Exception as e:
+                print(f"Warning: Could not save annotation: {str(e)}")
         
         self.brood_count_dict[img_pointer] = count
         self.set_prediction_image(img_pointer, annotation_fp)
@@ -832,13 +902,21 @@ class OysterPage(Page):
     
     
     def load_excel(self):        
+        initialdir = get_excel_path('excel')
+        # Always ensure the directory exists
+        try:
+            os.makedirs(initialdir, exist_ok=True)
+            print(f"Ensured excel directory exists: {initialdir}")
+        except Exception as e:
+            print(f"Warning: Could not create excel directory: {str(e)}")
+        
         file_path = askopenfilename(
-            initialdir=INTIAL_DIR / Path('excel'),
+            initialdir=initialdir,
             title='Please select an excel file to open',
             filetypes=[('Excel Files', '*.xlsx *.xlsb *.xltx *.xltm *.xls *.xlt *.ods')]
         )
         
-        if Path(file_path).suffix not in '.xlsx .xlsb .xltx .xltm .xls .xlt .ods'.split(' '):
+        if file_path == () or Path(file_path).suffix not in '.xlsx .xlsb .xltx .xltm .xls .xlt .ods'.split(' '):
             return
 
         self.excel_obj.read_excel(file_path)
@@ -890,10 +968,10 @@ class DevisionPage(Page):
                 
         model_str = self.model_select.value
         if model_str == 'Four Embryo Classification - StarDist2D':
-            model_dir = Path('models') / Path('xenopus-4-class')
+            model_dir = get_model_path('models/xenopus-4-class')
             classes = 4
         elif model_str == 'Egg Counter - StarDist2D':
-            model_dir = Path('models') / Path('frog-egg-counter')
+            model_dir = get_model_path('models/frog-egg-counter')
             classes = 1
         else:
             self.model_error_label.config(text='Failed to load model: Please select a valid model.')
@@ -903,9 +981,14 @@ class DevisionPage(Page):
             api = ModelAPI(model_dir, img, classes)
             count, annotation = api.get()
         
-        annotation_fp = Path('annotations') / Path(f"devisionannotation{self.image_pointer}.png")
+        annotation_fp = get_annotation_path(f"annotations/devisionannotation{self.image_pointer}.png")
         if self.settings['toggles']['autosave-image-default']:
-            annotation.save(fp=annotation_fp)
+            # Ensure annotations directory exists
+            try:
+                os.makedirs(os.path.dirname(annotation_fp), exist_ok=True)
+                annotation.save(fp=annotation_fp)
+            except Exception as e:
+                print(f"Warning: Could not save annotation: {str(e)}")
         
         
         self.egg_count_dict[img_pointer] = count

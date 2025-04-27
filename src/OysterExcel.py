@@ -9,6 +9,24 @@ import os
 if not os.path.exists('excel'):
     os.mkdir('excel')
 
+def get_excel_path(relative_path):
+    """Helper function to get excel path with environment variable support"""
+    if relative_path.startswith('excel/') or relative_path == 'excel':
+        path = Path(relative_path)
+        subdir = ""
+        if os.environ.get('DEVISION_EXCEL'):
+            # If we're in a bundled app, use the environment variable path
+            if 'excel/' in str(path):
+                subdir = str(path).split('excel/', 1)[1]
+            path = Path(os.environ.get('DEVISION_EXCEL')) / subdir
+            print(f"Using bundled excel path: {path}")
+        # Make sure directory exists
+        dir_to_create = os.path.dirname(path) if subdir else path
+        os.makedirs(dir_to_create, exist_ok=True)
+        return path
+    else:
+        return Path(relative_path)
+
 class OysterExcel():
     id = 0
     def __init__(self, *, file_name='oyster-data.xlsx', staff_name=''):
@@ -164,7 +182,7 @@ class OysterExcel():
            data, which contains data of all subsamples;
            and statistics, which contains aggregate data performed on subsamples
         """
-        file_path = Path('excel') / Path(f'data{self.id}.xlsx')
+        file_path = get_excel_path(f'excel/data{self.id}.xlsx')
         
         # Converting the internal dataframe names to human readable export
         print_df = self.df.copy()

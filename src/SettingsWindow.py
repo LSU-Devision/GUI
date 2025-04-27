@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, font
 from ttkbootstrap import Style
 from WarningWindow import WarningWindow
 
@@ -38,17 +38,38 @@ class Settings(tk.Toplevel):
         self.child = Settings.instance
         self.title('Settings')
         
-        # Pop up windows options
+        # Get screen dimensions
+        screen_width = self.winfo_screenwidth()
+        screen_height = self.winfo_screenheight()
+        
+        # Scale fonts based on screen resolution
+        self._scale_fonts(screen_width, screen_height)
+        
+        # Calculate window size based on screen size (using percentages)
+        # Use at most 80% of screen width/height, but not less than minimum values
+        width_percentage = 0.35  # 35% of screen width
+        height_percentage = 0.6  # 60% of screen height
+        
+        self.pop_up_window_width = min(max(int(screen_width * width_percentage), 400), 600)
+        self.pop_up_window_height = min(max(int(screen_height * height_percentage), 400), 600)
+        
+        # Position the window - prefer to the right of main window if space allows
         main_window_width = self.parent.winfo_width()
         main_window_height = self.parent.winfo_height()
+        main_window_x = self.parent.winfo_rootx()
+        main_window_y = self.parent.winfo_rooty()
         
-        self.pop_up_window_width = 550
-        self.pop_up_window_height = 330
+        # First try positioning to the right of main window
+        x = main_window_x + main_window_width + 20
+        y = main_window_y + (main_window_height // 2 - self.pop_up_window_height // 2)
         
-        x = main_window_width + 75
-        y = main_window_height // 2 - self.pop_up_window_height // 2 
+        # If window would be off-screen, center it on screen instead
+        if x + self.pop_up_window_width > screen_width:
+            x = screen_width // 2 - self.pop_up_window_width // 2
+            y = screen_height // 2 - self.pop_up_window_height // 2
 
-        self.minsize(self.pop_up_window_width, self.pop_up_window_height)
+        # Set minimum size and geometry
+        self.minsize(400, 400)
         self.geometry(f'{self.pop_up_window_width}x{self.pop_up_window_height}+{x}+{y}')
         
         # Placing the child object within the new window
@@ -58,6 +79,27 @@ class Settings(tk.Toplevel):
         self.child.grid(row=0, column=0, sticky='nsew')
         
         self.bind('<Destroy>', self.on_destroy)        
+    
+    def _scale_fonts(self, screen_width, screen_height):
+        """Scale fonts based on screen resolution"""
+        # Base font sizes for different screen resolutions
+        if screen_width >= 2560:  # 4K and higher
+            label_size = 11
+            default_size = 10
+            text_size = 10
+        elif screen_width >= 1920:  # Full HD
+            label_size = 10
+            default_size = 9
+            text_size = 9
+        else:  # Smaller screens
+            label_size = 9
+            default_size = 8
+            text_size = 8
+            
+        # Configure font sizes
+        font.nametofont("TkHeadingFont").configure(size=label_size)
+        font.nametofont("TkDefaultFont").configure(size=default_size)
+        font.nametofont("TkTextFont").configure(size=text_size)
     
     def on_destroy(self, event):
         Settings.is_open = False
@@ -74,37 +116,85 @@ class SettingsWindow(ttk.Frame):
     # Initializes before object creation to programmatically create class variables at runtime
     # but before the frame is created
     def __new__(cls, *args):
+        # Make sure the config directory exists
+        config_dir = path.dirname(cls.DEFAULT_SETTINGS)
+        if not path.exists(config_dir):
+            try:
+                pathlib.Path(config_dir).mkdir(parents=True, exist_ok=True)
+            except Exception as e:
+                print(f"Error creating config directory: {e}")
+                
         if not path.exists(cls.DEFAULT_SETTINGS):
             json_str = """
-{
-    "toggles":{
-        "excel-default": true,
-        "clear-excel-default" : false,
-        "clear-output-default" : true,
-        "autosave-image-default": true
-    },
+                        {
+                            "toggles":{
+                                "excel-default": true,
+                                "clear-excel-default" : false,
+                                "clear-output-default" : true,
+                                "autosave-image-default": true
+                            },
 
-    "theme":"darkly-style"
-}"""
-            with open(cls.DEFAULT_SETTINGS, 'w') as file:
-                file.write(json_str)
+                            "theme":"darkly-style"
+                        }"""
+            try:
+                with open(cls.DEFAULT_SETTINGS, 'w') as file:
+                    file.write(json_str)
+            except Exception as e:
+                print(f"Error writing default settings: {e}")
         
         if not path.exists(cls.USER_SETTINGS):
-            shutil.copy(cls.DEFAULT_SETTINGS, cls.USER_SETTINGS)
+            try:
+                shutil.copy(cls.DEFAULT_SETTINGS, cls.USER_SETTINGS)
+            except Exception as e:
+                print(f"Error copying default settings to user settings: {e}")
              
-        with open(cls.USER_SETTINGS, 'r') as file:
-            cls._settings = json.load(file)
+        try:
+            with open(cls.USER_SETTINGS, 'r') as file:
+                cls._settings = json.load(file)
+        except Exception as e:
+            print(f"Error loading user settings: {e}")
+            # If we can't load user settings, use default settings
+            try:
+                with open(cls.DEFAULT_SETTINGS, 'r') as file:
+                    cls._settings = json.load(file)
+            except Exception as e2:
+                print(f"Error loading default settings: {e2}")
+                # Fallback to hardcoded settings if everything else fails
+                cls._settings = {
+                    "toggles": {
+                        "excel-default": True,
+                        "clear-excel-default": False,
+                        "clear-output-default": True,
+                        "autosave-image-default": True
+                    },
+                    "theme": "darkly-style"
+                }
         
+        # Create USER_THEMES file if it doesn't exist
+        if not path.exists(cls.USER_THEMES):
+            try:
+                with open(cls.USER_THEMES, 'w') as file:
+                    file.write('{}')  # Initialize with empty JSON object
+            except Exception as e:
+                print(f"Error creating user themes file: {e}")
+                
         # Load in custom themes from the Style singleton
-        Style().load_user_themes(file=cls.USER_THEMES)
+        try:
+            Style().load_user_themes(file=cls.USER_THEMES)
+        except Exception as e:
+            print(f"Error loading user themes: {e}")
         
         # Intialize the theme from file
+        try:
+            Style.instance.theme_use(cls._settings['theme'][:-6])
+        except Exception as e:
+            print(f"Error setting theme: {e}")
         
-        Style.instance.theme_use(cls._settings['theme'][:-6])
-        
-        
-        with open(cls.USER_SETTINGS, 'w') as file:
-            json.dump(cls._settings, file, indent=2)
+        try:
+            with open(cls.USER_SETTINGS, 'w') as file:
+                json.dump(cls._settings, file, indent=2)
+        except Exception as e:
+            print(f"Error writing user settings: {e}")
         
         # Create a new class object from super method, this also instantiates an object put doesn't call supers init
         return super().__new__(cls)
@@ -129,8 +219,14 @@ class SettingsWindow(ttk.Frame):
         # The dropdown menu object with various visual settings
         self._settings_tree = ttk.Treeview(container, columns=("status"), height=30, selectmode='browse')
         
-        self._settings_tree.column("#0", width=(args[0].pop_up_window_width // 3) * 2, minwidth=400)
-        self._settings_tree.column('status', width=args[0].pop_up_window_width // 3, minwidth=200)
+        # Calculate proportional column widths based on window size
+        total_width = args[0].pop_up_window_width - 20  # Account for scrollbar and borders
+        main_column_width = int(total_width * 0.7)  # 70% for main column
+        status_column_width = int(total_width * 0.3)  # 30% for status column
+        
+        # Set minimum width smaller to accommodate smaller screens
+        self._settings_tree.column("#0", width=main_column_width, minwidth=200)
+        self._settings_tree.column('status', width=status_column_width, minwidth=100)
         
         self._settings_tree.heading("status", text="Status", anchor="w")
         
@@ -182,6 +278,25 @@ class SettingsWindow(ttk.Frame):
         self._settings_tree.grid(row=0, column=0, sticky='nsew')
         vsb.grid(row=0, column=1, sticky='ns')
         hsb.grid(row=1, column=0, sticky='ew')
+        
+        # Add resize handler to adjust column widths when window is resized
+        args[0].bind("<Configure>", self._on_window_resize)
+    
+    def _on_window_resize(self, event):
+        """Adjust column widths when window is resized"""
+        # Only respond to our parent window's resize events
+        if event.widget == self.master:
+            # Get current window width
+            window_width = event.width
+            
+            # Recalculate column widths
+            total_width = window_width - 20  # Account for scrollbar and borders
+            main_column_width = int(total_width * 0.7)
+            status_column_width = int(total_width * 0.3)
+            
+            # Update column widths
+            self._settings_tree.column("#0", width=main_column_width)
+            self._settings_tree.column('status', width=status_column_width)
     
     # Settings for the default tab
     def _default_settings(self):
@@ -199,11 +314,12 @@ class SettingsWindow(ttk.Frame):
             self.cls._settings['toggles'][id] = not self.cls._settings['toggles'][id]
             self.write_user_settings()
         
+        # More concise, screen-friendly text
         settings_text = [
-            "Export Excel file to output folder upon predicting",
-            "Append new predictions to a new Excel file upon predicting",
-            "Create new Excel file upon clearing images",
-            "Automatically save images to annotations after predicting",
+            "Auto-export Excel file",
+            "New Excel for predictions",
+            "New Excel when clearing",
+            "Auto-save images",
         ]
         
         settings_id = [
@@ -260,7 +376,7 @@ class SettingsWindow(ttk.Frame):
         
         settings_text = [
            'Check for updates',
-           'Open user guide' 
+           'User guide' 
         ]
         
         settings_id = [
@@ -282,7 +398,6 @@ class SettingsWindow(ttk.Frame):
         self._settings_tree.tag_bind('guide-version', '<Double-1>', guide_select)
         self._settings_tree.tag_bind('guide-version', '<Return>', guide_select)
         
-        
     def _style_settings(self):
         # Callback function for changing style at runtime, writing settings to file
         def theme_select(event):
@@ -302,12 +417,27 @@ class SettingsWindow(ttk.Frame):
         # Create header for dark themes
         self._settings_tree.insert('style', 'end', iid='dt', text="Dark Themes", tags="Label")
         
-        # Fill theme menus
-        for x in self.__styles.lt_names: 
-            self._settings_tree.insert('lt', 'end', iid= x + '-style', text=x, tags="Theme", values='inactive')
+        # Group themes for more compact display - first create light themes
+        light_themes_per_row = 3
+        for i in range(0, len(self.__styles.lt_names), light_themes_per_row):
+            group = self.__styles.lt_names[i:i+light_themes_per_row]
+            row_id = f'light_row_{i//light_themes_per_row}'
             
-        for x in self.__styles.dt_names: 
-            self._settings_tree.insert('dt', 'end', iid= x + '-style', text=x, tags="Theme", values='inactive')
+            # For each group, create a row in the tree
+            for theme in group:
+                # Add individual theme as menu item with proper tag
+                self._settings_tree.insert('lt', 'end', iid=theme + '-style', text=theme, tags="Theme", values='inactive')
+            
+        # Create dark themes rows
+        dark_themes_per_row = 3
+        for i in range(0, len(self.__styles.dt_names), dark_themes_per_row):
+            group = self.__styles.dt_names[i:i+dark_themes_per_row]
+            row_id = f'dark_row_{i//dark_themes_per_row}'
+            
+            # For each group, create a row in the tree
+            for theme in group:
+                # Add individual theme as menu item with proper tag
+                self._settings_tree.insert('dt', 'end', iid=theme + '-style', text=theme, tags="Theme", values='inactive')
         
         self._settings_tree.tag_configure("Theme", font="TkTextFont")
         

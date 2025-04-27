@@ -4,6 +4,7 @@ from PIL import Image
 import numpy as np
 from csbdeep.utils import normalize
 import os
+from importlib import import_module
 
 from ImageProcessing import highlight_boundary
 
@@ -24,14 +25,31 @@ class ModelAPI:
         
         model_dir = Path(model_dir)
         
+        # If we're running as a bundled app, check for environment variable path
+        if getattr(import_module('sys'), 'frozen', False) and os.environ.get('DEVISION_MODELS'):
+            # If the model_dir is a relative path starting with 'models', use the environment variable
+            if str(model_dir).startswith('models'):
+                # Extract the subdirectory path after 'models/'
+                subdir = str(model_dir).split('models/', 1)[1] if 'models/' in str(model_dir) else ''
+                model_dir = Path(os.environ.get('DEVISION_MODELS')) / subdir
+                print(f"Using bundled model path: {model_dir}")
+        
         basedir = model_dir.parent
         name = model_dir.stem
         
-        self._model = StarDist2D(
-            config=None,
-            basedir=basedir,
-            name=name
-        )
+        try:
+            self._model = StarDist2D(
+                config=None,
+                basedir=basedir,
+                name=name
+            )
+        except Exception as e:
+            print(f"Error loading model from {model_dir}: {str(e)}")
+            # Print directory content to help with debugging
+            print(f"Directory exists: {os.path.exists(basedir)}")
+            if os.path.exists(basedir):
+                print(f"Files in {basedir}: {os.listdir(basedir)}")
+            raise
         
         self._image = img
         self._nclasses = classes
