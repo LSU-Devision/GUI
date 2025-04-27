@@ -925,6 +925,8 @@ if __name__ == '__main__':
     notebook.add(frog, text='Devision Page')
     notebook.add(oyster, text='Oyster Page')
     
+    #frog.grid(row=0, column=0, sticky='NSEW')
+    
     notebook.grid(row=0, column=0, sticky='NSEW')
     
     root.rowconfigure(0, weight=1)
