@@ -8,7 +8,7 @@ import numpy as np
 from csbdeep.utils import normalize
 
 import tkinter as tk
-from tkinter.filedialog import askopenfilename
+from tkinter.filedialog import askopenfilename, askopenfilenames
 import json
 
 from tkinter import ttk
@@ -415,8 +415,7 @@ class Page(ttk.Frame):
     
     
     def add_image(self):
-        """_summary_
-        """
+        """Allow selecting and uploading multiple images at once."""
         initialdir = get_images_path('images')
         # Always ensure the directory exists
         try:
@@ -425,22 +424,30 @@ class Page(ttk.Frame):
         except Exception as e:
             print(f"Warning: Could not create images directory: {str(e)}")
         
-        file_path = askopenfilename(
-                            initialdir=initialdir,
-                            title='Please select an image',
-                            filetypes=[('Images', '*.jpg *.JPG *.jpeg *.JPEG *.png *.PNG *.tif *.tiff')]
-                        )
-        if file_path == () or Path(file_path).suffix not in ['.jpg', '.JPG', '.jpeg', '.png', '.PNG', '.tif', '.tiff']:
+        from tkinter.filedialog import askopenfilenames
+        file_paths = askopenfilenames(
+            initialdir=initialdir,
+            title='Please select image(s)',
+            filetypes=[('Images', '*.jpg *.JPG *.jpeg *.JPEG *.png *.PNG')]
+        )
+        if not file_paths:
             return
-        # Store original PIL image
-        pil_img = Image.open(file_path)
-        self._original_images.append(pil_img.copy())
-        pil_img.close()
-        self.images.append(file_path)
-        self.prediction_images.append(None)
-        self._original_pred_images.append(None)
-        self.update_image(file_path)
-        self.set_image()
+        last_file_path = None
+        for file_path in file_paths:
+            if Path(file_path).suffix not in ['.jpg', '.JPG', '.jpeg', '.png', '.PNG']:
+                continue
+            # Store original PIL image
+            pil_img = Image.open(file_path)
+            self._original_images.append(pil_img.copy())
+            pil_img.close()
+            self.images.append(file_path)
+            self.prediction_images.append(None)
+            self._original_pred_images.append(None)
+            self.update_image(file_path)
+            last_file_path = file_path
+        # Only update the UI to the last image added
+        if last_file_path:
+            self.set_image()
         
     def update_image(self, file_path):
         """_summary_
@@ -790,7 +797,10 @@ class OysterPage(Page):
         self.settings_obj = SettingsWindow()
         self.settings = self.settings_obj.settings
         
-        self.model_select = self.add_input(DropdownBox, text="Model Select", dropdowns=["2-4mm model", "4-6mm model"])
+        self.model_select = self.add_input(DropdownBox, text="Model Select", dropdowns=[
+            "2-4mm model",
+            "4-6mm model",
+        ])
         # Give the Model Select column a higher weight and minsize to prevent shrinking
         self.top_frame.columnconfigure(0, weight=3, minsize=180)
         
@@ -822,12 +832,11 @@ class OysterPage(Page):
                 self.model_error_label.config(text='')
         self.model_select.menu_var.trace_add('write', clear_error_on_select)
         
-    #TODO: Convert this code to use some sort of image processing manager, more than ImageList
     def get_prediction(self, img_pointer=None):
         # Hide error label by default
         self.model_error_label.config(text='')
         
-        if not img_pointer:
+        if img_pointer is None:
             img_pointer = self.image_pointer
         
         if len(self.images) == 0  or img_pointer >= len(self.images) or img_pointer < 0:
@@ -846,11 +855,12 @@ class OysterPage(Page):
             self.model_error_label.config(text='Please select a model before predicting.')
             return 0
         
-        with Image.open(self.images.paths[self.image_pointer]) as img:  
+        # Always use img_pointer for image and annotation
+        with Image.open(self.images.paths[img_pointer]) as img:  
             api = ModelAPI(model_path, img, classes)    
             count, annotation = api.get()
 
-        annotation_fp = get_annotation_path(f"annotations/oysterannotation{self.image_pointer}.png")
+        annotation_fp = get_annotation_path(f"annotations/oysterannotation{img_pointer}.png")
         if self.settings['toggles']['autosave-image-default']:
             # Ensure annotations directory exists
             try:
