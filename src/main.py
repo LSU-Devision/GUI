@@ -1,5 +1,5 @@
 import tkinter as tk
-from Pages import OysterPage
+from pages import OysterPage
 
 if __name__ == '__main__':
     root = tk.Tk()

@@ -5,10 +5,14 @@ import numpy as np
 from csbdeep.utils import normalize
 import os
 from importlib import import_module
+import pandas as pd
+from image_processing import highlight_boundary
 
-from ImageProcessing import highlight_boundary
-
-### Stardist API
+def count_by_class(class_arr):
+    class_dict = {}
+    for class_id in class_arr:
+        class_dict[class_id] = class_dict.get(class_id, 0) + 1
+    return class_dict
 
 class ModelAPI:
     def __init__(self, 
@@ -72,19 +76,40 @@ class ModelAPI:
     def _predict(self):
         n_tiles = self._model._guess_n_tiles(self._arr)
         lbls, details = self._model.predict_instances(self._arr, n_tiles=n_tiles, axes='YXC')
-                
         if self._nclasses > 1:
             class_dct = {k+1:v for k, v in enumerate(details['class_id'])}
         else:
             class_dct = {}
-        
         mask_image = Image.new(mode='L', color=0, size=self._image.size)
         mask_image.putdata(lbls.flatten())
         
         self._count = len(details['points'])
-        self._out_image = highlight_boundary(self._image, mask_image, width=4, classes=self._nclasses, class_dct=class_dct)
         
-        #yield self._count, self._out_image
+        self.count_dct = count_by_class(details['class_id'])
+        self.color_dct = {
+            1: 'red',
+            2: 'blue',
+            3: 'green',
+            4: 'yellow'
+        }
+        
+        self._out_image = highlight_boundary(self._image, mask_image, width=4, classes=self._nclasses, class_dct=class_dct, colors=self.color_dct)
+
+    def df(self):
+        
+        
+        data_lst = [str(self._image_path.name), 
+                    self._count] + [self.count_dct.get(i, 0) for i in range(4)]
+        
+        df = pd.DataFrame([data_lst], 
+                     columns=['File', 
+                              'Total Count', 
+                              'Nonviable Count (Red)', 
+                              'Two-Split Count (Blue)', 
+                              'Four-Split Count (Green)', 
+                              'Eight-Split Count (Yellow)']
+                     )
+        return df
     
     def get(self):
         if self._count is None or self._out_image is None:
