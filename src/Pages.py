@@ -8,14 +8,14 @@ import numpy as np
 from csbdeep.utils import normalize
 
 import tkinter as tk
-from tkinter.filedialog import askopenfilename, askopenfilenames
+from tkinter.filedialog import askopenfilename, askopenfilenames, askdirectory
 import json
 
 from tkinter import ttk
 
 from Widgets import *
 from SettingsWindow import SettingsWindow, Settings
-from OysterExcel import OysterExcel
+from OysterExcel import OysterData
 from ImageProcessing import ImageList, THUMBNAIL_SIZE, highlight_boundary
 
 from PIL.ImageTk import PhotoImage, getimage
@@ -30,6 +30,7 @@ from model import ModelAPI
 
 import tempfile
 import cv2
+import sys
 
 # Raspberry Pi detection and picamera2 import check
 def is_raspberry_pi():
@@ -540,6 +541,8 @@ class Page(ttk.Frame):
 
     def take_image(self):
         """Open a window with a live camera feed and capture/cancel buttons."""
+        # Disable the button while camera window is open
+        self.images_frame.take_image.config(state='disabled')
         self._open_camera_window()
 
     def _open_camera_window(self):
@@ -557,6 +560,7 @@ class Page(ttk.Frame):
                 import numpy as np
             except ImportError:
                 mb.showerror('Camera Error', 'picamera2 is not installed')
+                self.images_frame.take_image.config(state='normal')  # Re-enable button on error
                 return
             picam = Picamera2()
             config = picam.create_preview_configuration()
@@ -569,6 +573,7 @@ class Page(ttk.Frame):
             cap = cv2.VideoCapture(0)
             if not cap.isOpened():
                 mb.showerror('Camera Error', 'Could not open webcam')
+                self.images_frame.take_image.config(state='normal')  # Re-enable button on error
                 return
             cap.set(cv2.CAP_PROP_FRAME_WIDTH, 9999)
             cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 9999)
@@ -678,6 +683,7 @@ class Page(ttk.Frame):
             else:
                 cap.release()
             self._camera_running = False
+            self.images_frame.take_image.config(state='normal')  # Re-enable the button
             cam_win.destroy()
         capture_btn.config(command=on_capture)
         cancel_btn.config(command=on_cancel)
@@ -787,13 +793,26 @@ def get_excel_path(relative_path):
             print(f"Using bundled excel path: {excel_path}")
     return excel_path
 
+def get_output_dir(name):
+    """Return a persistent output directory, next to the EXE when frozen, else cwd."""
+    if getattr(sys, 'frozen', False):
+        base = os.path.dirname(sys.executable)
+    else:
+        base = os.getcwd()
+    out_dir = os.path.join(base, name)
+    os.makedirs(out_dir, exist_ok=True)
+    return out_dir
+
 class OysterPage(Page):
     def __init__(self, *args, **kwargs):
         self.name = "Oyster"
         super().__init__(*args, **kwargs)
+        # Ensure csv_path exists in user settings
+        if 'csv_path' not in SettingsWindow._settings:
+            SettingsWindow._settings['csv_path'] = ''
         
         self.brood_count_dict = {}
-        self.excel_obj = OysterExcel()
+        self.excel_obj = OysterData()
         self.settings_obj = SettingsWindow()
         self.settings = self.settings_obj.settings
         
@@ -816,8 +835,8 @@ class OysterPage(Page):
         
         # Add the settings buttons in a single row
         predict_button = self.add_settings(IOButton, text='Predict Brood Count', command=self.get_prediction, disable_during_run=True)
-        self.add_settings(IOButton, text='Append to Excel File', command=self.load_excel)
-        self.add_settings(IOButton, text='Predict all and Export', command=self.to_excel, disable_during_run=True)
+        self.add_settings(IOButton, text='Append to CSV File', command=self.load_csv)
+        self.add_settings(IOButton, text='Predict all and Export', command=self.to_csv, disable_during_run=True)
         self.add_settings(IOButton, text='Settings', command=self.open_settings)
         
         predict_counter = self.add_output(Counter, text='Oyster Brood Count')
@@ -832,7 +851,7 @@ class OysterPage(Page):
                 self.model_error_label.config(text='')
         self.model_select.menu_var.trace_add('write', clear_error_on_select)
         
-    def get_prediction(self, img_pointer=None):
+    def get_prediction(self, img_pointer=None, auto_export=True):
         # Hide error label by default
         self.model_error_label.config(text='')
         
@@ -860,9 +879,28 @@ class OysterPage(Page):
             api = ModelAPI(model_path, img, classes)    
             count, annotation = api.get()
 
-        annotation_fp = get_annotation_path(f"annotations/oysterannotation{img_pointer}.png")
+        # Determine where to save annotations
+        anno_dir = self.settings['annotation_path']
         if self.settings['toggles']['autosave-image-default']:
-            # Ensure annotations directory exists
+            # Prompt user for annotation directory on first use
+            if not anno_dir:
+                selected = askdirectory(
+                    initialdir=get_annotation_path('annotations'),
+                    title='Select folder to save annotation images'
+                )
+                if selected:
+                    anno_dir = selected
+                    # Persist choice
+                    SettingsWindow._settings['annotation_path'] = anno_dir
+                    self.settings_obj.write_user_settings()
+            # Build full annotation file path
+            if anno_dir:
+                annotation_fp = os.path.join(anno_dir, f"oysterannotation{img_pointer}.png")
+            else:
+                # Fallback to persistent annotations folder
+                fallback_dir = get_output_dir('annotations')
+                annotation_fp = os.path.join(fallback_dir, f"oysterannotation{img_pointer}.png")
+            # Save the annotation image
             try:
                 os.makedirs(os.path.dirname(annotation_fp), exist_ok=True)
                 annotation.save(fp=annotation_fp)
@@ -872,20 +910,35 @@ class OysterPage(Page):
         self.brood_count_dict[img_pointer] = count
         self.set_prediction_image(img_pointer, annotation_fp)
         
-        #Legacy settings
-        if self.settings['toggles']['excel-default']:
-            self.to_excel(predict_all=False)
+        # Auto-export to CSV only if enabled and this call allows it
+        if auto_export and self.settings['toggles']['excel-default']:
+            self.to_csv(predict_all=False)
         
         if self.settings['toggles']['clear-excel-default']:
-            self.excel_obj = OysterExcel()
+            self.excel_obj = OysterData()
             
         return count
     
-    def to_excel(self, drop_na=True, predict_all=True):
+    def to_csv(self, drop_na=True, predict_all=True):
+        # Determine export directory from user settings
+        export_dir = SettingsWindow._settings.get('csv_path', '')
+        # Full export: ask for folder if not already set
         if predict_all:
+            if not export_dir:
+                dir_selected = askdirectory(
+                    initialdir=get_excel_path('excel'),
+                    title='Select folder to save CSV files'
+                )
+                if not dir_selected:
+                    return
+                export_dir = dir_selected
+                SettingsWindow._settings['csv_path'] = export_dir
+                self.settings_obj.write_user_settings()
+            # Reset data and predict all without individual exports
+            self.excel_obj = OysterData()
             for img_pointer in range(len(self.images)):
                 if img_pointer not in self.brood_count_dict:
-                    self.get_prediction(img_pointer)
+                    self.get_prediction(img_pointer, auto_export=False)
         
         data = self.get_all_inputs()
 
@@ -907,11 +960,24 @@ class OysterPage(Page):
         for col in numeric_columns:
             df[col] = pd.to_numeric(df[col])
 
-        self.excel_obj.extend(df)
-        self.excel_obj.write_excel()
+        # Append only the last record when doing incremental export
+        if predict_all:
+            df_to_export = df
+        else:
+            df_to_export = df.tail(1)
+
+        # Fallback to persistent csv folder when no user setting is provided
+        if not export_dir:
+            export_dir = get_output_dir('excel')
+        base_path = os.path.join(export_dir, f'data{self.excel_obj.id}')
+        self.excel_obj.extend(df_to_export)
+        self.excel_obj.write_csv(base_path=base_path)
+        
+    # For backward compatibility
+    def to_excel(self, drop_na=True, predict_all=True):
+        return self.to_csv(drop_na, predict_all)
     
-    
-    def load_excel(self):        
+    def load_csv(self):        
         initialdir = get_excel_path('excel')
         # Always ensure the directory exists
         try:
@@ -922,23 +988,22 @@ class OysterPage(Page):
         
         file_path = askopenfilename(
             initialdir=initialdir,
-            title='Please select an excel file to open',
-            filetypes=[('Excel Files', '*.xlsx *.xlsb *.xltx *.xltm *.xls *.xlt *.ods')]
+            title='Please select a CSV file to open',
+            filetypes=[('CSV Files', '*.csv'), ('Excel Files', '*.xlsx *.xlsb *.xltx *.xltm *.xls *.xlt *.ods')]
         )
         
-        if file_path == () or Path(file_path).suffix not in '.xlsx .xlsb .xltx .xltm .xls .xlt .ods'.split(' '):
+        if file_path == ():
+            return
+        
+        if Path(file_path).suffix not in ['.csv', '.xlsx', '.xlsb', '.xltx', '.xltm', '.xls', '.xlt', '.ods']:
             return
 
-        self.excel_obj.read_excel(file_path)
-        
-        # if self.settings['toggles']['load-default']:
-        #     ### Implement reloading frame based on excel and image data
-        #     pass
-                
+        self.excel_obj.read_csv(file_path)
+    
     def clear_all_images(self):
         super().clear_all_images()
         if self.settings['toggles']['clear-output-default']:
-            self.excel_obj = OysterExcel()
+            self.excel_obj = OysterData()
         
     def open_settings(self):
         Settings(self)

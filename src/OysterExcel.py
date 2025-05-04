@@ -1,6 +1,4 @@
 import pandas as pd
-from openpyxl import Workbook
-from openpyxl.utils.dataframe import dataframe_to_rows
 from datetime import datetime
 from scipy.stats import t
 from pathlib import Path
@@ -9,8 +7,8 @@ import os
 if not os.path.exists('excel'):
     os.mkdir('excel')
 
-def get_excel_path(relative_path):
-    """Helper function to get excel path with environment variable support"""
+def get_csv_path(relative_path):
+    """Helper function to get CSV path with environment variable support"""
     if relative_path.startswith('excel/') or relative_path == 'excel':
         path = Path(relative_path)
         subdir = ""
@@ -19,28 +17,38 @@ def get_excel_path(relative_path):
             if 'excel/' in str(path):
                 subdir = str(path).split('excel/', 1)[1]
             path = Path(os.environ.get('DEVISION_EXCEL')) / subdir
-            print(f"Using bundled excel path: {path}")
-        # Make sure directory exists
-        dir_to_create = os.path.dirname(path) if subdir else path
+            print(f"Using bundled CSV path: {path}")
+        
+        # Determine if this is a directory or a file path
+        if '.' in os.path.basename(path):  # Contains extension, so it's a file
+            # Create only the directory part, not the file
+            dir_to_create = os.path.dirname(path)
+        else:  # It's a directory
+            dir_to_create = path
+            
         os.makedirs(dir_to_create, exist_ok=True)
         return path
     else:
-        return Path(relative_path)
+        # For non-excel paths, still ensure directory exists if it's a file path
+        path = Path(relative_path)
+        if '.' in os.path.basename(path):  # Contains extension, so it's a file
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+        return path
 
-class OysterExcel():
+class OysterData():
     id = 0
-    def __init__(self, *, file_name='oyster-data.xlsx', staff_name=''):
-        self.id = OysterExcel.id 
-        OysterExcel.id += 1
+    def __init__(self, *, file_name='oyster-data.csv', staff_name=''):
+        self.id = OysterData.id 
+        OysterData.id += 1
         
         self.file_name = file_name
         
         formatted_datetime = datetime.now().strftime('%m/%d/%Y %I:%M:%S %p')
         
-        # Goes into the info tab
+        # Goes into the info file
         self.info_df = pd.DataFrame([[formatted_datetime, staff_name]], columns=['Date', 'Staff'])
         
-        # Goes into the data tab
+        # Goes into the data file
         # Mass is in grams unless otherwise specified
         self.df = pd.DataFrame(columns=[
             'model',
@@ -67,13 +75,13 @@ class OysterExcel():
         
         self.readable_to_data = {self.data_to_readable[k]:k for k in self.data_to_readable}
         
-        # Goes into the statistics tab
+        # Goes into the statistics file
         self.stats = None
         
     def insert(self, *, model, group_number, file_name, size_class,
                         seed_tray_weight, slide_weight,
                         slide_and_seed_weight, subsample_count):
-        """Inserts a new value into the OysterExcel dataframe
+        """Inserts a new value into the OysterData dataframe
 
         Args:
             model (str): The name of the model used to predict the sample
@@ -115,7 +123,6 @@ class OysterExcel():
         
         pd.options.mode.chained_assignment = None
 
-        
         insert_df = insert_df[['model', 'group', 'file-name', 'size-class', 'seed-tray-weight', 'slide-weight', 'slide-and-seed-weight', 'subsample-count']]
         total_count = insert_df['subsample-count'] / (insert_df['slide-and-seed-weight'] - insert_df['slide-weight']) * insert_df['seed-tray-weight']
         insert_df['total-number'] = total_count
@@ -124,6 +131,8 @@ class OysterExcel():
             self.df = insert_df
         else:
             self.df = pd.concat([self.df, insert_df], ignore_index=True)
+        # Remove duplicate entries by file-name, keeping only the most recent
+        self.df = self.df.drop_duplicates(subset=['file-name'], keep='last').reset_index(drop=True)
        
         self.compute()
         pd.options.mode.chained_assignment = 'warn'
@@ -150,92 +159,68 @@ class OysterExcel():
         # Write to dataframe
         self.stats = pd.concat([mean, std, sem, dof, confidence95], axis=1)
     
-    def _openpyxl_write(self, dataframe, workbook, worksheet, kwargs):
-        """Internal method for formatting openpyxl
-
-        Args:
-            dataframe (pandas.DataFrame): The dataframe object that is being written
-            workbook (openpyxl.workbook.workbook.Workbook): The excel workbook object
-            worksheet (openpyxl.worksheet.worksheet.Worksheet): The current working sheet
-            kwargs (dict): Additional keyword arguments to be passed into openpyxl's dataframe_to_rows
-        """
+    def write_csv(self, base_path=None):
+        """Writes this object into a single CSV file containing all data entries."""
+        # Determine full file path (override if provided) and ensure directory exists
+        if base_path:
+            file_path = Path(base_path).with_suffix('.csv')
+            os.makedirs(file_path.parent, exist_ok=True)
+        else:
+            file_base = get_csv_path(f'excel/data{self.id}')
+            file_path = Path(f"{file_base}.csv")
         
-        workbook.active = worksheet
-        # Add rows to the current sheet from the dataframe
-        for row in dataframe_to_rows(dataframe, **kwargs):
-            worksheet.append(row)
+        # Convert data to human-readable columns
+        export_df = self.df.copy().rename(columns=self.data_to_readable)
+        export_df.index.name = 'Index'
         
-        # Resize columns based on the max width of the entries in that column for this sheet
-        for column in worksheet.columns:
-            column_letter = column[0].column_letter
-            max_width = len(str(
-                max(column, 
-                    key = lambda x: len(str(x.value))
-                    )
-                .value))
-
-            worksheet.column_dimensions[column_letter].width = max_width + 1
+        try:
+            export_df.to_csv(file_path, index=False)
+            print(f"CSV file saved successfully at: {file_path}")
+        except Exception as e:
+            print(f"Error saving CSV file: {str(e)}")
     
+    # For backward compatibility
     def write_excel(self):
-        """Writes this object into an excel file with three sheets:
-           info, which contains date and staff fields;
-           data, which contains data of all subsamples;
-           and statistics, which contains aggregate data performed on subsamples
-        """
-        file_path = get_excel_path(f'excel/data{self.id}.xlsx')
-        
-        # Converting the internal dataframe names to human readable export
-        print_df = self.df.copy()
-        print_df = print_df.rename(columns=self.data_to_readable)
-        print_df.index.name = 'Index'
-        
-        print_stats = self.stats.copy()
-        print_stats = print_stats.rename(columns={
-            'mean':'Mean',
-            'std':'Standard Deviation',
-            'sem':'Standard Error',
-            'dof':'Degrees of Freedom (n-1)',
-            'confidence95':'95% Confidence Interval'
-        })
-        print_stats.index.name = 'Group Number'
-        
-        # Writing to excel using openpyxl
-        wb = Workbook()
-        
-        # Sets the default sheet to the info sheet
-        info = wb.active
-        data = wb.create_sheet(title="Data")
-        statistics = wb.create_sheet(title="Statistics")
-        
-        info.title = "Info"
-        
-        self._openpyxl_write(self.info_df, wb, info, {'index':False, 'header':True})
-
-        self._openpyxl_write(print_df, wb, data, {'index':True, 'header':True})
-
-        self._openpyxl_write(print_stats, wb, statistics, {'index':True, 'header':True})
-        
-        wb.save(file_path)
+        """Legacy method for backward compatibility"""
+        self.write_csv()
     
-    #This assumes that the file was written by this excel writer or is in the same format
-    def read_excel(self, file_path=None):
+    def read_csv(self, file_path=None):
+        """Reads data from a CSV file
+        
+        Args:
+            file_path: Path to the CSV file to read. If None, uses self.file_name
+            
+        Returns:
+            DataFrame containing the loaded data
+        """
         if not file_path:
             file_path = self.file_name
+        
+        try:
+            df = pd.read_csv(file_path, index_col=0)
+            df = df.rename(columns=self.readable_to_data)
             
-        df = pd.read_excel(file_path, index_col=0, skiprows=[1], sheet_name='Data')
-        df = df.rename(columns=self.readable_to_data)
-        
-        self.extend(df)
-        
-        return df
+            self.extend(df)
+            return df
+        except Exception as e:
+            print(f"Error reading CSV file: {str(e)}")
+            return pd.DataFrame()
+    
+    # For backward compatibility
+    def read_excel(self, file_path=None):
+        """Legacy method for backward compatibility"""
+        return self.read_csv(file_path)
+
+# For backward compatibility
+OysterExcel = OysterData
 
 # Testing function
 if __name__ == '__main__':  
     import_df = pd.read_csv('test/oyster-example-data.csv')
-    excel_obj = OysterExcel(file_name='test/oyster-excel-out.xlsx')
+    data_obj = OysterData(file_name='test/oyster-data-out.csv')
     
-    excel_obj.extend(import_df)
-    excel_obj.write_excel()
+    data_obj.extend(import_df)
+    data_obj.write_csv()
     
-    print(excel_obj.read_excel())
+    print(data_obj.read_csv())
     
