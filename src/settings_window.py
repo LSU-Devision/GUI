@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk, font
+from tkinter.filedialog import askdirectory
 from ttkbootstrap import Style
 from warning_window import WarningWindow
 
@@ -192,6 +193,11 @@ class SettingsWindow(ttk.Frame):
         
         try:
             with open(cls.USER_SETTINGS, 'w') as file:
+                # Ensure csv_path and annotation_path exist in settings
+                if 'csv_path' not in cls._settings:
+                    cls._settings['csv_path'] = ''
+                if 'annotation_path' not in cls._settings:
+                    cls._settings['annotation_path'] = ''
                 json.dump(cls._settings, file, indent=2)
         except Exception as e:
             print(f"Error writing user settings: {e}")
@@ -337,6 +343,17 @@ class SettingsWindow(ttk.Frame):
         self._settings_tree.tag_configure('Toggleable', font='TkDefaultFont')
         self._settings_tree.tag_bind('Toggleable', '<Return>', toggle_setting)
         self._settings_tree.tag_bind('Toggleable', '<Double-1>', toggle_setting)
+        
+        # Add CSV output directory setting
+        csv_dir = self.cls._settings.get('csv_path', '')
+        self._settings_tree.insert('default', 'end', iid='csv-path', text='CSV Output Directory', values=csv_dir, tags='CSVPathSetting')
+        self._settings_tree.tag_configure('CSVPathSetting', font='TkDefaultFont')
+        self._settings_tree.tag_bind('CSVPathSetting', '<Double-1>', self._change_csv_path)
+        # Add Annotation output directory setting
+        ann_dir = self.cls._settings.get('annotation_path', '')
+        self._settings_tree.insert('default', 'end', iid='annotation-path', text='Annotation Output Directory', values=ann_dir, tags='AnnotationPathSetting')
+        self._settings_tree.tag_configure('AnnotationPathSetting', font='TkDefaultFont')
+        self._settings_tree.tag_bind('AnnotationPathSetting', '<Double-1>', self._change_annotation_path)
         
     def _version_settings(self):
         
@@ -521,6 +538,26 @@ class SettingsWindow(ttk.Frame):
     def settings(self):
         return self.read_only_settings
     
+    def _change_csv_path(self, event):
+        """Open a directory dialog to change CSV export directory"""
+        current = self.cls._settings.get('csv_path', '') or str(self.CWD)
+        selected = askdirectory(title='Select CSV export directory', initialdir=current)
+        if not selected:
+            return
+        self.cls._settings['csv_path'] = selected
+        self.write_user_settings()
+        self._settings_tree.set('csv-path', column='status', value=selected)
+
+    def _change_annotation_path(self, event):
+        """Open a directory dialog to change annotation output directory"""
+        current = self.cls._settings.get('annotation_path', '') or str(self.CWD)
+        selected = askdirectory(title='Select annotation output directory', initialdir=current)
+        if not selected:
+            return
+        self.cls._settings['annotation_path'] = selected
+        self.write_user_settings()
+        self._settings_tree.set('annotation-path', column='status', value=selected)
+        
 # Object for storing style names
 class StyleSettings():
     def __init__(self):
@@ -621,5 +658,4 @@ class read_only_settings():
     def __setitem__(self, *args, **kwargs):
         raise TypeError('Cannot set read-only setting')
 
-        
     
