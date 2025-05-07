@@ -266,8 +266,23 @@ class Counter(Outputable):
     def update(self):
         self.counter.config(text=self.value)
     
-        
     def push(self, inp):
         self.value = inp
         if inp is None:
             self.counter.config(text='-')
+            
+class ErrorLabel(Outputable):
+    def __init__(self, parent, **kwargs):
+        super().__init__(parent)
+        
+        self.text_label = ttk.Label(self, relief='solid', foreground='red', font='TkDefaultFont', **kwargs)
+        
+    def update(self):
+        self.text_label.config(text=self.value)
+    
+    def push(self, inp):
+        self.value = inp
+        if inp is None:
+            self.text_label.config(text='')
+        else:
+            self.text_label.config(text=str(inp))

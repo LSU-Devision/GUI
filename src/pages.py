@@ -64,8 +64,7 @@ def has_picamera2():
         return False
 
 INTIAL_DIR = Path.cwd()
-# There doesn't really exist a way to both resize a tkinter dialog and maintain a dynamically sized image
-# This is a motivating example for a website
+
 
 class IdNotFoundError(Exception):
     def __init__(self, value):
@@ -86,6 +85,7 @@ class Page(ttk.Frame):
     # Static variables
     id = 0
     black_image = Image.new(mode='RGB', color=(0, 0, 0), size=THUMBNAIL_SIZE)    
+    
     
     def __init__(self,
                  *args,
@@ -415,7 +415,6 @@ class Page(ttk.Frame):
         
         self.set_image()
     
-    
     def add_image(self):
         """_summary_
         """
@@ -454,8 +453,7 @@ class Page(ttk.Frame):
         self.image_pointer = len(self.images) - 1
         self.file_name_dict[self.image_pointer] = Path(file_path).name
         self.write_frame()
-        
-        
+                
     def set_image(self):
         """Update the displayed images, resizing to fit the label size, keeping aspect ratio, and centering."""
         pil_img = None
@@ -803,8 +801,8 @@ class OysterPage(Page):
         self.add_input(LabelBox, text='Slide + Seed Weight (g)')
         
         # Add error label above Predict Brood Count button
-        self.model_error_label = ttk.Label(self.settings_frame, text='', foreground='red', font='TkDefaultFont')
-        self.model_error_label.grid(row=0, column=0, columnspan=4, sticky='EW', pady=(0, 2))
+        # self.model_error_label = ttk.Label(self.settings_frame, text='', foreground='red', font='TkDefaultFont')
+        # self.model_error_label.grid(row=0, column=0, columnspan=4, sticky='EW', pady=(0, 2))
         
         # Add the settings buttons in a single row
         predict_button = self.add_settings(IOButton, text='Predict Brood Count', command=self.get_prediction, disable_during_run=True)
@@ -813,8 +811,8 @@ class OysterPage(Page):
         self.add_settings(IOButton, text='Settings', command=self.open_settings)
         
         predict_counter = self.add_output(Counter, text='Oyster Brood Count')
-        self.model_error_label = ttk.Label(self.output_frame, text='', foreground='red', font='TkDefaultFont')
-        self.model_error_label.grid(row=0, column=1, sticky='W', padx=(10, 0))
+        self.model_error_label = self.add_output(ErrorLabel, text='')
+        
         predict_button.bind_out(predict_counter)
         
         # Bind callback to model_select dropdown to clear error label when a valid model is selected
@@ -827,7 +825,7 @@ class OysterPage(Page):
     #TODO: Convert this code to use some sort of image processing manager, more than ImageList
     def get_prediction(self, img_pointer=None):
         # Hide error label by default
-        self.model_error_label.config(text='')
+        self.model_error_label.push(None)
         
         if not img_pointer:
             img_pointer = self.image_pointer
@@ -836,8 +834,8 @@ class OysterPage(Page):
             return 0
         
         model_path = self.model_select.value
-        if model_path == 'None' or not model_path:
-            self.model_error_label.config(text='Please select a model before predicting.')
+        if model_path is None:
+            self.model_error_label.push('Please select a model before predicting.')
             return 0
         classes = 1  # Default value
         if model_path == '2-4mm model':
@@ -845,7 +843,7 @@ class OysterPage(Page):
         elif model_path == '4-6mm model':
             model_path = get_model_path('models/oyster_4-6mm')
         else:
-            self.model_error_label.config(text='Please select a model before predicting.')
+            self.model_error_label.push('Please select a model before predicting.')
             return 0
         
         with Image.open(self.images.paths[self.image_pointer]) as img:  
