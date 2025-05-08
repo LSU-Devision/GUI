@@ -125,17 +125,11 @@ def highlight_boundary(img: Image.Image, mask: Image.Image, width=1, classes=1, 
         img (_type_): _description_
     """
     class_dct.update({0:0})
-    
-    if len(class_dct) == 1 and classes > 1:
-        raise ValueError("Attempted to use multiclass without class mapping dictionary")
-    elif len(class_dct) == 1:
-        class_dct.update({1:1})
-
     mask_arr = np.asarray(mask, dtype=np.uint8)
-    if len(class_dct) > 1:
-        f = lambda x: class_dct[x]
-        f = np.vectorize(f)
-        mask_arr = f(mask_arr)
+
+    f = lambda x: class_dct[x]
+    f = np.vectorize(f)
+    mask_arr = f(mask_arr)
         
     classes_ids = np.unique(list(class_dct.values()))
     colors_imgs = {}

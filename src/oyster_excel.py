@@ -178,7 +178,14 @@ class OysterData():
             print(f"CSV file saved successfully at: {file_path}")
         except Exception as e:
             print(f"Error saving CSV file: {str(e)}")
-    
+
+        try:
+            path = file_path.parent / Path(file_path.stem + 'stats' + file_path.suffix)
+            self.stats.to_csv(path)
+            print(f"Stats csv saved successfully at: {path}")
+        except Exception as e:
+            print(f"Error saving CSV file: {str(e)}")
+            
     # For backward compatibility
     def write_excel(self):
         """Legacy method for backward compatibility"""

@@ -242,8 +242,12 @@ class Page(ttk.Frame):
         # Writing images read from disk onto frame in order, if applicable
         for index in range(len(self.images)):
             file_path = self.images.paths[index]
-            self.update_image(file_path)
-            self.set_image()
+            with Image.open(file_path) as og_img:
+                self._original_images.append(og_img.copy())
+            self.file_name_dict[index] = file_path
+            self.next()
+        
+            
         
     def add_input(self, widget, **kwargs):
         """Adds and manages a subclass of Inputable onto the top frame, these
@@ -472,10 +476,16 @@ class Page(ttk.Frame):
             pil_pred_img = self._original_pred_images[self.image_pointer]
         lw = self.images_frame.left_window
         rw = self.images_frame.right_window
-        lw_w = lw.winfo_width() or THUMBNAIL_SIZE[0]
-        lw_h = lw.winfo_height() or THUMBNAIL_SIZE[1]
-        rw_w = rw.winfo_width() or THUMBNAIL_SIZE[0]
-        rw_h = rw.winfo_height() or THUMBNAIL_SIZE[1]
+        
+        lw_w = lw.winfo_width()
+        lw_w = lw_w if lw_w not in (None, 0, 1) else THUMBNAIL_SIZE[0]
+        lw_h = lw.winfo_height()
+        lw_h = lw_h if lw_h not in (None, 0, 1) else THUMBNAIL_SIZE[1]
+        rw_w = rw.winfo_width()
+        rw_w = rw_w if rw_w not in (None, 0, 1) else THUMBNAIL_SIZE[0]
+        rw_h = rw.winfo_height()
+        rw_h = rw_h if rw_h not in (None, 0, 1) else THUMBNAIL_SIZE[1]
+                
         def resize_and_center(pil_img, box_w, box_h):
             if pil_img is None:
                 return self.black_photoimage
@@ -812,7 +822,7 @@ class OysterPage(Page):
             SettingsWindow._settings['csv_path'] = ''
         
         self.brood_count_dict = {}
-        self.excel_obj = OysterData()
+        self.excel_obj = OysterExcel()
         self.settings_obj = SettingsWindow()
         self.settings = self.settings_obj.settings
         
@@ -915,7 +925,7 @@ class OysterPage(Page):
             self.to_csv(predict_all=False)
         
         if self.settings['toggles']['clear-excel-default']:
-            self.excel_obj = OysterData()
+            self.excel_obj = OysterExcel()
             
         return count
     
@@ -935,7 +945,7 @@ class OysterPage(Page):
                 SettingsWindow._settings['csv_path'] = export_dir
                 self.settings_obj.write_user_settings()
             # Reset data and predict all without individual exports
-            self.excel_obj = OysterData()
+            self.excel_obj = OysterExcel()
             for img_pointer in range(len(self.images)):
                 if img_pointer not in self.brood_count_dict:
                     self.get_prediction(img_pointer, auto_export=False)
@@ -1003,7 +1013,7 @@ class OysterPage(Page):
     def clear_all_images(self):
         super().clear_all_images()
         if self.settings['toggles']['clear-output-default']:
-            self.excel_obj = OysterData()
+            self.excel_obj = OysterExcel()
         
     def open_settings(self):
         Settings(self)
