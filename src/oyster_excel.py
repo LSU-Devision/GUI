@@ -204,7 +204,7 @@ class OysterData():
             file_path = self.file_name
         
         try:
-            df = pd.read_csv(file_path, index_col=0)
+            df = pd.read_csv(file_path)
             df = df.rename(columns=self.readable_to_data)
             
             self.extend(df)
