@@ -510,7 +510,7 @@ class Page(ttk.Frame):
         rw.image = rw_img
         rw.config(image=rw_img)
         if len(self.images) == 0:
-            self.images_frame.counter.config(text='0/0')
+            self.images_frame.counter.config(text='-/0')
         else:
             self.images_frame.counter.config(text=f'{self.image_pointer + 1}/{len(self.images)}')
     
@@ -1030,7 +1030,11 @@ class DevisionPage(Page):
         self.settings = self.settings_obj.settings
         
         #This button resizes at runtime and there's no built in way to change a ttk widget's width
-        self.model_select = self.add_input(DropdownBox, text='Select a Model Below', dropdowns = ['Egg Counter - StarDist2D', 'Four Embryo Classification - StarDist2D'])
+        self.model_select = self.add_input(DropdownBox, text='Select a Model Below', dropdowns = 
+                                           ['Frog Egg Counter', 
+                                            'Xenopus 4 Class Counter'
+                                            ]
+                                           )
         
         # Add error label above Predict and Annotate button
         self.model_error_label = ttk.Label(self.settings_frame, text='', foreground='red', font='TkDefaultFont')
@@ -1052,10 +1056,10 @@ class DevisionPage(Page):
             return 0
                 
         model_str = self.model_select.value
-        if model_str == 'Four Embryo Classification - StarDist2D':
+        if model_str == 'Xenopus 4 Class Counter':
             model_dir = get_model_path('models/xenopus-4-class-v2')
             classes = 4
-        elif model_str == 'Egg Counter - StarDist2D':
+        elif model_str == 'Frog Egg Counter':
             model_dir = get_model_path('models/frog-egg-counter')
             classes = 1
         else:
