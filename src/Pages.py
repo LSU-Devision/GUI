@@ -23,6 +23,12 @@ from PIL import Image
 
 import os
 from pathlib import Path
+import subprocess
+import threading
+import time
+import glob
+from queue import Queue
+import tkinter.messagebox as messagebox
 
 import pandas as pd
 
@@ -172,12 +178,16 @@ class Page(ttk.Frame):
         self.images_frame.button_frame.grid(row=0, column=0, columnspan=3, sticky='EW', **self.images_frame_kwargs)
         self.images_frame.button_frame.columnconfigure(0, weight=1)
         self.images_frame.button_frame.columnconfigure(1, weight=1)
+        self.images_frame.button_frame.columnconfigure(2, weight=1)
         # Create buttons with same width
         button_width = 20
         self.images_frame.file_select = ttk.Button(self.images_frame.button_frame, text='Select an image', command=self.add_image, style='Image.TButton', width=button_width)
         self.images_frame.take_image = ttk.Button(self.images_frame.button_frame, text='Take an image', command=self.take_image, style='Image.TButton', width=button_width)
+        self.images_frame.receive_bt_image = ttk.Button(self.images_frame.button_frame, text='Receive via Bluetooth', command=self.receive_image_bluetooth, style='Image.TButton', width=button_width)
+        
         self.images_frame.file_select.grid(row=0, column=0, padx=5, pady=0, sticky='EW')
         self.images_frame.take_image.grid(row=0, column=1, padx=5, pady=0, sticky='EW')
+        self.images_frame.receive_bt_image.grid(row=0, column=2, padx=5, pady=0, sticky='EW')
         # --- End button frame ---
         # Set fixed size for image display labels
         self.images_frame.left_window = tk.Label(
@@ -242,7 +252,127 @@ class Page(ttk.Frame):
             self.update_image(file_path)
             self.set_image()
         
+        self.bt_server_process = None
+        self.bt_monitor_thread = None
+        self.bt_transfer_path = os.path.expanduser("~/bluetooth_transfers")
+        os.makedirs(self.bt_transfer_path, exist_ok=True)
+        self.bt_received_file_queue = Queue()
+        self.after(100, self._check_bt_queue)
         
+    def _check_bt_queue(self):
+        try:
+            new_file_path = self.bt_received_file_queue.get_nowait()
+            if new_file_path:
+                print(f"Adding image from BT: {new_file_path}")
+                self.update_image(new_file_path)
+                self.image_pointer = len(self.images) -1
+                self.set_image()
+                messagebox.showinfo("Bluetooth Transfer", f"Successfully received and loaded: {os.path.basename(new_file_path)}")
+                self._stop_bt_server_and_monitor()
+        except Exception as e:
+            if not isinstance(e, Queue.Empty if hasattr(Queue, 'Empty') else type(Queue().get_nowait.__self__.Empty)):
+                 print(f"Error processing BT queue: {e}")       
+        self.after(100, self._check_bt_queue)
+
+    def _get_ip_address(self):
+        try:
+            result = subprocess.run(["hostname", "-I"], capture_output=True, text=True, check=True)
+            return result.stdout.strip().split(' ')[0]
+        except Exception as e:
+            print(f"Could not determine IP address using 'hostname -I': {e}")
+            try:
+                import socket
+                s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+                s.connect(("8.8.8.8", 80))
+                ip = s.getsockname()[0]
+                s.close()
+                return ip
+            except Exception as e_sock:
+                print(f"Socket method to get IP also failed: {e_sock}")
+                return None
+
+    def receive_image_bluetooth(self):
+        if self.bt_server_process and self.bt_server_process.poll() is None:
+            messagebox.showwarning("Bluetooth Server", "Server is already running. Check terminal for IP or upload from phone.")
+            return
+
+        ip_address = self._get_ip_address()
+        if not ip_address:
+            messagebox.showerror("Network Error", "Could not determine the IP address of this device. Cannot start Bluetooth server.")
+            return
+
+        script_path = os.path.join(Path(__file__).resolve().parent.parent, "bt_file_server.py") 
+
+        if not os.path.exists(script_path):
+            messagebox.showerror("File Error", f"Server script not found at {script_path}")
+            return
+        
+        try:
+            self.bt_server_process = subprocess.Popen([sys.executable, script_path])
+            print(f"Bluetooth server script started (PID: {self.bt_server_process.pid}). Check its console output for status.")
+        except Exception as e:
+            messagebox.showerror("Server Error", f"Failed to start Bluetooth server: {e}")
+            self.bt_server_process = None
+            return
+
+        instructions = (
+            f"Bluetooth photo server started.\n\n"
+            f"1. Ensure your phone is PAIRED with this Raspberry Pi via Bluetooth.\n"
+            f"2. Ensure Bluetooth PAN (Personal Area Network) is active on the Pi.\n"
+            f"   (The system service 'bt-pan.service' should be running).\n"
+            f"3. On your phone, open a web browser and go to:\n"
+            f"   http://{ip_address}:5000\n\n"
+            f"4. Upload your photo using the web page.\n"
+            f"The photo will appear here automatically after upload."
+        )
+        messagebox.showinfo("Receive via Bluetooth", instructions)
+
+        if self.bt_monitor_thread is None or not self.bt_monitor_thread.is_alive():
+            self.bt_monitor_thread = threading.Thread(target=self._monitor_bluetooth_transfers, daemon=True)
+            self.bt_monitor_thread.start()
+
+    def _monitor_bluetooth_transfers(self):
+        print(f"Monitoring {self.bt_transfer_path} for new files...")
+        seen_files = set(os.listdir(self.bt_transfer_path))
+
+        while True:
+            if self.bt_server_process is None or self.bt_server_process.poll() is not None:
+                print("Bluetooth server process stopped or not found. Stopping monitor.")
+                break
+            
+            try:
+                current_files = set(os.listdir(self.bt_transfer_path))
+                new_files = current_files - seen_files
+
+                if new_files:
+                    latest_file = max([os.path.join(self.bt_transfer_path, f) for f in new_files], key=os.path.getmtime)
+                    print(f"New file detected: {latest_file}")
+                    self.bt_received_file_queue.put(latest_file)
+                    seen_files.add(os.path.basename(latest_file))
+                    break
+
+            except FileNotFoundError:
+                time.sleep(1)
+                continue
+            except Exception as e:
+                print(f"Error in Bluetooth monitoring thread: {e}")
+                time.sleep(1)
+            
+            time.sleep(1)
+        print("Bluetooth monitoring thread finished.")
+
+    def _stop_bt_server_and_monitor(self):
+        if self.bt_server_process and self.bt_server_process.poll() is None:
+            print("Stopping Bluetooth server...")
+            self.bt_server_process.terminate()
+            try:
+                self.bt_server_process.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                print("Server did not terminate, killing.")
+                self.bt_server_process.kill()
+            self.bt_server_process = None
+            print("Bluetooth server stopped.")
+
     def add_input(self, widget, **kwargs):
         """Adds and manages a subclass of Inputable onto the top frame, these
         are meant to contain widgets that recieve inputs
@@ -518,22 +648,15 @@ class Page(ttk.Frame):
         self.set_image()
     
     def clear_all_images(self):
+        self._stop_bt_server_and_monitor()
+        self.images.clear()
+        self.prediction_images.clear()
+        self._original_images.clear()
+        self._original_pred_images.clear()
         self.image_pointer = 0
-        self.images_frame.right_window.config(image=self.black_photoimage)
-        self.images_frame.left_window.config(image=self.black_photoimage)
-        self.images = ImageList(name=f'True{self.name}')
-        self.top_frame_saves = {}
-        self.output_frame_saves = {}
-        self.prediction_images = ImageList(name=f'Pred{self.name}')
-        self._original_images = []
-        self._original_pred_images = []
-        widgets = self.top_frame_widgets
-        for key in self.top_frame_widgets:
-            widgets[key].push(None)
-        widgets = self.output_frame_widgets
-        for key in self.output_frame_widgets:
-            widgets[key].push(None)
-        self.images_frame.counter.config(text='-/0')
+        self.set_image()
+        self.set_prediction_image(None, None)
+        self.update_counter()
 
     def _on_images_frame_resize(self, event):
         """Handle resizing of the images_frame to update image sizes."""
@@ -740,6 +863,10 @@ class Page(ttk.Frame):
         )
         close_btn.place(relx=1.0, rely=0.0, anchor='ne', x=-20, y=20)
         close_btn.bind('<Button-1>', lambda e: win.destroy())
+
+    def destroy(self):
+        self._stop_bt_server_and_monitor()
+        super().destroy()
 
 def get_model_path(relative_path):
     """Helper function to get model path with environment variable support"""

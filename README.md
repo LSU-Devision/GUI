@@ -5,6 +5,7 @@ Framework created by [Jeffrey Tepper](https://github.com/jeffreytepper)
 ## Table of Contents
 - [Building an Executable](#building-an-executable)
 - [Raspberry Pi Setup](#raspberry-pi-setup)
+- [Raspberry Pi Bluetooth Setup](#raspberry-pi-bluetooth-file-transfer-setup-guide)
 
 ## Building an Executable
 To build an executable on your target system:
@@ -99,3 +100,98 @@ Note: For ease of setup, we recommend having a USB keyboard, mouse, and flash dr
    * Recommended placement is along the base of the screen intersecting casing at a 10-30 degree angle
    * This allows the battery to double as a base/stand for the Pi
 * Fill unused cooling holes and ports (to prevent water/dust damage)
+
+## Raspberry Pi Bluetooth File Transfer Setup Guide
+
+This feature allows transferring photos from a smartphone (iOS or Android) to the Raspberry Pi using Bluetooth, without needing WiFi or physical connections. The GUI application can then process these received photos.
+
+### Prerequisites
+
+*   Raspberry Pi (Raspberry Pi 5 recommended) with Raspberry Pi OS installed.
+*   Bluetooth capability (built into Raspberry Pi 3 and later models).
+*   iOS or Android smartphone with Bluetooth capability.
+*   Admin (sudo) access to your Raspberry Pi.
+
+### Installation and Setup Steps
+
+1.  **Update Your System**:
+    Open a terminal on your Raspberry Pi and run:
+    ```bash
+    sudo apt update
+    sudo apt upgrade -y
+    ```
+
+2.  **Install Required Packages**:
+    Install BlueZ (Bluetooth protocol stack), tools, and Python Flask (for the web server):
+    ```bash
+    sudo apt install bluez bluez-tools python3-flask -y
+    ```
+
+3.  **Set Up Bluetooth Personal Area Network (PAN)**:
+    This allows your phone to create a network connection with the Raspberry Pi over Bluetooth.
+
+    *   Create a systemd service file for the PAN server:
+        ```bash
+        sudo nano /etc/systemd/system/bt-pan.service
+        ```
+    *   Add the following content to this file:
+        ```
+        [Unit]
+        Description=Bluetooth Personal Area Network
+        After=bluetooth.service
+        PartOf=bluetooth.service
+
+        [Service]
+        ExecStart=/usr/bin/bt-network -s nap
+        Type=simple
+
+        [Install]
+        WantedBy=bluetooth.target
+        ```
+        Save the file and exit nano (Ctrl+X, then Y, then Enter).
+
+    *   Enable and start the service:
+        ```bash
+        sudo systemctl enable bt-pan.service
+        sudo systemctl start bt-pan.service
+        ```
+    *   To check its status:
+        ```bash
+        sudo systemctl status bt-pan.service
+        ```
+
+4.  **File Transfer Server Script (`bt_file_server.py`)**:
+    The GUI application includes a Python script named `bt_file_server.py` (located in the project root). This script runs a simple Flask web server that your phone connects to (via its web browser, over the Bluetooth PAN connection) to upload photos.
+
+    *   Ensure this script is executable. If you cloned the repository or downloaded it, it should have the correct permissions. If not, you can set it from the project root directory:
+        ```bash
+        chmod +x bt_file_server.py
+        ```
+
+### Using the Feature in the GUI
+
+1.  **Pair Your Phone**: Ensure your smartphone is paired with your Raspberry Pi via Bluetooth standard pairing procedures.
+2.  **Launch the GUI Application**: Run the DeVision application.
+3.  **Initiate Reception**: In the GUI, click the "Receive via Bluetooth" button.
+4.  **Follow GUI Instructions**: The application will display a message with the Raspberry Pi's IP address (accessible over the Bluetooth PAN) and port (e.g., `http://<IP_ADDRESS>:5000`).
+5.  **Upload from Phone**: On your phone, open a web browser and navigate to the address provided by the GUI.
+6.  **Select and Upload**: Use the web page on your phone to select and upload a photo.
+7.  **Automatic Processing**: Once uploaded, the photo will be saved to the `~/bluetooth_transfers/` directory on the Raspberry Pi, and the GUI will automatically detect and load it for processing.
+
+### Troubleshooting
+
+*   **Bluetooth Not Connecting/PAN not working**: 
+    *   Ensure your phone and Pi are paired.
+    *   Verify the `bt-pan.service` is active: `sudo systemctl status bt-pan.service`.
+    *   Restart Bluetooth services if needed: `sudo systemctl restart bluetooth`.
+    *   On some phones, you might need to explicitly enable Bluetooth tethering or PAN connection after pairing.
+*   **Cannot Access Web Interface on Phone**: 
+    *   Double-check the IP address displayed by the GUI matches what you entered in the phone's browser.
+    *   Ensure the `bt_file_server.py` script is running (the GUI starts it; check the terminal output where the GUI was launched for any errors from the script).
+*   **Files Not Appearing in GUI**: 
+    *   Check if files are present in the `~/bluetooth_transfers/` directory on the Raspberry Pi.
+    *   Ensure the GUI has permissions to read from this directory (though it typically runs as the user who owns their home directory).
+
+### Security Note
+
+This Bluetooth transfer system is designed for local, direct transfers. It does not implement strong security measures beyond standard Bluetooth pairing. Use it on trusted networks and with trusted devices.
