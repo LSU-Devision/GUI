@@ -435,13 +435,13 @@ class Page(ttk.Frame):
         file_paths = askopenfilenames(
             initialdir=initialdir,
             title='Please select image(s)',
-            filetypes=[('Images', '*.jpg *.JPG *.jpeg *.JPEG *.png *.PNG')]
+            filetypes=[('Images', '*.jpg *.JPG *.jpeg *.JPEG *.png *.PNG *.tif *.TIF')]
         )
         if not file_paths:
             return
         last_file_path = None
         for file_path in file_paths:
-            if Path(file_path).suffix not in ['.jpg', '.JPG', '.jpeg', '.png', '.PNG']:
+            if Path(file_path).suffix not in ['.jpg', '.JPG', '.jpeg', '.png', '.PNG', '.tif', '.TIF']:
                 continue
             # Store original PIL image
             pil_img = Image.open(file_path)
