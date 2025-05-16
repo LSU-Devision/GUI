@@ -127,7 +127,19 @@ This feature allows transferring photos from a smartphone (iOS or Android) to th
     sudo apt install bluez bluez-tools python3-flask -y
     ```
 
-3.  **Set Up Bluetooth Personal Area Network (PAN)**:
+3.  **Configure Bluetooth Visibility and Pairing**:
+    Make your Raspberry Pi discoverable and pairable. Open a terminal and run `sudo bluetoothctl`, then enter the following commands one by one:
+    ```bash
+    power on
+    discoverable on
+    pairable on
+    agent on
+    default-agent
+    quit
+    ```
+    These settings ensure your phone can find and pair with the Raspberry Pi.
+
+4.  **Set Up Bluetooth Personal Area Network (PAN)**:
     This allows your phone to create a network connection with the Raspberry Pi over Bluetooth.
 
     *   Create a systemd service file for the PAN server:
@@ -160,7 +172,7 @@ This feature allows transferring photos from a smartphone (iOS or Android) to th
         sudo systemctl status bt-pan.service
         ```
 
-4.  **File Transfer Server Script (`bt_file_server.py`)**:
+5.  **File Transfer Server Script (`bt_file_server.py`)**:
     The GUI application includes a Python script named `bt_file_server.py` (located in the project root). This script runs a simple Flask web server that your phone connects to (via its web browser, over the Bluetooth PAN connection) to upload photos.
 
     *   Ensure this script is executable. If you cloned the repository or downloaded it, it should have the correct permissions. If not, you can set it from the project root directory:
@@ -172,7 +184,7 @@ This feature allows transferring photos from a smartphone (iOS or Android) to th
 
 1.  **Pair Your Phone**: Ensure your smartphone is paired with your Raspberry Pi via Bluetooth standard pairing procedures.
 2.  **Launch the GUI Application**: Run the DeVision application.
-3.  **Initiate Reception**: In the GUI, click the "Receive via Bluetooth" button.
+3.  **Initiate Reception**: In the GUI, click the "Receive via Bluetooth" button or by clicking the blutooth icon on the top right.
 4.  **Follow GUI Instructions**: The application will display a message with the Raspberry Pi's IP address (accessible over the Bluetooth PAN) and port (e.g., `http://<IP_ADDRESS>:5000`).
 5.  **Upload from Phone**: On your phone, open a web browser and navigate to the address provided by the GUI.
 6.  **Select and Upload**: Use the web page on your phone to select and upload a photo.

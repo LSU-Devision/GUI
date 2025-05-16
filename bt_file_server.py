@@ -97,15 +97,15 @@ if __name__ == '__main__':
         print("Could not determine IP address. Ensure 'hostname -I' works.")
         
     print(f"Bluetooth MAC address: {my_address}")
-    print(f"Starting web server for file uploads on port 5000.")
+    print(f"Starting web server for file uploads on port 4020.")
     print(f"Files will be saved to: {save_path}")
     print(f"Instructions for user:")
     print(f"1. Ensure your phone is paired with this Raspberry Pi via Bluetooth.")
     print(f"2. Ensure Bluetooth PAN is active on the Pi (e.g., bt-pan.service is running).")
     if ip_address:
-      print(f"3. On your phone, open a web browser and go to http://{ip_address}:5000")
+      print(f"3. On your phone, open a web browser and go to http://{ip_address}:4020")
     else:
-      print(f"3. On your phone, open a web browser and go to http://<RASPBERRY_PI_IP_ADDRESS>:5000 (check Pi's IP manually).")
+      print(f"3. On your phone, open a web browser and go to http://<RASPBERRY_PI_IP_ADDRESS>:4020 (check Pi's IP manually).")
     
     # Run the Flask app
-    app.run(host='0.0.0.0', port=5000) 
+    app.run(host='0.0.0.0', port=4020) 
