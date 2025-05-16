@@ -279,9 +279,6 @@ class Page(ttk.Frame):
 
                 messagebox.showinfo("Bluetooth Transfer", f"Successfully received and loaded: {os.path.basename(new_file_path)}")
                 
-                # Existing behavior: Stop server and monitor after processing one file successfully.
-                self._stop_bt_server_and_monitor()
-
             except FileNotFoundError:
                 print(f"Error: File {new_file_path} not found during BT processing.")
                 if new_file_path: # Avoid error if new_file_path itself is None (shouldn't happen here)
@@ -329,20 +326,25 @@ class Page(ttk.Frame):
         ip_address = self._get_ip_address()
         if not ip_address:
             messagebox.showerror("Network Error", "Could not determine the IP address of this device. Cannot start Bluetooth server.")
+            self.images_frame.receive_bt_image.config(state='normal') # Re-enable button
             return
 
         script_path = os.path.join(Path(__file__).resolve().parent.parent, "bt_file_server.py") 
 
         if not os.path.exists(script_path):
             messagebox.showerror("File Error", f"Server script not found at {script_path}")
+            self.images_frame.receive_bt_image.config(state='normal') # Re-enable button
             return
         
         try:
+            # Disable the button before starting the server
+            self.images_frame.receive_bt_image.config(state='disabled')
             self.bt_server_process = subprocess.Popen([sys.executable, script_path])
             print(f"Bluetooth server script started (PID: {self.bt_server_process.pid}). Check its console output for status.")
         except Exception as e:
             messagebox.showerror("Server Error", f"Failed to start Bluetooth server: {e}")
             self.bt_server_process = None
+            self.images_frame.receive_bt_image.config(state='normal') # Re-enable button on failure
             return
 
         instructions = (
@@ -404,6 +406,9 @@ class Page(ttk.Frame):
                 self.bt_server_process.kill()
             self.bt_server_process = None
             print("Bluetooth server stopped.")
+            # Re-enable the button when server is stopped
+            if hasattr(self, 'images_frame') and hasattr(self.images_frame, 'receive_bt_image'):
+                self.images_frame.receive_bt_image.config(state='normal')
 
     def add_input(self, widget, **kwargs):
         """Adds and manages a subclass of Inputable onto the top frame, these

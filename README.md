@@ -197,6 +197,7 @@ This feature allows transferring photos from a smartphone (iOS or Android) to th
     *   Verify the `bt-pan.service` is active: `sudo systemctl status bt-pan.service`.
     *   Restart Bluetooth services if needed: `sudo systemctl restart bluetooth`.
     *   On some phones, you might need to explicitly enable Bluetooth tethering or PAN connection after pairing.
+    *   Make sure the Pi and Phone are connected to the same WiFi / Personal Hotspot
 *   **Cannot Access Web Interface on Phone**: 
     *   Double-check the IP address displayed by the GUI matches what you entered in the phone's browser.
     *   Ensure the `bt_file_server.py` script is running (the GUI starts it; check the terminal output where the GUI was launched for any errors from the script).
