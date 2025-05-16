@@ -15,7 +15,7 @@ from tkinter import ttk
 
 from widgets import *
 from settings_window import SettingsWindow, Settings
-from oyster_excel import OysterExcel
+from oyster_data import OysterExcel
 from image_processing import ImageList, THUMBNAIL_SIZE, highlight_boundary
 
 from PIL.ImageTk import PhotoImage, getimage

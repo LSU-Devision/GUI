@@ -97,15 +97,15 @@ class OysterData():
         
         total_count = (subsample_count / (slide_and_seed_weight - slide_weight)) * seed_tray_weight
         insert_row = pd.DataFrame([[
-                model,
-                group_number,
-                file_name, 
-                size_class,
-                seed_tray_weight, 
-                slide_weight, 
-                slide_and_seed_weight,
-                subsample_count,
-                total_count
+                str(model),
+                int(group_number),
+                str(file_name), 
+                str(size_class),
+                float(seed_tray_weight), 
+                float(slide_weight), 
+                float(slide_and_seed_weight),
+                int(subsample_count),
+                int(total_count)
             ]], columns=self.df.columns
         )
         
@@ -124,6 +124,9 @@ class OysterData():
         pd.options.mode.chained_assignment = None
 
         insert_df = insert_df[['model', 'group', 'file-name', 'size-class', 'seed-tray-weight', 'slide-weight', 'slide-and-seed-weight', 'subsample-count']]
+        
+        insert_df['group'] = insert_df['group'].astype(int)
+        
         total_count = insert_df['subsample-count'] / (insert_df['slide-and-seed-weight'] - insert_df['slide-weight']) * insert_df['seed-tray-weight']
         insert_df['total-number'] = total_count
         
