@@ -27,7 +27,7 @@ import subprocess
 import threading
 import time
 import glob
-from queue import Queue
+from queue import Queue, Empty
 import tkinter.messagebox as messagebox
 
 import pandas as pd
@@ -260,19 +260,49 @@ class Page(ttk.Frame):
         self.after(100, self._check_bt_queue)
         
     def _check_bt_queue(self):
+        new_file_path = None
         try:
             new_file_path = self.bt_received_file_queue.get_nowait()
-            if new_file_path:
-                print(f"Adding image from BT: {new_file_path}")
-                self.update_image(new_file_path)
-                self.image_pointer = len(self.images) -1
-                self.set_image()
+
+            print(f"Processing image from BT queue: {new_file_path}")
+            try:
+                pil_img = Image.open(new_file_path)
+                self._original_images.append(pil_img.copy())
+                pil_img.close()
+
+                self.images.append(new_file_path)
+                self.prediction_images.append(None)
+                self._original_pred_images.append(None)
+
+                self.update_image(new_file_path) # Sets image_pointer correctly
+                self.set_image() # Displays the new image
+
                 messagebox.showinfo("Bluetooth Transfer", f"Successfully received and loaded: {os.path.basename(new_file_path)}")
+                
+                # Existing behavior: Stop server and monitor after processing one file successfully.
                 self._stop_bt_server_and_monitor()
+
+            except FileNotFoundError:
+                print(f"Error: File {new_file_path} not found during BT processing.")
+                if new_file_path: # Avoid error if new_file_path itself is None (shouldn't happen here)
+                    messagebox.showerror("File Error", f"Failed to load: {os.path.basename(new_file_path)}\nFile not found.")
+            except Image.UnidentifiedImageError:
+                print(f"Error: Could not open or read image file {new_file_path} (unidentified image).")
+                if new_file_path:
+                    messagebox.showerror("Image Error", f"Failed to load: {os.path.basename(new_file_path)}\nNot a valid image file or format.")
+            except Exception as img_proc_e: # Catch other image processing errors
+                print(f"Error processing image {new_file_path} from BT: {img_proc_e}")
+                if new_file_path:
+                    messagebox.showerror("Processing Error", f"Error processing image: {os.path.basename(new_file_path)}\nDetails: {img_proc_e}")
+
+        except Empty: # Handles empty queue
+            pass # No new file in the queue, do nothing this cycle
         except Exception as e:
-            if not isinstance(e, Queue.Empty if hasattr(Queue, 'Empty') else type(Queue().get_nowait.__self__.Empty)):
-                 print(f"Error processing BT queue: {e}")       
-        self.after(100, self._check_bt_queue)
+            # Catch other unexpected errors in the _check_bt_queue logic itself
+            print(f"Unexpected error in _check_bt_queue (outside image processing): {e}")
+        finally:
+            # Always reschedule the check
+            self.after(100, self._check_bt_queue)
 
     def _get_ip_address(self):
         try:
