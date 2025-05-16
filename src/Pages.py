@@ -1251,14 +1251,51 @@ if __name__ == '__main__':
     root = tk.Tk()
     notebook = ttk.Notebook(root)
     
-    frog = DevisionPage()
-    oyster = OysterPage()
+    frog = DevisionPage(notebook)
+    oyster = OysterPage(notebook)
     
     notebook.add(frog, text='Devision Page')
     notebook.add(oyster, text='Oyster Page')
     
     notebook.grid(row=0, column=0, sticky='NSEW')
     
+    def on_tab_changed(event):
+        selected_tab_id = notebook.select()
+        if not selected_tab_id: 
+            return
+
+        try:
+            selected_widget = notebook.nametowidget(selected_tab_id)
+        except tk.TclError: 
+            return
+
+        # Always manage OysterPage BT server and button state
+        if hasattr(oyster, 'images_frame') and hasattr(oyster.images_frame, 'receive_bt_image'):
+            if selected_widget == oyster:
+                # Switched TO OysterPage
+                if oyster.bt_server_process and oyster.bt_server_process.poll() is None:
+                    print("Switched to Oyster tab, BT server is active. Disabling button.")
+                    oyster.images_frame.receive_bt_image.config(state='disabled')
+                else:
+                    print("Switched to Oyster tab, BT server is not active. Enabling button.")
+                    oyster.images_frame.receive_bt_image.config(state='normal')
+            else:
+                # Switched AWAY from OysterPage
+                if oyster.bt_server_process and oyster.bt_server_process.poll() is None:
+                    print("Switched away from Oyster tab, stopping BT server if active.")
+                    oyster._stop_bt_server_and_monitor() # This already enables the button
+                # If server wasn't running, button should remain enabled (handled by _stop_bt_server_and_monitor or initial state)
+    
+    notebook.bind("<<NotebookTabChanged>>", on_tab_changed)
+
+    # Initialize button state for OysterPage on startup (in case it's the default tab)
+    # This assumes OysterPage is created and its widgets are available.
+    if hasattr(oyster, 'images_frame') and hasattr(oyster.images_frame, 'receive_bt_image'):
+        if oyster.bt_server_process and oyster.bt_server_process.poll() is None:
+            oyster.images_frame.receive_bt_image.config(state='disabled')
+        else:
+            oyster.images_frame.receive_bt_image.config(state='normal')
+
     root.rowconfigure(0, weight=1)
     root.columnconfigure(0, weight=1)
     root.mainloop()
