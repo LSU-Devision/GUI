@@ -7,6 +7,7 @@ from stardist.models import StarDist2D
 import numpy as np
 from csbdeep.utils import normalize
 
+import datetime
 import tkinter as tk
 from tkinter.filedialog import askopenfilename, askopenfilenames, askdirectory
 import json
@@ -1026,22 +1027,22 @@ class DevisionPage(Page):
         super().__init__(*args, **kwargs)
         
         self.egg_count_dict = {}
+        self.class_count_dicts = {}
         self.settings_obj = SettingsWindow()
         self.settings = self.settings_obj.settings
+        self.model_names = ['Frog Egg Counter', 
+                            'Xenopus 4 Class Counter'
+                           ]
         
         #This button resizes at runtime and there's no built in way to change a ttk widget's width
-        self.model_select = self.add_input(DropdownBox, text='Select a Model Below', dropdowns = 
-                                           ['Frog Egg Counter', 
-                                            'Xenopus 4 Class Counter'
-                                            ]
-                                           )
+        self.model_select = self.add_input(DropdownBox, text='Select a Model Below', dropdowns=self.model_names)
         
         # Add error label above Predict and Annotate button
         self.model_error_label = ttk.Label(self.settings_frame, text='', foreground='red', font='TkDefaultFont')
         self.model_error_label.grid(row=0, column=0, columnspan=4, sticky='EW', pady=(0, 2))
         
         predict_button = self.add_settings(IOButton, text='Predict and Annotate', command=self.get_prediction, disable_during_run=True)
-        self.add_settings(IOButton, text='Export to Excel')
+        self.add_settings(IOButton, text='Export to CSV', command=self.to_csv)
         self.add_settings(IOButton, text='Settings', command=self.open_settings)
         self.add_settings(IOButton, text='Help')
         
@@ -1056,10 +1057,10 @@ class DevisionPage(Page):
             return 0
                 
         model_str = self.model_select.value
-        if model_str == 'Xenopus 4 Class Counter':
+        if model_str == self.model_names[1]:
             model_dir = get_model_path('models/xenopus-4-class-v2')
             classes = 4
-        elif model_str == 'Frog Egg Counter':
+        elif model_str == self.model_names[0]:
             model_dir = get_model_path('models/frog-egg-counter')
             classes = 1
         else:
@@ -1079,13 +1080,39 @@ class DevisionPage(Page):
             except Exception as e:
                 print(f"Warning: Could not save annotation: {str(e)}")
         
-        
+        self.class_count_dicts[img_pointer] = api.count_dct.copy()
         self.egg_count_dict[img_pointer] = count
         self.set_prediction_image(img_pointer, annotation_fp)
         return count
     
     def open_settings(self):
         Settings(self)
+        
+    def to_csv(self):
+        date = datetime.datetime.now()
+        files: dict = self.file_name_dict
+        counts: dict = self.egg_count_dict
+        models: dict = self.get_all_inputs()[0]
+        count_dicts: dict = self.class_count_dicts
+        
+        data = [{'Datetime':date, 'Model':model, 'Filename':file, 'Total Count':count, 
+                 'Class 0 Count':count_dct.get(0, 0), 'Class 1 Count': count_dct.get(1, 0), 'Class 2 Count': count_dct.get(2, 0), 'Class 3 Count': count_dct.get(3, 0)} for 
+                file, count, model, count_dct in zip(files.values(), counts.values(), models.values(), count_dicts.values())]
+        
+        df = pd.DataFrame(data, columns=['Datetime', 'Model', 'Filename', 'Total Count',
+                                         'Class 0 Count', 'Class 1 Count', 'Class 2 Count', 'Class 3 Count'])
+        
+        
+        df = df.dropna(how='any')
+        
+        head = SettingsWindow._settings.get('csv_path', './excel')
+        if head == '':
+            head = './excel'
+        export_dir = Path(head) / 'data-devision.csv'
+        df.to_csv(export_dir, index=False)
+            
+
+        
                 
 if __name__ == '__main__':
     root = tk.Tk()
@@ -1097,7 +1124,6 @@ if __name__ == '__main__':
     notebook.add(frog, text='Devision Page')
     notebook.add(oyster, text='Oyster Page')
     
-    #frog.grid(row=0, column=0, sticky='NSEW')
     
     notebook.grid(row=0, column=0, sticky='NSEW')
     
