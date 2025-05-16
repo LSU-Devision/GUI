@@ -1260,31 +1260,16 @@ if __name__ == '__main__':
     notebook.grid(row=0, column=0, sticky='NSEW')
     
     def on_tab_changed(event):
-        selected_tab_id = notebook.select()
-        if not selected_tab_id: 
-            return
-
-        try:
-            selected_widget = notebook.nametowidget(selected_tab_id)
-        except tk.TclError: 
-            return
-
-        # Always manage OysterPage BT server and button state
-        if hasattr(oyster, 'images_frame') and hasattr(oyster.images_frame, 'receive_bt_image'):
-            if selected_widget == oyster:
-                # Switched TO OysterPage
-                if oyster.bt_server_process and oyster.bt_server_process.poll() is None:
-                    print("Switched to Oyster tab, BT server is active. Disabling button.")
-                    oyster.images_frame.receive_bt_image.config(state='disabled')
-                else:
-                    print("Switched to Oyster tab, BT server is not active. Enabling button.")
-                    oyster.images_frame.receive_bt_image.config(state='normal')
-            else:
-                # Switched AWAY from OysterPage
-                if oyster.bt_server_process and oyster.bt_server_process.poll() is None:
-                    print("Switched away from Oyster tab, stopping BT server if active.")
-                    oyster._stop_bt_server_and_monitor() # This already enables the button
-                # If server wasn't running, button should remain enabled (handled by _stop_bt_server_and_monitor or initial state)
+        if frog.bt_server_process and frog.bt_server_process.poll() is None:
+            frog.bt_server_process.terminate()
+            frog.bt_server_process.wait()
+            frog.images_frame.receive_bt_image.config(state='normal')
+            print("BT server stopped for DevisionPage")
+        if oyster.bt_server_process and oyster.bt_server_process.poll() is None:
+            oyster.bt_server_process.terminate()
+            oyster.bt_server_process.wait()
+            oyster.images_frame.receive_bt_image.config(state='normal')
+            print("BT server stopped for OysterPage")
     
     notebook.bind("<<NotebookTabChanged>>", on_tab_changed)
 
