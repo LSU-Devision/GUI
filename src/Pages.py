@@ -254,7 +254,7 @@ class Page(ttk.Frame):
         
         self.bt_server_process = None
         self.bt_monitor_thread = None
-        self.bt_transfer_path = os.path.expanduser("~/bluetooth_transfers")
+        self.bt_transfer_path = get_bluetooth_transfer_path()
         os.makedirs(self.bt_transfer_path, exist_ok=True)
         self.bt_received_file_queue = Queue()
         self.after(100, self._check_bt_queue)
@@ -321,7 +321,7 @@ class Page(ttk.Frame):
             f"2. Ensure Bluetooth PAN (Personal Area Network) is active on the Pi.\n"
             f"   (The system service 'bt-pan.service' should be running).\n"
             f"3. On your phone, open a web browser and go to:\n"
-            f"   http://{ip_address}:5000\n\n"
+            f"   http://{ip_address}:4020\n\n"
             f"4. Upload your photo using the web page.\n"
             f"The photo will appear here automatically after upload."
         )
@@ -341,24 +341,26 @@ class Page(ttk.Frame):
                 break
             
             try:
-                current_files = set(os.listdir(self.bt_transfer_path))
-                new_files = current_files - seen_files
+                current_files_basenames = set(os.listdir(self.bt_transfer_path))
+                newly_added_basenames = current_files_basenames - seen_files
 
-                if new_files:
-                    latest_file = max([os.path.join(self.bt_transfer_path, f) for f in new_files], key=os.path.getmtime)
-                    print(f"New file detected: {latest_file}")
-                    self.bt_received_file_queue.put(latest_file)
-                    seen_files.add(os.path.basename(latest_file))
-                    break
+                if newly_added_basenames:
+                    for basename in newly_added_basenames:
+                        full_path = os.path.join(self.bt_transfer_path, basename)
+                        if os.path.isfile(full_path): # Ensure it's a file
+                            print(f"New file detected: {full_path}")
+                            self.bt_received_file_queue.put(full_path)
+                            seen_files.add(basename) # Add basename to seen_files
 
             except FileNotFoundError:
-                time.sleep(1)
-                continue
+                print(f"Monitoring path {self.bt_transfer_path} not found. Stopping monitor.")
+                break # Stop monitoring if the path itself disappears
             except Exception as e:
                 print(f"Error in Bluetooth monitoring thread: {e}")
+                # Add a small delay to prevent rapid error logging if persistent issue
                 time.sleep(1)
             
-            time.sleep(1)
+            time.sleep(1) # Poll every second
         print("Bluetooth monitoring thread finished.")
 
     def _stop_bt_server_and_monitor(self):
@@ -867,6 +869,16 @@ class Page(ttk.Frame):
     def destroy(self):
         self._stop_bt_server_and_monitor()
         super().destroy()
+
+def get_bluetooth_transfer_path():
+    """Determines the path for Bluetooth transfers.
+    Checks for DEVISION_TRANSFER_PATH environment variable first.
+    Defaults to '~/bluetooth_transfers' if not set.
+    """
+    env_path = os.environ.get('DEVISION_TRANSFER_PATH')
+    if env_path:
+        return env_path
+    return os.path.expanduser("~/bluetooth_transfers")
 
 def get_model_path(relative_path):
     """Helper function to get model path with environment variable support"""

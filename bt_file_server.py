@@ -8,8 +8,18 @@ import re
 
 app = Flask(__name__)
 
+def get_transfer_path():
+    """Determines the path for Bluetooth transfers.
+    Checks for DEVISION_TRANSFER_PATH environment variable first.
+    Defaults to '~/bluetooth_transfers' if not set.
+    """
+    env_path = os.environ.get('DEVISION_TRANSFER_PATH')
+    if env_path:
+        return env_path
+    return os.path.expanduser("~/bluetooth_transfers")
+
 # Create directory for received files
-save_path = os.path.expanduser("~/bluetooth_transfers")
+save_path = get_transfer_path()
 os.makedirs(save_path, exist_ok=True)
 
 # Get Bluetooth MAC address
