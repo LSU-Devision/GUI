@@ -185,7 +185,7 @@ This feature allows transferring photos from a smartphone (iOS or Android) to th
 1.  **Pair Your Phone**: Ensure your smartphone is paired with your Raspberry Pi via Bluetooth standard pairing procedures.
 2.  **Launch the GUI Application**: Run the DeVision application.
 3.  **Initiate Reception**: In the GUI, click the "Receive via Bluetooth" button or by clicking the blutooth icon on the top right.
-4.  **Follow GUI Instructions**: The application will display a message with the Raspberry Pi's IP address (accessible over the Bluetooth PAN) and port (e.g., `http://<IP_ADDRESS>:5000`).
+4.  **Follow GUI Instructions**: The application will display a message with the Raspberry Pi's IP address (accessible over the Bluetooth PAN) and port (e.g., `http://<IP_ADDRESS>:4020`).
 5.  **Upload from Phone**: On your phone, open a web browser and navigate to the address provided by the GUI.
 6.  **Select and Upload**: Use the web page on your phone to select and upload a photo.
 7.  **Automatic Processing**: Once uploaded, the photo will be saved to the `~/bluetooth_transfers/` directory on the Raspberry Pi, and the GUI will automatically detect and load it for processing.
