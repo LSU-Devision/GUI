@@ -55,6 +55,10 @@ class ModelAPI:
                 print(f"Files in {basedir}: {os.listdir(basedir)}")
             raise
         
+        # Resize the image if the resolution is incorrect
+        if img.size != (3024, 4032):
+            img = img.resize(3024, 4032)
+        
         self._image = img
         self._nclasses = classes
         

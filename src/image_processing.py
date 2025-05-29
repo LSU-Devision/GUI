@@ -24,7 +24,7 @@ def get_data_path(relative_path: os.PathLike):
     if str(path) == 'data' or (len(path.parents) > 0 and path.parents[-1] == 'data'):
         if os.environ.get('DEVISION_DATA'):
             # If we're in a bundled app, use the environment variable path
-            path = Path(reversed(path.parents[-1])) / path.name
+            path = Path(path.parents[-1]) / path.name
             path = Path(os.environ.get('DEVISION_DATA')) / path
             print(f"Using bundled data path: {path}")
         

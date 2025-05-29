@@ -99,7 +99,7 @@ class Page(ttk.Frame):
         if 'settings_frame_kwargs' not in kwargs:
             settings_frame_kwargs={'sticky':'EW', 'padx':10}
         if 'output_frame_kwargs' not in kwargs:
-            output_frame_kwargs={'sticky':'NSWE', 'padx':10}
+            output_frame_kwargs={'sticky':'EW', 'padx':10}
         
         # Initializing ttk widget methods in ttk.Frame
         super().__init__(*args)
@@ -233,12 +233,6 @@ class Page(ttk.Frame):
         
         self.settings_frame.rowconfigure(0, weight=1)
         self.top_frame.rowconfigure(0, weight=1)
-
-        # Temp rewrite from ImageList to PIL list internal
-        # for path in self.images.paths:
-        #     img = Image.open(path)
-        #     self._original_images.append(img.copy())
-        #     img.close()
             
         # Writing images read from disk onto frame in order, if applicable
         for index in range(len(self.images)):
@@ -867,7 +861,7 @@ class OysterPage(Page):
         def clear_error_on_select(*args):
             value = self.model_select.value
             if value != 'None' and value:
-                self.model_error_label.config(text='')
+                self.model_error_label.push(None)
         self.model_select.menu_var.trace_add('write', clear_error_on_select)
         
     def get_prediction(self, img_pointer=None, auto_export=True):
@@ -969,6 +963,7 @@ class OysterPage(Page):
         
         if drop_na:
             df = df.dropna(how='any')
+            df = df[~df.isin(['']).any(axis=1)]
         
         if df.empty:
             return
@@ -1045,16 +1040,14 @@ class DevisionPage(Page):
         #This button resizes at runtime and there's no built in way to change a ttk widget's width
         self.model_select = self.add_input(DropdownBox, text='Select a Model Below', dropdowns=self.model_names)
         
-        # Add error label above Predict and Annotate button
-        self.model_error_label = ttk.Label(self.settings_frame, text='', foreground='red', font='TkDefaultFont')
-        self.model_error_label.grid(row=0, column=0, columnspan=4, sticky='EW', pady=(0, 2))
-        
         predict_button = self.add_settings(IOButton, text='Predict and Annotate', command=self.get_prediction, disable_during_run=True)
         self.add_settings(IOButton, text='Export to CSV', command=self.to_csv)
         self.add_settings(IOButton, text='Settings', command=self.open_settings)
         self.add_settings(IOButton, text='Help')
         
         predict_counter = self.add_output(Counter, text='Model Count')
+        self.model_error_label = self.add_output(ErrorLabel, text='')
+        
         predict_button.bind_out(predict_counter)
     
     def get_prediction(self, img_pointer=None):
@@ -1072,7 +1065,7 @@ class DevisionPage(Page):
             model_dir = get_model_path('models/frog-egg-counter')
             classes = 1
         else:
-            self.model_error_label.config(text='Failed to load model: Please select a valid model.')
+            self.model_error_label.push('Failed to load model: Please select a valid model.')
             return 0
         
         with Image.open(self.images.paths[img_pointer]) as img:

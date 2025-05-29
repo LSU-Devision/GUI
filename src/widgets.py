@@ -5,6 +5,8 @@
 # some examples of callback functions that produce a value without having to implement asnychronous pipes/queues
 
 import tkinter.ttk as ttk
+import ttkbootstrap
+from ttkbootstrap.constants import *
 import tkinter as tk
 import threading
 
@@ -276,7 +278,7 @@ class ErrorLabel(Outputable):
         super().__init__(parent)
         
         self.text_label = ttk.Label(self, relief='solid', foreground='red', font='TkDefaultFont', **kwargs)
-        
+        self.text_label.pack(expand=False, side=tk.LEFT, fill=tk.BOTH)
     def update(self):
         self.text_label.config(text=self.value)
     
@@ -286,3 +288,23 @@ class ErrorLabel(Outputable):
             self.text_label.config(text='')
         else:
             self.text_label.config(text=str(inp))
+            
+class ProgressBar(Outputable):
+    def __init__(self, parent, **kwargs):
+        super().__init__(parent)
+        
+        self.progress = ttkbootstrap.Progressbar(self, phase=0, value=100, length=500, bootstyle=SUCCESS)
+        self.progress.pack(expand=False, side=tk.LEFT, fill=tk.BOTH)
+        
+    def update(self):
+        if self.value == None or self.value == '':
+            self.progress.config(phase=0, value=100)
+        else:
+            self.progress.config(phase=1, value=self.value)
+
+    def push(self, value):
+        self.value = value
+        if self.value == None or self.value == '':
+            self.progress.config(phase=0, value=100)
+        else:
+            self.progress.config(phase=1, value=self.value)
