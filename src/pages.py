@@ -245,10 +245,18 @@ class Page(ttk.Frame):
             file_path = self.images.paths[index]
             with Image.open(file_path) as og_img:
                 self._original_images.append(og_img.copy())
+            
+            # Reload prediction images    
+            file_path_pred = self.prediction_images.paths[index]
+            try:
+                with Image.open(file_path_pred) as og_pred_img:
+                    self._original_pred_images.append(og_pred_img.copy())
+            except:
+                self._original_pred_images.append(None)
             self.file_name_dict[index] = file_path
             self.next()
         
-            
+             
         
     def add_input(self, widget, **kwargs):
         """Adds and manages a subclass of Inputable onto the top frame, these
@@ -1110,9 +1118,7 @@ class DevisionPage(Page):
             head = './excel'
         export_dir = Path(head) / 'data-devision.csv'
         df.to_csv(export_dir, index=False)
-            
-
-        
+                    
                 
 if __name__ == '__main__':
     root = tk.Tk()
