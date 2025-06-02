@@ -18,7 +18,7 @@ class ModelAPI:
     def __init__(self, 
                  model_dir: os.PathLike,
                  img: Image.Image,
-                 classes: int=1,
+                 classes: int=1, # Useless parameter
                  annotate: bool=True):
         """StarDist2D Prediction wrapper, provides methods to return object count and create an annotated PIL image from model outputs
 
@@ -63,7 +63,7 @@ class ModelAPI:
         self.annotate = annotate
         
         self._image = img
-        self._nclasses = classes
+        self._nclasses = self._model.config.classes
         
         if self._model.config.n_channel_in == 3:
             img = img.convert('RGB')
