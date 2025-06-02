@@ -856,6 +856,7 @@ class OysterPage(Page):
         predict_counter = self.add_output(Counter, text='Oyster Brood Count')
         self.model_error_label = self.add_output(ErrorLabel, text='')
         self.progress_bar = self.add_output(ProgressBar)
+        self.progress = 1
         
         predict_button.bind_out(predict_counter)
         
@@ -937,6 +938,11 @@ class OysterPage(Page):
             
         return count
     
+    def write_frame(self):
+        super().write_frame()
+        if hasattr(self, 'progress_bar'):
+            self.progress_bar.push(self.progress)
+    
     def to_csv(self, drop_na=True, predict_all=True):
         # Determine export directory from user settings
         export_dir = SettingsWindow._settings.get('csv_path', '')
@@ -956,10 +962,12 @@ class OysterPage(Page):
             self.excel_obj = OysterExcel()
             
             for img_pointer in range(len(self.images)):
-                self.progress_bar.push(100 * img_pointer / len(self.images))
+                self.progress = 100 * img_pointer / len(self.images)
+                self.progress_bar.push(self.progress)
                 if img_pointer not in self.brood_count_dict:
                     self.get_prediction(img_pointer, auto_export=False)
-            self.progress_bar.push(100)
+            self.progress = 100
+            self.progress_bar.push(self.progress)
             
         data = self.get_all_inputs()
 
