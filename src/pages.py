@@ -154,7 +154,6 @@ class Page(ttk.Frame):
         if os.path.exists(f'data/ImageListPred{self.name}.json'):
             with open(f'data/ImageListPred{self.name}.json', 'r') as file:
                 pred_json = list(json.load(file))
-        print(f'image list: {self.name}')
         self.images = ImageList(iterable=true_json, name=f'True{self.name}')
         self.prediction_images = ImageList(iterable=pred_json, name=f'Pred{self.name}')
         
