@@ -63,7 +63,7 @@ class ModelAPI:
         self.annotate = annotate
         
         self._image = img
-        self._nclasses = self._model.config.n_classes
+        self._nclasses = self._model.config.n_classes if self._model.config.n_classes != None else 1
         
         if self._model.config.n_channel_in == 3:
             img = img.convert('RGB')
