@@ -109,7 +109,6 @@ class ImageList(list):
     def _json_dump(self):
         str_paths = list(map(lambda x: str(x), self.paths))
         file_path = get_data_path(f'data/ImageList{self.name}.json')
-        print(f'filepath: {file_path}')
         # Ensure parent directory exists
         try:
             with open(file_path, 'w') as file:
