@@ -324,9 +324,9 @@ class SettingsWindow(ttk.Frame):
         
         # More concise, screen-friendly text
         settings_text = [
-            "Auto-export Excel file",
-            "New Excel for predictions",
-            "New Excel when clearing",
+            "Auto-export CSV file",
+            "New CSV for predictions",
+            "New CSV when clearing",
             "Auto-save images",
             "Annotate predicted images"
         ]
