@@ -530,7 +530,10 @@ class Page(ttk.Frame):
             
         if len(self._original_pred_images) <= prediction_image_pointer:
             self._original_pred_images.extend([None] * (prediction_image_pointer + 1 - len(self._original_pred_images)))
-        self._original_pred_images[prediction_image_pointer] = pil_pred_img.copy()
+        try:
+            self._original_pred_images[prediction_image_pointer] = pil_pred_img.copy()
+        except AttributeError:
+            self._original_pred_images[prediction_image_pointer] = None
         self.prediction_images[prediction_image_pointer] = file_path
         self.set_image()
     
@@ -854,6 +857,7 @@ class OysterPage(Page):
         
         predict_counter = self.add_output(Counter, text='Oyster Brood Count')
         self.model_error_label = self.add_output(ErrorLabel, text='')
+        self.progress_bar = self.add_output(ProgressBar)
         
         predict_button.bind_out(predict_counter)
         
@@ -952,10 +956,13 @@ class OysterPage(Page):
                 self.settings_obj.write_user_settings()
             # Reset data and predict all without individual exports
             self.excel_obj = OysterExcel()
+            
             for img_pointer in range(len(self.images)):
+                self.progress_bar.push(100 * img_pointer / len(self.images))
                 if img_pointer not in self.brood_count_dict:
                     self.get_prediction(img_pointer, auto_export=False)
-        
+            self.progress_bar.push(100)
+            
         data = self.get_all_inputs()
 
         df = pd.DataFrame.from_dict(data, orient='index')
@@ -1050,10 +1057,12 @@ class DevisionPage(Page):
         
         predict_counter = self.add_output(Counter, text='Model Count')
         self.model_error_label = self.add_output(ErrorLabel, text='')
-        
+       
         predict_button.bind_out(predict_counter)
     
     def get_prediction(self, img_pointer=None):
+        self.model_error_label.push(None)
+        
         if not img_pointer:
             img_pointer = self.image_pointer
         
@@ -1128,7 +1137,6 @@ if __name__ == '__main__':
     
     notebook.add(frog, text='Devision Page')
     notebook.add(oyster, text='Oyster Page')
-    
     
     notebook.grid(row=0, column=0, sticky='NSEW')
     
