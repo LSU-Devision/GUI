@@ -11,7 +11,6 @@ import datetime
 import tkinter as tk
 from tkinter.filedialog import askopenfilename, askopenfilenames, askdirectory
 import json
-
 from tkinter import ttk
 
 from widgets import *
@@ -155,7 +154,7 @@ class Page(ttk.Frame):
         if os.path.exists(f'data/ImageListPred{self.name}.json'):
             with open(f'data/ImageListPred{self.name}.json', 'r') as file:
                 pred_json = list(json.load(file))
-        
+        print(f'image list: {self.name}')
         self.images = ImageList(iterable=true_json, name=f'True{self.name}')
         self.prediction_images = ImageList(iterable=pred_json, name=f'Pred{self.name}')
         
@@ -1044,7 +1043,8 @@ class DevisionPage(Page):
         self.settings_obj = SettingsWindow()
         self.settings = self.settings_obj.settings
         self.model_names = ['Frog Egg Counter', 
-                            'Xenopus 4 Class Counter'
+                            'Xenopus 4 Class Counter',
+                            'Select a Model from Folder'
                            ]
         
         #This button resizes at runtime and there's no built in way to change a ttk widget's width
@@ -1076,6 +1076,10 @@ class DevisionPage(Page):
         elif model_str == self.model_names[0]:
             model_dir = get_model_path('models/frog-egg-counter')
             classes = 1
+        elif model_str == self.model_names[2]:
+            model_dir = get_model_path(askdirectory(title='Please select a model directory'))
+            classes = 1
+
         else:
             self.model_error_label.push('Failed to load model: Please select a valid model.')
             return 0

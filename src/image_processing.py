@@ -20,8 +20,15 @@ def get_data_path(relative_path: os.PathLike):
     Returns:
         os.PathLike: The absolute path of the data based on OS
     """
-    path = Path(relative_path)
-    if str(path) == 'data' or (len(path.parents) > 0 and path.parents[-1] == 'data'):
+    path = Path(relative_path).absolute()
+    #print(f'''Checking data path: {path}''', Path(relative_path).absolute())
+    # print(list(path.parents)[0])
+
+    # conditional statement to check if the path is in the data directory or if it is a child of the data directory
+    # proposal, instead of checking if the data directory is at index 0, check if data is in the path.parents
+
+    if str(path) == 'data' or (len(path.parents) > 0 and path.parents[1] == 'data'):
+    #if str(path) == 'data' or (len(path.parents) > 0 and 'data' in path.parents): proposed solution
         if os.environ.get('DEVISION_DATA'):
             # If we're in a bundled app, use the environment variable path
             path = Path(path.parents[-1]) / path.name
@@ -102,7 +109,7 @@ class ImageList(list):
     def _json_dump(self):
         str_paths = list(map(lambda x: str(x), self.paths))
         file_path = get_data_path(f'data/ImageList{self.name}.json')
-        
+        print(f'filepath: {file_path}')
         # Ensure parent directory exists
         try:
             with open(file_path, 'w') as file:
@@ -112,6 +119,7 @@ class ImageList(list):
             # Try to write to a fallback location if needed
             try:
                 fallback_path = Path(f'ImageList{self.name}.json')
+                print(str(fallback_path))
                 with open(fallback_path, 'w') as file:
                     json.dump(obj=str_paths, fp=file, indent=2)
                 print(f"Saved image list to fallback location: {fallback_path}")
