@@ -856,7 +856,7 @@ class OysterPage(Page):
         predict_counter = self.add_output(Counter, text='Oyster Brood Count')
         self.model_error_label = self.add_output(ErrorLabel, text='')
         self.progress_bar = self.add_output(ProgressBar)
-        self.progress = 1
+        self.progress = 100
         
         predict_button.bind_out(predict_counter)
         
