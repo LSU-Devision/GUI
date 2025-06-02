@@ -195,7 +195,7 @@ class LabelBox(Inputable):
         self.value = text
         
 class DropdownBox(Inputable):
-    def __init__(self, parent, text='', dropdowns=[]):
+    def __init__(self, parent, text='', dropdowns=[], command=None):
         super().__init__(parent)
         dropdowns = ['None'] + dropdowns
         
@@ -203,6 +203,7 @@ class DropdownBox(Inputable):
         def option_selected(e):
             self.ready()
             self.value = self.menu_var.get()
+            
         
         self.text = ttk.Label(self, text=text, relief='solid')
         

@@ -1,11 +1,12 @@
 
-{
-    "toggles":{
-        "excel-default": true,
-        "clear-excel-default" : false,
-        "clear-output-default" : true,
-        "autosave-image-default": true
-    },
+                        {
+                            "toggles":{
+                                "excel-default": true,
+                                "clear-excel-default" : false,
+                                "clear-output-default" : true,
+                                "autosave-image-default": true,
+                                "annotate-default": true
+                            },
 
-    "theme":"darkly-style"
-}
+                            "theme":"darkly-style"
+                        }

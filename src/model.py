@@ -18,7 +18,8 @@ class ModelAPI:
     def __init__(self, 
                  model_dir: os.PathLike,
                  img: Image.Image,
-                 classes: int=1):
+                 classes: int=1,
+                 annotate: bool=True):
         """StarDist2D Prediction wrapper, provides methods to return object count and create an annotated PIL image from model outputs
 
         Args:
@@ -58,6 +59,8 @@ class ModelAPI:
         # Resize the image if the resolution is incorrect
         if img.size != (3024, 4032):
             img = img.resize((3024, 4032))
+            
+        self.annotate = annotate
         
         self._image = img
         self._nclasses = classes
@@ -103,8 +106,10 @@ class ModelAPI:
             4: 'yellow'
         }
         
-        self._out_image = highlight_boundary(self._image, mask_image, width=4, classes=self._nclasses, class_dct=class_dct, colors=self.color_dct)
-
+        if self.annotate:
+            self._out_image = highlight_boundary(self._image, mask_image, width=4, classes=self._nclasses, class_dct=class_dct, colors=self.color_dct)
+        else:
+            self._out_image = None
     def df(self):
         
         

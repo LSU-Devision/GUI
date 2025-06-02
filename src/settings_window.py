@@ -132,7 +132,8 @@ class SettingsWindow(ttk.Frame):
                                 "excel-default": true,
                                 "clear-excel-default" : false,
                                 "clear-output-default" : true,
-                                "autosave-image-default": true
+                                "autosave-image-default": true,
+                                "annotate-default": true
                             },
 
                             "theme":"darkly-style"
@@ -166,7 +167,8 @@ class SettingsWindow(ttk.Frame):
                         "excel-default": True,
                         "clear-excel-default": False,
                         "clear-output-default": True,
-                        "autosave-image-default": True
+                        "autosave-image-default": True,
+                        "annotate-default": True
                     },
                     "theme": "darkly-style"
                 }
@@ -252,7 +254,7 @@ class SettingsWindow(ttk.Frame):
             'default',
             'style',    
             'version',
-            'clear',            
+            'clear'            
         ]
         
         # The displayed names for the dropdown labels
@@ -326,6 +328,7 @@ class SettingsWindow(ttk.Frame):
             "New Excel for predictions",
             "New Excel when clearing",
             "Auto-save images",
+            "Annotate predicted images"
         ]
         
         settings_id = [
@@ -333,6 +336,7 @@ class SettingsWindow(ttk.Frame):
             "clear-excel-default",
             'clear-output-default',
             'autosave-image-default',
+            'annotate-default'
         ]
         
         # Place the default settings into the tree

@@ -523,7 +523,11 @@ class Page(ttk.Frame):
         assert prediction_image_pointer >= 0 and prediction_image_pointer <= len(self.images) - 1
         self.image_pointer = prediction_image_pointer
         # Store original PIL prediction image
-        pil_pred_img = Image.open(file_path)
+        if file_path == None:
+            pil_pred_img = None
+        else:
+            pil_pred_img = Image.open(file_path)
+            
         if len(self._original_pred_images) <= prediction_image_pointer:
             self._original_pred_images.extend([None] * (prediction_image_pointer + 1 - len(self._original_pred_images)))
         self._original_pred_images[prediction_image_pointer] = pil_pred_img.copy()
@@ -841,11 +845,7 @@ class OysterPage(Page):
         self.add_input(LabelBox, text='Seed Tray Weight (g)')
         self.add_input(LabelBox, text='Slide Weight (g)')
         self.add_input(LabelBox, text='Slide + Seed Weight (g)')
-        
-        # Add error label above Predict Brood Count button
-        # self.model_error_label = ttk.Label(self.settings_frame, text='', foreground='red', font='TkDefaultFont')
-        # self.model_error_label.grid(row=0, column=0, columnspan=4, sticky='EW', pady=(0, 2))
-        
+       
         # Add the settings buttons in a single row
         predict_button = self.add_settings(IOButton, text='Predict Brood Count', command=self.get_prediction, disable_during_run=True)
         self.add_settings(IOButton, text='Append to CSV File', command=self.load_csv)
@@ -889,37 +889,40 @@ class OysterPage(Page):
         
         # Always use img_pointer for image and annotation
         with Image.open(self.images.paths[img_pointer]) as img:  
-            api = ModelAPI(model_path, img, classes)    
+            annotate = self.settings['toggles']['annotate-default']
+            api = ModelAPI(model_path, img, classes, annotate)   
             count, annotation = api.get()
 
         # Determine where to save annotations
-        anno_dir = self.settings['annotation_path']
-        if self.settings['toggles']['autosave-image-default']:
-            # Prompt user for annotation directory on first use
-            if not anno_dir:
-                selected = askdirectory(
-                    initialdir=get_annotation_path('annotations'),
-                    title='Select folder to save annotation images'
-                )
-                if selected:
-                    anno_dir = selected
-                    # Persist choice
-                    SettingsWindow._settings['annotation_path'] = anno_dir
-                    self.settings_obj.write_user_settings()
-            # Build full annotation file path
-            if anno_dir:
-                annotation_fp = os.path.join(anno_dir, f"oysterannotation{img_pointer}.png")
-            else:
-                # Fallback to persistent annotations folder
-                fallback_dir = get_output_dir('annotations')
-                annotation_fp = os.path.join(fallback_dir, f"oysterannotation{img_pointer}.png")
-            # Save the annotation image
-            try:
-                os.makedirs(os.path.dirname(annotation_fp), exist_ok=True)
-                annotation.save(fp=annotation_fp)
-            except Exception as e:
-                print(f"Warning: Could not save annotation: {str(e)}")
-        
+        if annotation:
+            anno_dir = self.settings['annotation_path']
+            if self.settings['toggles']['autosave-image-default']:
+                # Prompt user for annotation directory on first use
+                if not anno_dir:
+                    selected = askdirectory(
+                        initialdir=get_annotation_path('annotations'),
+                        title='Select folder to save annotation images'
+                    )
+                    if selected:
+                        anno_dir = selected
+                        # Persist choice
+                        SettingsWindow._settings['annotation_path'] = anno_dir
+                        self.settings_obj.write_user_settings()
+                # Build full annotation file path
+                if anno_dir:
+                    annotation_fp = os.path.join(anno_dir, f"oysterannotation{img_pointer}.png")
+                else:
+                    # Fallback to persistent annotations folder
+                    fallback_dir = get_output_dir('annotations')
+                    annotation_fp = os.path.join(fallback_dir, f"oysterannotation{img_pointer}.png")
+                # Save the annotation image
+                try:
+                    os.makedirs(os.path.dirname(annotation_fp), exist_ok=True)
+                    annotation.save(fp=annotation_fp)
+                except Exception as e:
+                    print(f"Warning: Could not save annotation: {str(e)}")
+        else:
+            annotation_fp = None
         self.brood_count_dict[img_pointer] = count
         self.set_prediction_image(img_pointer, annotation_fp)
         
@@ -1069,18 +1072,21 @@ class DevisionPage(Page):
             return 0
         
         with Image.open(self.images.paths[img_pointer]) as img:
-            api = ModelAPI(model_dir, img, classes)
+            annotate = self.settings['toggles']['annotate-default']
+            api = ModelAPI(model_dir, img, classes, annotate)
             count, annotation = api.get()
         
-        annotation_fp = get_annotation_path(f"annotations/devisionannotation{self.image_pointer}.png")
-        if self.settings['toggles']['autosave-image-default']:
-            # Ensure annotations directory exists
-            try:
-                os.makedirs(os.path.dirname(annotation_fp), exist_ok=True)
-                annotation.save(fp=annotation_fp)
-            except Exception as e:
-                print(f"Warning: Could not save annotation: {str(e)}")
-        
+        if annotation:
+            annotation_fp = get_annotation_path(f"annotations/devisionannotation{self.image_pointer}.png")
+            if self.settings['toggles']['autosave-image-default']:
+                # Ensure annotations directory exists
+                try:
+                    os.makedirs(os.path.dirname(annotation_fp), exist_ok=True)
+                    annotation.save(fp=annotation_fp)
+                except Exception as e:
+                    print(f"Warning: Could not save annotation: {str(e)}")
+        else:
+            annotation_fp = None
         self.class_count_dicts[img_pointer] = api.count_dct.copy()
         self.egg_count_dict[img_pointer] = count
         self.set_prediction_image(img_pointer, annotation_fp)
