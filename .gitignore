@@ -9,6 +9,7 @@ gui/vm.tar
 data/*
 !data/devision-help.md
 !data/.gitkeep
+!data/oyster-help.md
 
 excel/*
 !excel/.gitkeep

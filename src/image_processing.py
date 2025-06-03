@@ -21,8 +21,6 @@ def get_data_path(relative_path: os.PathLike):
         os.PathLike: The absolute path of the data based on OS
     """
     path = Path(relative_path).absolute()
-    #print(f'''Checking data path: {path}''', Path(relative_path).absolute())
-    # print(list(path.parents)[0])
 
     # conditional statement to check if the path is in the data directory or if it is a child of the data directory
     # proposal, instead of checking if the data directory is at index 0, check if data is in the path.parents

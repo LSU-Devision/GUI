@@ -4,25 +4,18 @@ This page has a scroll bar to view the full page.
 
 ## Overview
 
-This software uses **Stardist** models to predict object locations, number, and type contained within an input image. Our predefined models provide access to a frog egg counter, as well as a classification counter for Xenopus frog eggs. Our software also provides support for importing custom user-defined Stardist models with less than five classes. 
+This software uses **Stardist** models to predict object locations, number, and type contained within an input image. Our predefined models provide access to a 2-4mm seed counter as well as a 4-6mm seed counter. Our software also provides support for importing custom user-defined Stardist models with less than five classes. 
 
 ### Usage
 To use this software, first import an image using the **Select an image** button, located in the top region of the page. This will open a file dialog to select an image file from your file system. Once an image has been imported into the program, it should appear in the left panel on the app page.
 
-Select your preferred model from the model dropdown menu, located in the top center of the screen. Choosing **Select a Model from Folder** will prompt the user for a custom Stardist model *after pressing the Predict and Annotate button*. This button will estimate the number of instances detected in the picture and place the result in the Model Count label located in the bottom left of the screen. While the predict button is greyed out, the program is actively calculating. Expect predictions to take ~10-30 seconds on a 2GHz CPU and predictions + annotations to take ~40-60 seconds. 
+Select your preferred model from the model dropdown menu, located in the top center of the screen. Choosing **Select a Model from Folder** will prompt the user for a custom Stardist model *after pressing the Predict Brood Count*. This button will estimate the number of instances detected in the picture and place the result in the Model Count label located in the bottom left of the screen. While the predict button is greyed out, the program is actively calculating. Expect predictions to take ~10-30 seconds on a 2GHz CPU and predictions + annotations to take ~40-60 seconds. If the Auto-export to CSV setting is selected, this button will also output a CSV file into the default CSV directory. 
 
 When selecting more than one image, the program will automatically place the most recent image added into the frame. To navigate back to older images, press the *Prev* (previous) and *Next* buttons to navigate. The counter in the center of the page contains the current frame integer id on the left side, and the total number of frames on the right side.
 
 Each image frame contains a fullscreen button in the top left to see a zoomed in version of the image.
 
-Selecting the Export to CSV button in the bottom of the page will take all the data in the program and place it into a CSV file in the default CSV directory.
-
-### Xenopus Frog Egg Classification
-The classes provided for the Xenopus frog egg model as as follows:
-- Class 0 (Red): Unfertilized
-- Class 1 (Blue): Fertilized Stage 1 ~ 2-split
-- Class 2 (Green): Fertilized Stage 2 ~ 4-split
-- Class 3 (Yellow): Fertilized Stage 3 ~ 8-split
+The top panel contains input boxes for calculating statistics in the CSV file. If any box is missing data, that entry in the CSV file will be skipped when exporting. The **Append to CSV file** button prompts the user for an existing CSV file in a file dialog. 
 
 ### Settings
 We have a number of features that are customizable to the user. These settings are accessed by pressing on the **Settings** button. These settings will automatically reload when reentering the program. To navigate the settings window, double click or press enter on any text in the tree. The setting names are located on the left side of the settings window, and the information regarding the status of the setting (active/inactive or other relevant information) is located under the status column on the right hand side of the window. 

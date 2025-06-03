@@ -3,7 +3,6 @@
 # Pages is specifically for image prediction pages like MainFrame and OysterPage, but the concept is
 # able to be generalized
 
-from stardist.models import StarDist2D
 import numpy as np
 from csbdeep.utils import normalize
 from markdown import Markdown
@@ -176,8 +175,13 @@ class Page(ttk.Frame):
         button_width = 20
         self.images_frame.file_select = ttk.Button(self.images_frame.button_frame, text='Select an image', command=self.add_image, style='Image.TButton', width=button_width)
         self.images_frame.take_image = ttk.Button(self.images_frame.button_frame, text='Take an image', command=self.take_image, style='Image.TButton', width=button_width)
-        self.images_frame.file_select.grid(row=0, column=0, padx=5, pady=0, sticky='EW')
-        self.images_frame.take_image.grid(row=0, column=1, padx=5, pady=0, sticky='EW')
+        
+        if is_raspberry_pi():
+            self.images_frame.take_image.grid(row=0, column=1, padx=5, pady=0, sticky='EW')
+            self.images_frame.file_select.grid(row=0, column=0, padx=5, pady=0, sticky='EW')
+
+        else:
+            self.images_frame.file_select.grid(row=0, column=0, columnspan=2, padx=5, pady=0, sticky='EW')
         # --- End button frame ---
         # Set fixed size for image display labels
         self.images_frame.left_window = tk.Label(
@@ -830,6 +834,7 @@ class OysterPage(Page):
         if 'csv_path' not in SettingsWindow._settings:
             SettingsWindow._settings['csv_path'] = ''
         
+        self.help_window_open = False
         self.brood_count_dict = {}
         self.excel_obj = OysterExcel()
         self.settings_obj = SettingsWindow()
@@ -853,6 +858,7 @@ class OysterPage(Page):
         self.add_settings(IOButton, text='Append to CSV File', command=self.load_csv)
         self.add_settings(IOButton, text='Predict all and Export', command=self.to_csv, disable_during_run=True)
         self.add_settings(IOButton, text='Settings', command=self.open_settings)
+        self.add_settings(IOButton, text='Help', command=self.open_help)
         
         predict_counter = self.add_output(Counter, text='Oyster Brood Count')
         self.model_error_label = self.add_output(ErrorLabel, text='')
@@ -938,6 +944,20 @@ class OysterPage(Page):
             self.excel_obj = OysterExcel()
             
         return count
+    
+    def open_help(self):
+        def on_destroy(event):
+            self.help_window_open = False
+        
+        if not self.help_window_open:
+            help_markdown_path = Path('data/oyster-help.md')
+            with open(help_markdown_path) as file:
+                raw_str = file.read()
+            
+            help_window = Markdown(self, raw_str)
+            help_window.bind('<Destroy>', on_destroy)
+            
+            self.help_window_open = True
     
     def write_frame(self):
         super().write_frame()
