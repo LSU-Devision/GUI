@@ -3,9 +3,21 @@ from ttkbootstrap.constants import *
 from tkinter import font
 import tkinter as tk
 
-class Markdown(ttk.Frame):
+
+class Markdown(tk.Toplevel):
     def __init__(self, parent, text: str, *args, **kwargs):
         super().__init__(parent, *args, **kwargs)
+        self.title("Devision Help Page")
+
+        
+        screen_width = str(self.winfo_screenwidth() * 2 // 3)
+        screen_height = str(self.winfo_screenheight() * 2 // 3)
+        
+        self.geometry(f"{screen_width}x{screen_height}")
+
+        
+        self.frame = ttk.Frame(self)
+        self.frame.pack(fill=BOTH, expand=True, side=TOP)
         
         self.fonts = {
                 "h1": font.Font(size=20, weight="bold"),
@@ -16,8 +28,8 @@ class Markdown(ttk.Frame):
                 "normal": font.Font(size=12)
                 }
         
-        self.text = ttk.Text(self, wrap=WORD, font=self.fonts['normal'])
-        self.scrollbar = ttk.Scrollbar(self, orient=VERTICAL, command=self.text.yview, bootstyle=SECONDARY)
+        self.text = ttk.Text(self.frame, wrap=WORD, font=self.fonts['normal'])
+        self.scrollbar = ttk.Scrollbar(self.frame, orient=VERTICAL, command=self.text.yview, bootstyle=SECONDARY)
         
         self.text.pack(side=LEFT, fill=BOTH, expand=TRUE)
         self.scrollbar.pack(side=RIGHT, fill=Y)
@@ -27,6 +39,7 @@ class Markdown(ttk.Frame):
         self.define_tags()
         
         self.render_markdown(text)
+
     
     def define_tags(self):
         self.text.tag_configure("h1", font=self.fonts["h1"], spacing3=10, foreground="#36c")
@@ -80,9 +93,6 @@ class Markdown(ttk.Frame):
 
 
 if __name__ == '__main__':
-    root = tk.Tk()
-    root.geometry("600x600")
-    
     sample_markdown = \
 """
 # Header 1
@@ -95,7 +105,5 @@ if __name__ == '__main__':
 Normal
 """
     
-    renderer = Markdown(root, sample_markdown)
-    renderer.grid()
-    
-    root.mainloop()
+    page = Markdown(sample_markdown)
+    page.mainloop()

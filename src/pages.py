@@ -6,6 +6,7 @@
 from stardist.models import StarDist2D
 import numpy as np
 from csbdeep.utils import normalize
+from markdown import Markdown
 
 import datetime
 import tkinter as tk
@@ -1037,6 +1038,7 @@ class OysterPage(Page):
         
     def open_settings(self):
         Settings(self)
+    
         
 #TODO: Add group number
 #TODO: Add temperature    
@@ -1045,6 +1047,7 @@ class DevisionPage(Page):
         self.name = "Devision"
         super().__init__(*args, **kwargs)
         
+        self.help_window_open = False
         self.egg_count_dict = {}
         self.class_count_dicts = {}
         self.settings_obj = SettingsWindow()
@@ -1060,7 +1063,7 @@ class DevisionPage(Page):
         predict_button = self.add_settings(IOButton, text='Predict and Annotate', command=self.get_prediction, disable_during_run=True)
         self.add_settings(IOButton, text='Export to CSV', command=self.to_csv)
         self.add_settings(IOButton, text='Settings', command=self.open_settings)
-        self.add_settings(IOButton, text='Help')
+        self.add_settings(IOButton, text='Help', command=self.open_help)
         
         predict_counter = self.add_output(Counter, text='Model Count')
         self.model_error_label = self.add_output(ErrorLabel, text='')
@@ -1114,7 +1117,21 @@ class DevisionPage(Page):
     
     def open_settings(self):
         Settings(self)
+    
+    def open_help(self):
+        def on_destroy(event):
+            self.help_window_open = False
         
+        if not self.help_window_open:
+            help_markdown_path = Path('data/devision-help.md')
+            with open(help_markdown_path) as file:
+                raw_str = file.read()
+            
+            help_window = Markdown(self, raw_str)
+            help_window.bind('<Destroy>', on_destroy)
+            
+            self.help_window_open = True
+            
     def to_csv(self):
         date = datetime.datetime.now()
         files: dict = self.file_name_dict
