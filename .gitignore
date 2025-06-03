@@ -5,7 +5,9 @@ config/ImageList*.json
 build/
 dist/
 gui/vm.tar
+
 data/*
+!data/devision-help.md
 !data/.gitkeep
 
 excel/*

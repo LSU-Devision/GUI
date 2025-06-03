@@ -11,7 +11,7 @@ from image_processing import highlight_boundary
 def count_by_class(class_arr):
     class_dict = {}
     for class_id in class_arr:
-        class_dict[class_id] = class_dict.get(class_id, 0) + 1
+        class_dict[class_id-1] = class_dict.get(class_id-1, 0) + 1
     return class_dict
 
 class ModelAPI:
