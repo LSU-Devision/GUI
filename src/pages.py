@@ -838,7 +838,7 @@ class OysterPage(Page):
         self.model_select = self.add_input(DropdownBox, text="Model Select", dropdowns=[
             "2-4mm model",
             "4-6mm model",
-            "choose a model from folder"
+            "Select a Model from Folder"
         ])
         # Give the Model Select column a higher weight and minsize to prevent shrinking
         self.top_frame.columnconfigure(0, weight=3, minsize=180)
