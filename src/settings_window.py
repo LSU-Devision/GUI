@@ -353,11 +353,13 @@ class SettingsWindow(ttk.Frame):
         self._settings_tree.insert('default', 'end', iid='csv-path', text='CSV Output Directory', values=csv_dir, tags='CSVPathSetting')
         self._settings_tree.tag_configure('CSVPathSetting', font='TkDefaultFont')
         self._settings_tree.tag_bind('CSVPathSetting', '<Double-1>', self._change_csv_path)
+        self._settings_tree.tag_bind('CSVPathSetting', '<Return>', self._change_csv_path)
         # Add Annotation output directory setting
         ann_dir = self.cls._settings.get('annotation_path', '')
         self._settings_tree.insert('default', 'end', iid='annotation-path', text='Annotation Output Directory', values=ann_dir, tags='AnnotationPathSetting')
         self._settings_tree.tag_configure('AnnotationPathSetting', font='TkDefaultFont')
         self._settings_tree.tag_bind('AnnotationPathSetting', '<Double-1>', self._change_annotation_path)
+        self._settings_tree.tag_bind('AnnotationPathSetting', '<Return>', self._change_annotation_path)
         
     def _version_settings(self):
         
@@ -384,25 +386,25 @@ class SettingsWindow(ttk.Frame):
             else:
                 tk.messagebox.showinfo("Update", "You are on the latest version") 
                            
-        def guide_select(event):
-            scraper_user_guide_class = Scraper()
-            # check if there is an internet connection
-            if (scraper_user_guide_class.check_internet())  == False:
-                # if there is no internet connection, show an error
-                tk.messagebox.showerror("Internet Issue", "Fix your internet to the point where you can load google.com")
-                return
-            # open the user guide page
-            else: scraper_user_guide_class.get_user_guide()
+        # def guide_select(event):
+        #     scraper_user_guide_class = Scraper()
+        #     # check if there is an internet connection
+        #     if (scraper_user_guide_class.check_internet())  == False:
+        #         # if there is no internet connection, show an error
+        #         tk.messagebox.showerror("Internet Issue", "Fix your internet to the point where you can load google.com")
+        #         return
+        #     # open the user guide page
+        #     else: scraper_user_guide_class.get_user_guide()
             
         
         settings_text = [
            'Check for updates',
-           'User guide' 
+           #'User guide' 
         ]
         
         settings_id = [
             'update-version',
-            'guide-version'
+            #'guide-version'
         ]
         
         # Insert settings into tree
@@ -411,13 +413,13 @@ class SettingsWindow(ttk.Frame):
 
         # Bind respective functions into tree
         self._settings_tree.tag_configure('update-version', font="TkDefaultFont")
-        self._settings_tree.tag_configure('guide-version', font="TkDefaultFont")
+        #self._settings_tree.tag_configure('guide-version', font="TkDefaultFont")
         
         self._settings_tree.tag_bind('update-version', '<Double-1>', update_select)
         self._settings_tree.tag_bind('update-version', '<Return>', update_select)
         
-        self._settings_tree.tag_bind('guide-version', '<Double-1>', guide_select)
-        self._settings_tree.tag_bind('guide-version', '<Return>', guide_select)
+        #self._settings_tree.tag_bind('guide-version', '<Double-1>', guide_select)
+        #self._settings_tree.tag_bind('guide-version', '<Return>', guide_select)
         
     def _style_settings(self):
         # Callback function for changing style at runtime, writing settings to file

@@ -5,7 +5,7 @@ import tkinter as tk
 
 
 class Markdown(tk.Toplevel):
-    def __init__(self, parent, text: str, *args, **kwargs):
+    def __init__(self, parent, data: str, *args, **kwargs):
         super().__init__(parent, *args, **kwargs)
         self.title("Devision Help Page")
 
@@ -38,7 +38,8 @@ class Markdown(tk.Toplevel):
         
         self.define_tags()
         
-        self.render_markdown(text)
+        self.render_markdown(data)
+        self.text.config(state='disabled')
 
     
     def define_tags(self):
