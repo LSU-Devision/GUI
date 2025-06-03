@@ -1,5 +1,7 @@
 # Devision User Manual
 
+This page has a scroll bar to view the full page.
+
 ## Overview
 
 This software uses **Stardist** models to predict object locations, number, and type contained within an input image. Our predefined models provide access to a frog egg counter, as well as a classification counter for Xenopus frog eggs. Our software also provides support for importing custom user-defined Stardist models with less than five classes. 
@@ -9,6 +11,10 @@ This software uses **Stardist** models to predict object locations, number, and 
 To use this software, first import an image using the **Select an image** button, located in the top left of the page. This will open a file dialog to select an image file from your file system. Once an image has been imported into the program, it should appear in the left panel on the app page.
 
 Select your preferred model from the model dropdown menu, located in the top center of the screen. Choosing **Select a Model from Folder** will prompt the user for a custom Stardist model *after pressing the Predict and Annotate button*. This button will estimate the number of instances detected in the picture and place the result in the Model Count label located in the bottom left of the screen. While the predict button is greyed out, the program is actively calculating. Expect predictions to take ~10-30 seconds on a 2GHz CPU and predictions + annotations to take ~40-60 seconds. 
+
+When selecting more than one image, the program will automatically place the most recent image added into the frame. To navigate back to older images, press the *Prev* (previous) and *Next* buttons to navigate. The counter in the center of the page contains the current frame integer id on the left side, and the total number of frames on the right side.
+
+Each image frame contains a fullscreen button in the top left to see a zoomed in version of the image.
 
 ### Xenopus Frog Egg Classification
 The classes provided for the Xenopus frog egg model as as follows:
@@ -34,3 +40,8 @@ Defaults:
 Style:
 This dropdown contains a number of themes to stylize the user experience. This contains a number of built in light and dark themes, as well as a custom LSU dark theme.
 
+Version:
+This dropdown contains the check for updates button, which informs the user if a new update is avaliable and routes them to the github if so.
+
+Reset:
+This dropdown contains a option that will reset all settings to their default values. This includes theme, directory options, and all toggleable options.
