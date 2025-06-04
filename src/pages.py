@@ -841,14 +841,15 @@ class OysterPage(Page):
         self.name = "Oyster"
         super().__init__(*args, **kwargs)
         # Ensure csv_path exists in user settings
-        if 'csv_path' not in SettingsWindow._settings:
-            SettingsWindow._settings['csv_path'] = ''
         
         self.help_window_open = False
         self.brood_count_dict = {}
         self.excel_obj = OysterExcel()
         self.settings_obj = SettingsWindow()
         self.settings = self.settings_obj.settings
+        
+        if 'csv_path' not in SettingsWindow._settings:
+            SettingsWindow._settings['csv_path'] = ''
         
         self.model_select = self.add_input(DropdownBox, text="Model Select", dropdowns=[
             "2-4mm model",
