@@ -15,7 +15,9 @@ When selecting more than one image, the program will automatically place the mos
 
 Each image frame contains a fullscreen button in the top left to see a zoomed in version of the image.
 
-Selecting the Export to CSV button in the bottom of the page will take all the data in the program and place it into a CSV file in the default CSV directory.
+Selecting the **Export to CSV** button in the bottom of the page will take all the data in the program and place it into a CSV file in the default CSV directory.
+
+The **Predict All** Button will predict every image loaded into the program. The model choice must be selected beforehand for each image.
 
 ### Xenopus Frog Egg Classification
 The classes provided for the Xenopus frog egg model as as follows:

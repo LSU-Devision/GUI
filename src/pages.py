@@ -253,7 +253,17 @@ class Page(ttk.Frame):
             self.file_name_dict[index] = file_path
             self.next()
         
-             
+    def disable_move_buttons(self):
+        self.images_frame.next_button.config(state='disabled')
+        self.images_frame.prev_button.config(state='disabled')
+        self.images_frame.file_select.config(state='disabled')
+        self.images_frame.clear_images.config(state='disabled')     
+    
+    def enable_move_buttons(self):
+        self.images_frame.next_button.config(state='enabled')
+        self.images_frame.prev_button.config(state='enabled')
+        self.images_frame.file_select.config(state='enabled')
+        self.images_frame.clear_images.config(state='enabled')
         
     def add_input(self, widget, **kwargs):
         """Adds and manages a subclass of Inputable onto the top frame, these
@@ -855,18 +865,18 @@ class OysterPage(Page):
         self.add_input(LabelBox, text='Slide + Seed Weight (g)')
        
         # Add the settings buttons in a single row
-        predict_button = self.add_settings(IOButton, text='Predict Brood Count', command=self.get_prediction, disable_during_run=True)
+        self.predict_button = self.add_settings(IOButton, text='Predict Brood Count', command=self.get_prediction, disable_during_run=True)
         self.add_settings(IOButton, text='Append to CSV File', command=self.load_csv)
         self.add_settings(IOButton, text='Predict all and Export', command=self.to_csv, disable_during_run=True)
         self.add_settings(IOButton, text='Settings', command=self.open_settings)
         self.add_settings(IOButton, text='Help', command=self.open_help)
         
-        predict_counter = self.add_output(Counter, text='Oyster Brood Count')
+        self.predict_counter = self.add_output(Counter, text='Oyster Brood Count')
         self.model_error_label = self.add_output(ErrorLabel, text='')
         self.progress_bar = self.add_output(ProgressBar)
         self.progress = 100
         
-        predict_button.bind_out(predict_counter)
+        self.predict_button.bind_out(self.predict_counter)
         
         # Bind callback to model_select dropdown to clear error label when a valid model is selected
         def clear_error_on_select(*args):
@@ -985,13 +995,21 @@ class OysterPage(Page):
             # Reset data and predict all without individual exports
             self.excel_obj = OysterExcel()
             
+            self.disable_move_buttons()
+            self.predict_button.button.config(state='disabled')
             for img_pointer in range(len(self.images)):
+                self.save_frame()
+                self.img_pointer = img_pointer
+                self.write_frame()
                 self.progress = 100 * img_pointer / len(self.images)
                 self.progress_bar.push(self.progress)
                 if img_pointer not in self.brood_count_dict:
-                    self.get_prediction(img_pointer, auto_export=False)
+                    count = self.get_prediction(img_pointer, auto_export=False)
+                    self.predict_counter.push(count)
             self.progress = 100
             self.progress_bar.push(self.progress)
+            self.enable_move_buttons()
+            self.predict_button.button.config(state='normal')
             
         data = self.get_all_inputs()
 
@@ -1062,9 +1080,8 @@ class OysterPage(Page):
     def open_settings(self):
         Settings(self)
     
-        
 #TODO: Add group number
-#TODO: Add temperature    
+#TODO: Add temperature
 class DevisionPage(Page):
     def __init__(self, *args, **kwargs):
         self.name = "Devision"
@@ -1079,19 +1096,47 @@ class DevisionPage(Page):
                             'Xenopus 4 Class Counter',
                             'Select a Model from Folder'
                            ]
+        self.progress = 100
         
         #This button resizes at runtime and there's no built in way to change a ttk widget's width
         self.model_select = self.add_input(DropdownBox, text='Select a Model Below', dropdowns=self.model_names)
         
-        predict_button = self.add_settings(IOButton, text='Predict and Annotate', command=self.get_prediction, disable_during_run=True)
+        self.predict_button: IOButton = self.add_settings(IOButton, text='Predict and Annotate', command=self.get_prediction, disable_during_run=True)
         self.add_settings(IOButton, text='Export to CSV', command=self.to_csv)
+        self.add_settings(IOButton, text='Predict All', command=self.predict_all, disable_during_run=True)
         self.add_settings(IOButton, text='Settings', command=self.open_settings)
         self.add_settings(IOButton, text='Help', command=self.open_help)
+
         
-        predict_counter = self.add_output(Counter, text='Model Count')
+        self.predict_counter = self.add_output(Counter, text='Model Count')
         self.model_error_label = self.add_output(ErrorLabel, text='')
+        self.progress_bar = self.add_output(ProgressBar)
+
        
-        predict_button.bind_out(predict_counter)
+        self.predict_button.bind_out(self.predict_counter)
+    
+    def write_frame(self):
+        out =  super().write_frame()
+        if hasattr(self, 'progress_bar'):
+            self.progress_bar.push(self.progress)
+        return out
+    
+    def predict_all(self):
+        self.disable_move_buttons()
+        self.predict_button.button.config(state='disabled')
+        for img_pointer in range(len(self.images)):
+            self.save_frame()
+            self.img_pointer = img_pointer
+            self.write_frame()
+            self.progress = 100 * img_pointer / len(self.images)
+            self.progress_bar.push(self.progress)
+            if img_pointer not in self.egg_count_dict:
+                count = self.get_prediction(img_pointer)
+                self.predict_counter.push(count)
+        self.progress = 100
+        self.progress_bar.push(self.progress)
+        self.enable_move_buttons()
+        self.predict_button.button.config(state='normal')
     
     def get_prediction(self, img_pointer=None):
         self.model_error_label.push(None)
