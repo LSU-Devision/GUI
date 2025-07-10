@@ -57,8 +57,10 @@ class ModelAPI:
             raise
         
         # Resize the image if the resolution is incorrect
+        '''
         if img.size != (3024, 4032):
             img = img.resize((3024, 4032))
+        '''
             
         self.annotate = annotate
         
